@@ -1,4 +1,3 @@
-
 // Mock data for the application
 
 // Internal Hotels
@@ -6,7 +5,7 @@ export const featuredHotels = [
   {
     id: "hotel-1",
     name: "Al Safwah Royale Orchid Hotel",
-    city: "Makkah",
+    city: "Makkah" as "Makkah" | "Madinah",
     address: "Ibrahim Al Khalil Rd, Makkah 24231, Saudi Arabia",
     description: "Experience luxury and comfort just steps away from the Holy Mosque. Our hotel offers breathtaking views of the Kaaba and impeccable service.",
     rating: 4.8,
@@ -18,7 +17,7 @@ export const featuredHotels = [
   {
     id: "hotel-2",
     name: "Elaf Kinda Hotel",
-    city: "Makkah",
+    city: "Makkah" as "Makkah" | "Madinah",
     address: "Central Area, Makkah 24231, Saudi Arabia",
     description: "Enjoy the convenience of our prime location in the heart of Makkah, with easy access to the Holy Mosque and modern amenities for a comfortable stay.",
     rating: 4.5,
@@ -30,7 +29,7 @@ export const featuredHotels = [
   {
     id: "hotel-3",
     name: "Al Noor Palace Hotel",
-    city: "Madinah",
+    city: "Madinah" as "Makkah" | "Madinah",
     address: "Central Zone, Madinah 42311, Saudi Arabia",
     description: "A serene retreat located near the Prophet's Mosque, offering pilgrims a peaceful and spiritual stay with all modern conveniences.",
     rating: 4.7,
@@ -55,7 +54,7 @@ export const featuredPackages = [
     includes_hotel: true,
     includes_flight: true,
     includes_transport: true,
-    city: "Both"
+    city: "Both" as "Makkah" | "Madinah" | "Both"
   },
   {
     id: "package-2",
@@ -69,7 +68,7 @@ export const featuredPackages = [
     includes_hotel: true,
     includes_flight: false,
     includes_transport: true,
-    city: "Both"
+    city: "Both" as "Makkah" | "Madinah" | "Both"
   }
 ];
 
@@ -77,10 +76,10 @@ export const featuredPackages = [
 export const externalListings = [
   {
     id: "ext-1",
-    listing_type: "hotel",
+    listing_type: "hotel" as "hotel" | "flight" | "transport",
     name: "Hilton Makkah Convention Hotel",
     description: "Luxury hotel with stunning views of the Haram",
-    city: "Makkah",
+    city: "Makkah" as "Makkah" | "Madinah" | "Jeddah" | "Other",
     provider_name: "Booking.com",
     redirect_url: "https://www.booking.com",
     image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
@@ -89,10 +88,10 @@ export const externalListings = [
   },
   {
     id: "ext-2",
-    listing_type: "hotel",
+    listing_type: "hotel" as "hotel" | "flight" | "transport",
     name: "Pullman ZamZam Makkah",
     description: "Modern hotel near the Holy Mosque",
-    city: "Makkah",
+    city: "Makkah" as "Makkah" | "Madinah" | "Jeddah" | "Other",
     provider_name: "Agoda",
     redirect_url: "https://www.agoda.com",
     image_url: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80",
@@ -101,10 +100,10 @@ export const externalListings = [
   },
   {
     id: "ext-3",
-    listing_type: "flight",
+    listing_type: "flight" as "hotel" | "flight" | "transport",
     name: "Flights to Jeddah",
     description: "Find the best deals on flights",
-    city: "Jeddah",
+    city: "Jeddah" as "Makkah" | "Madinah" | "Jeddah" | "Other",
     provider_name: "Skyscanner",
     redirect_url: "https://www.skyscanner.com",
     image_url: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1748&q=80",
@@ -112,10 +111,10 @@ export const externalListings = [
   },
   {
     id: "ext-4",
-    listing_type: "transport",
+    listing_type: "transport" as "hotel" | "flight" | "transport",
     name: "Makkah to Madinah Transport",
     description: "Reliable transport between holy cities",
-    city: "Both",
+    city: "Both" as "Makkah" | "Madinah" | "Jeddah" | "Other",
     provider_name: "GetYourGuide",
     redirect_url: "https://www.getyourguide.com",
     image_url: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",

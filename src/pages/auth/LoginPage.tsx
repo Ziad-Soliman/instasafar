@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Building } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Define the form schema
@@ -27,6 +27,7 @@ const LoginPage: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isProviderLogin, setIsProviderLogin] = useState(false);
 
   // Get the redirect path from state or default to home
   const from = (location.state as any)?.from?.pathname || "/";
@@ -47,7 +48,13 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-      navigate(from, { replace: true });
+      
+      // Redirect based on login type
+      if (isProviderLogin) {
+        navigate("/provider/dashboard", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error("Login error:", error);
     } finally {
@@ -55,13 +62,42 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const toggleProviderLogin = () => {
+    setIsProviderLogin(!isProviderLogin);
+  };
+
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t("auth.login.title")}</h1>
+        <h1 className="text-2xl font-bold">
+          {isProviderLogin ? "Provider Login" : t("auth.login.title")}
+        </h1>
         <p className="text-muted-foreground mt-2">
-          {t("auth.login.subtitle")}
+          {isProviderLogin 
+            ? "Access your provider dashboard to manage your listings and bookings" 
+            : t("auth.login.subtitle")}
         </p>
+      </div>
+
+      {/* Toggle between user and provider login */}
+      <div className="mb-6 flex">
+        <Button
+          type="button"
+          variant={isProviderLogin ? "outline" : "default"}
+          className="w-1/2 rounded-r-none"
+          onClick={() => setIsProviderLogin(false)}
+        >
+          User Login
+        </Button>
+        <Button
+          type="button"
+          variant={isProviderLogin ? "default" : "outline"}
+          className="w-1/2 rounded-l-none"
+          onClick={() => setIsProviderLogin(true)}
+        >
+          <Building className="mr-2 h-4 w-4" />
+          Provider Login
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -116,21 +152,37 @@ const LoginPage: React.FC = () => {
           className="w-full"
           disabled={isLoading}
         >
-          {isLoading ? `${t("loading")}...` : t("auth.signIn")}
+          {isLoading ? `${t("loading")}...` : (isProviderLogin ? "Sign in to Provider Dashboard" : t("auth.signIn"))}
         </Button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          {t("auth.noAccount")}{" "}
-          <Link
-            to="/auth/register"
-            className="text-primary font-medium hover:underline"
-          >
-            {t("auth.signUp")}
-          </Link>
-        </p>
-      </div>
+      {!isProviderLogin && (
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t("auth.noAccount")}{" "}
+            <Link
+              to="/auth/register"
+              className="text-primary font-medium hover:underline"
+            >
+              {t("auth.signUp")}
+            </Link>
+          </p>
+        </div>
+      )}
+
+      {isProviderLogin && (
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Want to become a provider?{" "}
+            <Link
+              to="/provider/register"
+              className="text-primary font-medium hover:underline"
+            >
+              Apply here
+            </Link>
+          </p>
+        </div>
+      )}
 
       {/* Quick Login Options */}
       <div className="mt-8">
@@ -146,26 +198,42 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="mt-4 grid gap-2">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              login("user@example.com", "password");
-              navigate(from, { replace: true });
-            }}
-          >
-            {t("auth.loginAsUser")}
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              login("admin@example.com", "password");
-              navigate("/admin", { replace: true });
-            }}
-          >
-            {t("auth.loginAsAdmin")}
-          </Button>
+          {isProviderLogin ? (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                login("provider@example.com", "password");
+                navigate("/provider/dashboard", { replace: true });
+              }}
+            >
+              <Building className="mr-2 h-4 w-4" />
+              {t("auth.loginAsProvider")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  login("user@example.com", "password");
+                  navigate(from, { replace: true });
+                }}
+              >
+                {t("auth.loginAsUser")}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  login("admin@example.com", "password");
+                  navigate("/admin", { replace: true });
+                }}
+              >
+                {t("auth.loginAsAdmin")}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

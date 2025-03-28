@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,494 +13,507 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { 
+  Camera, 
+  Edit, 
   User, 
   Building, 
   Mail, 
   Phone, 
-  MapPin,
-  Calendar,
-  Globe,
-  ShieldCheck,
-  LucideIcon,
-  Save,
-  Camera,
-  PenLine,
-  BookUser
+  MapPin, 
+  Shield, 
+  Calendar, 
+  FileCheck
 } from "lucide-react";
 
 // Mock provider data
-const mockProviderProfile = {
-  id: "provider-1",
-  user_id: "user-123",
-  status: "approved", // "pending", "approved", "rejected"
-  company_name: "Al Barakah Tours & Travels",
-  contact_email: "info@albarakah-tours.com",
-  contact_phone: "+966 55 123 4567",
-  website: "https://albarakah-tours.com",
-  business_type: "Tour Operator",
-  license_number: "LIC123456789",
-  year_established: "2010",
-  description: "Al Barakah Tours & Travels is a leading provider of Hajj and Umrah services with over 10 years of experience. We specialize in providing exceptional accommodations and memorable spiritual journeys for pilgrims from around the world.",
-  address: {
-    street: "123 King Fahd Road",
-    city: "Makkah",
-    postal_code: "21955",
-    country: "Saudi Arabia"
+const mockProviderData = {
+  id: "provider-123",
+  user_id: "user-456",
+  company_name: "Al-Haram Hotels & Services",
+  contact_email: "info@alharamhotels.com",
+  contact_phone: "+966 12 345 6789",
+  address: "King Abdul Aziz Road, Makkah, Saudi Arabia",
+  status: "approved",
+  created_at: "2022-05-10T14:30:00Z",
+  updated_at: "2023-10-15T08:45:00Z",
+  description: "Al-Haram Hotels & Services is a leading provider of premium accommodations and Hajj/Umrah packages in Makkah and Madinah. With over 15 years of experience, we specialize in offering comfortable stays close to the holy sites.",
+  logo_url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&h=300&q=80",
+  website: "https://www.alharamhotels.com",
+  social_media: {
+    facebook: "https://facebook.com/alharamhotels",
+    instagram: "https://instagram.com/alharamhotels",
+    twitter: "https://twitter.com/alharamhotels"
   },
-  logo: "/placeholder.svg",
-  created_at: "2022-05-10T08:30:00Z",
-  updated_at: "2023-09-15T14:45:00Z"
+  business_license: {
+    number: "SA12345678",
+    expiry_date: "2024-12-31",
+    verified: true
+  }
 };
 
 const ProviderProfilePage: React.FC = () => {
-  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
+  const { t, isRTL } = useLanguage();
   
-  // State for profile
-  const [profile, setProfile] = useState(mockProviderProfile);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [providerData, setProviderData] = useState(mockProviderData);
+  const [formData, setFormData] = useState(mockProviderData);
   
-  // State for form
-  const [formValues, setFormValues] = useState({
-    company_name: profile.company_name,
-    contact_email: profile.contact_email,
-    contact_phone: profile.contact_phone,
-    website: profile.website,
-    business_type: profile.business_type,
-    license_number: profile.license_number,
-    year_established: profile.year_established,
-    description: profile.description,
-    street: profile.address.street,
-    city: profile.address.city,
-    postal_code: profile.address.postal_code,
-    country: profile.address.country
-  });
-  
-  // Handle form input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormValues({
-      ...formValues,
+    setFormData({
+      ...formData,
       [name]: value
     });
   };
   
-  // Handle select change
-  const handleSelectChange = (name: string, value: string) => {
-    setFormValues({
-      ...formValues,
-      [name]: value
-    });
-  };
-  
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Update profile
-    setProfile({
-      ...profile,
-      company_name: formValues.company_name,
-      contact_email: formValues.contact_email,
-      contact_phone: formValues.contact_phone,
-      website: formValues.website,
-      business_type: formValues.business_type,
-      license_number: formValues.license_number,
-      year_established: formValues.year_established,
-      description: formValues.description,
-      address: {
-        street: formValues.street,
-        city: formValues.city,
-        postal_code: formValues.postal_code,
-        country: formValues.country
-      },
-      updated_at: new Date().toISOString()
-    });
-    
-    setIsEditing(false);
+  const handleSaveChanges = () => {
+    setProviderData(formData);
+    setIsEditMode(false);
     
     toast({
       title: "Profile Updated",
-      description: "Your provider profile has been updated successfully.",
-      variant: "default",
+      description: "Your profile information has been successfully updated.",
+      variant: "default"
     });
   };
-  
-  // Status badge
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <Badge className="bg-green-500/90">Approved</Badge>;
-      case "pending":
-        return <Badge className="bg-amber-500/90">Pending Approval</Badge>;
-      case "rejected":
-        return <Badge className="bg-red-500/90">Rejected</Badge>;
-      default:
-        return <Badge className="bg-slate-500/90">Unknown</Badge>;
-    }
-  };
-  
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-  
-  // Info item component
-  interface InfoItemProps {
-    icon: LucideIcon;
-    label: string;
-    value: string;
-  }
-  
-  const InfoItem: React.FC<InfoItemProps> = ({ icon: Icon, label, value }) => (
-    <div className="flex items-start mb-4">
-      <Icon className="h-5 w-5 mr-3 mt-0.5 text-muted-foreground" />
-      <div>
-        <div className="text-sm text-muted-foreground">{label}</div>
-        <div className="font-medium">{value}</div>
-      </div>
-    </div>
-  );
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Provider Profile</h1>
-        {isEditing ? (
-          <Button onClick={() => setIsEditing(false)} variant="outline">
-            Cancel Editing
-          </Button>
-        ) : (
-          <Button onClick={() => setIsEditing(true)}>
-            <PenLine className="mr-2 h-4 w-4" />
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Provider Profile</h1>
+          <p className="text-muted-foreground">
+            Manage your company information and settings
+          </p>
+        </div>
+        {!isEditMode ? (
+          <Button onClick={() => setIsEditMode(true)}>
+            <Edit className="mr-2 h-4 w-4" />
             Edit Profile
           </Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setIsEditMode(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveChanges}>
+              Save Changes
+            </Button>
+          </div>
         )}
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Profile summary card */}
-        <Card className="lg:col-span-1">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center">
-              <div className="relative mb-4">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile.logo} alt={profile.company_name} />
-                  <AvatarFallback>
-                    {profile.company_name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute bottom-0 right-0">
-                  <Button size="icon" variant="outline" className="h-8 w-8 rounded-full">
-                    <Camera className="h-4 w-4" />
-                  </Button>
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="profile">Company Profile</TabsTrigger>
+          <TabsTrigger value="verification">Verification</TabsTrigger>
+          <TabsTrigger value="settings">Account Settings</TabsTrigger>
+        </TabsList>
+        
+        {/* Company Profile Tab */}
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Logo and Upload Section */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <Avatar className="w-32 h-32 border-2 border-primary/20">
+                      <AvatarImage src={providerData.logo_url} />
+                      <AvatarFallback className="text-3xl">
+                        {providerData.company_name.split(' ').map(word => word[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isEditMode && (
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 bg-background"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <Badge variant="outline" className="text-primary flex items-center">
+                    <Shield className="h-3 w-3 mr-1" />
+                    {providerData.status === 'approved' ? 'Verified Provider' : 'Pending Verification'}
+                  </Badge>
+                  
+                  <div className="text-center text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      <span>Member since {new Date(providerData.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Company Details Form */}
+                <div className="flex-1 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="company_name" className="flex items-center">
+                        <Building className="h-4 w-4 mr-1" />
+                        Company Name
+                      </Label>
+                      {isEditMode ? (
+                        <Input 
+                          id="company_name"
+                          name="company_name"
+                          value={formData.company_name}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <div className="font-medium">{providerData.company_name}</div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="website" className="flex items-center">
+                        <Globe className="h-4 w-4 mr-1" />
+                        Website
+                      </Label>
+                      {isEditMode ? (
+                        <Input 
+                          id="website"
+                          name="website"
+                          value={formData.website}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <div className="font-medium text-primary hover:underline">
+                          <a href={providerData.website} target="_blank" rel="noopener noreferrer">
+                            {providerData.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="contact_email" className="flex items-center">
+                        <Mail className="h-4 w-4 mr-1" />
+                        Contact Email
+                      </Label>
+                      {isEditMode ? (
+                        <Input 
+                          id="contact_email"
+                          name="contact_email"
+                          value={formData.contact_email}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <div className="font-medium">{providerData.contact_email}</div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="contact_phone" className="flex items-center">
+                        <Phone className="h-4 w-4 mr-1" />
+                        Contact Phone
+                      </Label>
+                      {isEditMode ? (
+                        <Input 
+                          id="contact_phone"
+                          name="contact_phone"
+                          value={formData.contact_phone}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <div className="font-medium">{providerData.contact_phone}</div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="address" className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        Address
+                      </Label>
+                      {isEditMode ? (
+                        <Input 
+                          id="address"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                        />
+                      ) : (
+                        <div className="font-medium">{providerData.address}</div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="description" className="flex items-center">
+                        Company Description
+                      </Label>
+                      {isEditMode ? (
+                        <Textarea 
+                          id="description"
+                          name="description"
+                          value={formData.description}
+                          onChange={handleInputChange}
+                          rows={5}
+                        />
+                      ) : (
+                        <div className="text-sm text-muted-foreground">{providerData.description}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Media Links</CardTitle>
+              <CardDescription>Connect your business social media accounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="facebook">Facebook</Label>
+                  <Input 
+                    id="facebook" 
+                    value={providerData.social_media.facebook}
+                    readOnly={!isEditMode}
+                    placeholder="https://facebook.com/yourbusiness"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram">Instagram</Label>
+                  <Input 
+                    id="instagram" 
+                    value={providerData.social_media.instagram}
+                    readOnly={!isEditMode}
+                    placeholder="https://instagram.com/yourbusiness"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="twitter">Twitter</Label>
+                  <Input 
+                    id="twitter" 
+                    value={providerData.social_media.twitter}
+                    readOnly={!isEditMode}
+                    placeholder="https://twitter.com/yourbusiness"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Verification Tab */}
+        <TabsContent value="verification" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Business Verification</CardTitle>
+              <CardDescription>Your business verification status and documents</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    providerData.business_license.verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {providerData.business_license.verified ? 
+                      <FileCheck className="h-5 w-5" /> : 
+                      <Clock className="h-5 w-5" />
+                    }
+                  </div>
+                  <div className="ml-4">
+                    <div className="font-medium">
+                      {providerData.business_license.verified ? 'Business Verified' : 'Verification Pending'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {providerData.business_license.verified ? 
+                        'Your business has been verified by InstaSafar' : 
+                        'We are reviewing your submitted documents'}
+                    </div>
+                  </div>
+                </div>
+                <Badge variant={providerData.business_license.verified ? 'default' : 'secondary'}>
+                  {providerData.business_license.verified ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="license_number">Business License Number</Label>
+                  <Input 
+                    id="license_number" 
+                    value={providerData.business_license.number}
+                    readOnly
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="license_expiry">License Expiry Date</Label>
+                  <Input 
+                    id="license_expiry" 
+                    value={providerData.business_license.expiry_date}
+                    readOnly
+                  />
                 </div>
               </div>
               
-              <h2 className="text-xl font-bold text-center mb-1">{profile.company_name}</h2>
-              <div className="mb-2">{getStatusBadge(profile.status)}</div>
-              <p className="text-sm text-muted-foreground text-center mb-4">{profile.business_type}</p>
-              
-              <Separator className="mb-4" />
-              
-              <div className="w-full">
-                <InfoItem 
-                  icon={Calendar} 
-                  label="Member Since" 
-                  value={formatDate(profile.created_at)} 
-                />
-                <InfoItem 
-                  icon={Calendar} 
-                  label="Established" 
-                  value={profile.year_established} 
-                />
-                <InfoItem 
-                  icon={ShieldCheck} 
-                  label="License Number" 
-                  value={profile.license_number} 
-                />
-                <InfoItem 
-                  icon={Globe} 
-                  label="Website" 
-                  value={profile.website} 
-                />
+              <div className="space-y-2">
+                <Label>Documents</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border rounded-lg p-4 flex flex-col items-center">
+                    <div className="w-full h-40 bg-muted rounded-lg flex items-center justify-center mb-4">
+                      <FileCheck className="h-16 w-16 text-muted-foreground/50" />
+                    </div>
+                    <div className="text-sm font-medium">Business License</div>
+                    <div className="text-xs text-muted-foreground">Uploaded on {new Date(providerData.created_at).toLocaleDateString()}</div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4 flex flex-col items-center">
+                    <div className="w-full h-40 bg-muted rounded-lg flex items-center justify-center mb-4">
+                      <FileCheck className="h-16 w-16 text-muted-foreground/50" />
+                    </div>
+                    <div className="text-sm font-medium">ID Verification</div>
+                    <div className="text-xs text-muted-foreground">Uploaded on {new Date(providerData.created_at).toLocaleDateString()}</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              
+              {!providerData.business_license.verified && (
+                <div className="flex justify-center mt-4">
+                  <Button>Upload Additional Documents</Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
         
-        {/* Main profile content */}
-        <div className="lg:col-span-3">
-          <Tabs defaultValue={isEditing ? "edit" : "overview"}>
-            <TabsList>
-              <TabsTrigger value="overview" disabled={isEditing}>
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="edit" disabled={!isEditing}>
-                Edit Profile
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Company Information</CardTitle>
-                  <CardDescription>
-                    Your business details and contact information visible to customers.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Contact Information</h3>
-                      <InfoItem 
-                        icon={Building} 
-                        label="Company Name" 
-                        value={profile.company_name} 
+        {/* Account Settings Tab */}
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>Manage your account preferences and security</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Email Notifications</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="notify_bookings"
+                        defaultChecked
+                        className="form-checkbox rounded"
                       />
-                      <InfoItem 
-                        icon={Mail} 
-                        label="Email Address" 
-                        value={profile.contact_email} 
-                      />
-                      <InfoItem 
-                        icon={Phone} 
-                        label="Phone Number" 
-                        value={profile.contact_phone} 
-                      />
-                      <InfoItem 
-                        icon={MapPin} 
-                        label="Address" 
-                        value={`${profile.address.street}, ${profile.address.city}, ${profile.address.postal_code}, ${profile.address.country}`} 
-                      />
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Account Information</h3>
-                      <InfoItem 
-                        icon={Building} 
-                        label="Business Type" 
-                        value={profile.business_type} 
-                      />
-                      <InfoItem 
-                        icon={BookUser} 
-                        label="Account Status" 
-                        value={profile.status.charAt(0).toUpperCase() + profile.status.slice(1)} 
-                      />
-                      <InfoItem 
-                        icon={Calendar} 
-                        label="Last Updated" 
-                        value={formatDate(profile.updated_at)} 
-                      />
+                      <Label htmlFor="notify_bookings">New booking notifications</Label>
                     </div>
                   </div>
-                  
-                  <Separator className="my-6" />
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">About Company</h3>
-                    <p className="text-muted-foreground">{profile.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="edit">
-              <Card>
-                <form onSubmit={handleSubmit}>
-                  <CardHeader>
-                    <CardTitle className="text-xl">Edit Profile Information</CardTitle>
-                    <CardDescription>
-                      Update your business details and contact information.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="company_name">Company Name</Label>
-                          <Input
-                            id="company_name"
-                            name="company_name"
-                            value={formValues.company_name}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="contact_email">Contact Email</Label>
-                          <Input
-                            id="contact_email"
-                            name="contact_email"
-                            type="email"
-                            value={formValues.contact_email}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="contact_phone">Contact Phone</Label>
-                          <Input
-                            id="contact_phone"
-                            name="contact_phone"
-                            value={formValues.contact_phone}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="website">Website</Label>
-                          <Input
-                            id="website"
-                            name="website"
-                            value={formValues.website}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="business_type">Business Type</Label>
-                          <Select 
-                            defaultValue={formValues.business_type} 
-                            onValueChange={(value) => handleSelectChange("business_type", value)}
-                          >
-                            <SelectTrigger id="business_type">
-                              <SelectValue placeholder="Select business type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Tour Operator">Tour Operator</SelectItem>
-                              <SelectItem value="Hotel">Hotel</SelectItem>
-                              <SelectItem value="Transport Provider">Transport Provider</SelectItem>
-                              <SelectItem value="Travel Agency">Travel Agency</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="license_number">License Number</Label>
-                          <Input
-                            id="license_number"
-                            name="license_number"
-                            value={formValues.license_number}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="year_established">Year Established</Label>
-                          <Input
-                            id="year_established"
-                            name="year_established"
-                            value={formValues.year_established}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6">
-                      <Label htmlFor="description">Company Description</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        rows={4}
-                        value={formValues.description}
-                        onChange={handleInputChange}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="notify_messages"
+                        defaultChecked
+                        className="form-checkbox rounded"
                       />
+                      <Label htmlFor="notify_messages">Customer message notifications</Label>
                     </div>
-                    
-                    <Separator className="my-6" />
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Address Information</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <Label htmlFor="street">Street Address</Label>
-                          <Input
-                            id="street"
-                            name="street"
-                            value={formValues.street}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="city">City</Label>
-                          <Select 
-                            defaultValue={formValues.city} 
-                            onValueChange={(value) => handleSelectChange("city", value)}
-                          >
-                            <SelectTrigger id="city">
-                              <SelectValue placeholder="Select city" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Makkah">Makkah</SelectItem>
-                              <SelectItem value="Madinah">Madinah</SelectItem>
-                              <SelectItem value="Jeddah">Jeddah</SelectItem>
-                              <SelectItem value="Riyadh">Riyadh</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="postal_code">Postal Code</Label>
-                          <Input
-                            id="postal_code"
-                            name="postal_code"
-                            value={formValues.postal_code}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="country">Country</Label>
-                          <Select 
-                            defaultValue={formValues.country} 
-                            onValueChange={(value) => handleSelectChange("country", value)}
-                          >
-                            <SelectTrigger id="country">
-                              <SelectValue placeholder="Select country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Saudi Arabia">Saudi Arabia</SelectItem>
-                              <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                              <SelectItem value="Qatar">Qatar</SelectItem>
-                              <SelectItem value="Kuwait">Kuwait</SelectItem>
-                              <SelectItem value="Bahrain">Bahrain</SelectItem>
-                              <SelectItem value="Oman">Oman</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="notify_updates"
+                        defaultChecked
+                        className="form-checkbox rounded"
+                      />
+                      <Label htmlFor="notify_updates">Platform updates and announcements</Label>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" type="button" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    </motion.div>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Login & Security</h3>
+                <Button variant="outline">Change Password</Button>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Language & Region</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="language">Preferred Language</Label>
+                    <select 
+                      id="language"
+                      className="w-full p-2 border rounded-md"
+                      defaultValue="en"
+                    >
+                      <option value="en">English</option>
+                      <option value="ar">العربية (Arabic)</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone">Timezone</Label>
+                    <select 
+                      id="timezone"
+                      className="w-full p-2 border rounded-md"
+                      defaultValue="Asia/Riyadh"
+                    >
+                      <option value="Asia/Riyadh">Riyadh (GMT+3)</option>
+                      <option value="Asia/Dubai">Dubai (GMT+4)</option>
+                      <option value="Europe/London">London (GMT+0/+1)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
+
+// Adding missing Globe component for this file only
+const Globe = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" x2="22" y1="12" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+// Adding missing Clock component for this file only
+const Clock = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
 
 export default ProviderProfilePage;

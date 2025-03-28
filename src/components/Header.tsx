@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, LogIn, LogOut, Book } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogIn, LogOut, Book, Plane, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,6 +39,8 @@ const Header: React.FC = () => {
     { label: "Home", path: "/" },
     { label: "Hotels", path: "/search?type=hotel" },
     { label: "Packages", path: "/search?type=package" },
+    { label: "Flights", path: "/flights", icon: <Plane className="h-4 w-4 mr-1" /> },
+    { label: "Transport", path: "/transport", icon: <Car className="h-4 w-4 mr-1" /> },
     { label: "About", path: "/about" },
     { label: "Contact", path: "/contact" },
   ];
@@ -84,7 +86,7 @@ const Header: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
                   location.pathname === item.path
                     ? "text-primary"
                     : "text-foreground/80 hover:text-foreground hover:bg-accent"
@@ -94,7 +96,9 @@ const Header: React.FC = () => {
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="flex items-center"
                 >
+                  {item.icon}
                   {item.label}
                 </motion.span>
               </Link>
@@ -138,6 +142,13 @@ const Header: React.FC = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="cursor-pointer w-full">
                         Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {user.role === "provider" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/provider" className="cursor-pointer w-full">
+                        Provider Dashboard
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -194,12 +205,13 @@ const Header: React.FC = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors flex items-center ${
                     location.pathname === item.path
                       ? "text-primary bg-accent"
                       : "text-foreground hover:bg-accent"
                   }`}
                 >
+                  {item.icon}
                   {item.label}
                 </Link>
               ))}

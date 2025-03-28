@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, Plane, Car, Package, Building } from "lucide-react";
 
 const Footer: React.FC = () => {
   return (
@@ -49,13 +49,27 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/search?type=hotel" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/search?type=hotel" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <MapPin className="h-3 w-3 mr-1" />
                   Hotels
                 </Link>
               </li>
               <li>
-                <Link to="/search?type=package" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/search?type=package" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <Package className="h-3 w-3 mr-1" />
                   Packages
+                </Link>
+              </li>
+              <li>
+                <Link to="/flights" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <Plane className="h-3 w-3 mr-1" />
+                  Flights
+                </Link>
+              </li>
+              <li>
+                <Link to="/transport" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <Car className="h-3 w-3 mr-1" />
+                  Transport
                 </Link>
               </li>
               <li>
@@ -93,6 +107,12 @@ const Footer: React.FC = () => {
               <li>
                 <Link to="/refund" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/provider" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                  <Building className="h-3 w-3 mr-1" />
+                  Provider Portal
                 </Link>
               </li>
             </ul>

@@ -1,116 +1,110 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { Calendar, CheckCircle, Hotel, Plane, Bus } from "lucide-react";
 import { motion } from "framer-motion";
+import { Calendar, Clock, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
-interface Package {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration_days: number;
-  start_date: string;
-  end_date: string;
-  thumbnail: string;
-  includes_hotel: boolean;
-  includes_flight: boolean;
-  includes_transport: boolean;
-  city: "Makkah" | "Madinah" | "Both";
-}
-
-interface PackageCardProps {
-  package: Package;
+export interface PackageCardProps {
+  package: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    duration_days: number;
+    start_date: string;
+    end_date: string;
+    thumbnail: string;
+    includes_hotel: boolean;
+    includes_flight: boolean;
+    includes_transport: boolean;
+    city: string;
+    is_internal?: boolean;
+  };
   onButtonClick?: () => void;
   buttonText?: string;
 }
 
-const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, onButtonClick, buttonText = "View Package" }) => {
-  const startDate = new Date(pkg.start_date);
-  const endDate = new Date(pkg.end_date);
+const PackageCard: React.FC<PackageCardProps> = ({ 
+  package: pkg, 
+  onButtonClick,
+  buttonText = "View Package" 
+}) => {
+  // Format dates
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
 
   return (
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className="card-custom group flex flex-col"
+      className="card-custom group h-full flex flex-col"
     >
-      <Link to={`/packages/${pkg.id}`} className="block relative overflow-hidden rounded-t-lg">
-        <div className="relative h-60 md:h-72 overflow-hidden">
+      <div className="relative overflow-hidden rounded-t-lg">
+        <div className="h-40 bg-muted/50">
           <img
-            src={pkg.thumbnail}
+            src={pkg.thumbnail || "/placeholder.svg"}
             alt={pkg.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
           
-          <div className="absolute bottom-3 left-3 flex items-start gap-2 flex-col">
-            <Badge className="bg-primary">
-              ${pkg.price} / person
-            </Badge>
-            <Badge variant="outline" className="bg-black/40 text-white border-none">
-              <Calendar className="mr-1 h-3 w-3" />
-              {pkg.duration_days} Days
-            </Badge>
+          <div className="absolute top-2 left-2">
+            <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center">
+              <MapPin className="w-3 h-3 mr-1" />
+              {pkg.city}
+            </div>
+          </div>
+          
+          <div className="absolute bottom-2 right-2">
+            <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center">
+              <Clock className="w-3 h-3 mr-1" />
+              {pkg.duration_days} days
+            </div>
           </div>
         </div>
-      </Link>
-
+      </div>
+      
       <div className="p-4 flex-grow flex flex-col">
-        <div className="flex flex-wrap gap-1 mb-3">
-          {pkg.includes_hotel && (
-            <Badge variant="outline" className="text-xs">
-              <Hotel className="mr-1 h-3 w-3" />
-              Hotel
-            </Badge>
-          )}
-          {pkg.includes_flight && (
-            <Badge variant="outline" className="text-xs">
-              <Plane className="mr-1 h-3 w-3" />
-              Flight
-            </Badge>
-          )}
-          {pkg.includes_transport && (
-            <Badge variant="outline" className="text-xs">
-              <Bus className="mr-1 h-3 w-3" />
-              Transport
-            </Badge>
-          )}
+        <h3 className="font-medium text-sm line-clamp-1 mb-1">{pkg.name}</h3>
+        
+        <div className="text-xs text-muted-foreground mb-2 flex items-center">
+          <Calendar className="w-3 h-3 mr-1" />
+          {formatDate(pkg.start_date)} - {formatDate(pkg.end_date)}
         </div>
         
-        <h3 className="font-semibold text-xl mb-2">{pkg.name}</h3>
-        
-        <div className="flex items-center text-muted-foreground text-sm mb-3">
-          <Calendar className="h-3.5 w-3.5 mr-1" />
-          <span>
-            {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-          </span>
-        </div>
-        
-        <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
           {pkg.description}
         </p>
-
-        <div className="space-y-2 mb-4">
-          <div className="flex items-start">
-            <CheckCircle className="h-4 w-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
-            <span className="text-sm">Guided visits to holy sites</span>
+        
+        <div className="grid grid-cols-3 gap-1 text-xs mb-3">
+          <div className={`flex items-center ${pkg.includes_hotel ? 'text-primary' : 'text-muted-foreground'}`}>
+            {pkg.includes_hotel ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
+            Hotel
           </div>
-          <div className="flex items-start">
-            <CheckCircle className="h-4 w-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
-            <span className="text-sm">Experienced religious guides</span>
+          <div className={`flex items-center ${pkg.includes_flight ? 'text-primary' : 'text-muted-foreground'}`}>
+            {pkg.includes_flight ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
+            Flight
           </div>
-          <div className="flex items-start">
-            <CheckCircle className="h-4 w-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
-            <span className="text-sm">All-inclusive package</span>
+          <div className={`flex items-center ${pkg.includes_transport ? 'text-primary' : 'text-muted-foreground'}`}>
+            {pkg.includes_transport ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
+            Transport
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <div className="text-sm font-medium">${pkg.price}</div>
+            <div className="text-xs text-muted-foreground">per person</div>
           </div>
         </div>
         
         <div className="mt-auto">
-          <Button asChild className="w-full" onClick={onButtonClick}>
-            <Link to={`/packages/${pkg.id}`}>{buttonText}</Link>
+          <Button 
+            onClick={onButtonClick}
+            className="w-full"
+          >
+            {buttonText}
           </Button>
         </div>
       </div>

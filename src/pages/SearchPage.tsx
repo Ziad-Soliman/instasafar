@@ -48,8 +48,7 @@ interface Package {
 }
 
 // Import the ExternalListing type from ExternalListingCard to ensure consistency
-import type { ExternalListing as CardExternalListing } from "@/components/cards/ExternalListingCard";
-type ExternalListing = CardExternalListing;
+import type { ExternalListing } from "@/components/cards/ExternalListingCard";
 
 type ListingType = Hotel | Package | ExternalListing;
 

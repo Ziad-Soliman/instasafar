@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -45,6 +44,10 @@ const ProviderListings = lazy(() => import("./pages/provider/ListingsPage"));
 const ProviderBookings = lazy(() => import("./pages/provider/BookingsPage"));
 const ProviderProfile = lazy(() => import("./pages/provider/ProfilePage"));
 
+// Import the new pages
+const FlightSearchPage = lazy(() => import("./pages/FlightSearchPage"));
+const TransportSearchPage = lazy(() => import("./pages/TransportSearchPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -82,6 +85,8 @@ const App = () => (
                   <Route element={<MainLayout />}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/search" element={<SearchPage />} />
+                    <Route path="/flights" element={<FlightSearchPage />} />
+                    <Route path="/transport" element={<TransportSearchPage />} />
                     <Route path="/hotels/:hotelId" element={<HotelDetailPage />} />
                     <Route path="/packages/:packageId" element={<PackageDetailPage />} />
                     <Route path="/booking/confirm" element={<BookingConfirmPage />} />
@@ -129,6 +134,8 @@ const App = () => (
                     <Route element={<MainLayout />}>
                       <Route index element={<HomePage />} />
                       <Route path="search" element={<SearchPage />} />
+                      <Route path="flights" element={<FlightSearchPage />} />
+                      <Route path="transport" element={<TransportSearchPage />} />
                       <Route path="hotels/:hotelId" element={<HotelDetailPage />} />
                       <Route path="packages/:packageId" element={<PackageDetailPage />} />
                       <Route path="booking/confirm" element={<BookingConfirmPage />} />

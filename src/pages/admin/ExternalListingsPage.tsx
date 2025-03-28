@@ -1,15 +1,46 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Plus, Search, Edit, Trash, ExternalLink, MapPin } from "lucide-react";
+import { ExternalListing } from "@/components/cards/ExternalListingCard";
+import { useToast } from "@/hooks/use-toast";
+
+// Form validation schema
+const externalListingSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  listing_type: z.enum(["hotel", "flight", "transport"], { 
+    required_error: "Please select a listing type.",
+  }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
+  city: z.enum(["Makkah", "Madinah", "Jeddah", "Other"], { 
+    required_error: "Please select a city.",
+  }),
+  provider_name: z.string().min(2, { message: "Provider name is required." }),
+  redirect_url: z.string().url({ message: "Please enter a valid URL." }),
+  image_url: z.string().optional(),
+  price_indication: z.string().optional(),
+  rating_indication: z.string().optional(),
+});
+
+type ExternalListingFormValues = z.infer<typeof externalListingSchema>;
 
 const AdminExternalListings: React.FC = () => {
+  const { toast } = useToast();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // This would typically fetch external listing data from your API
-  const externalListings = [
+  const externalListings: ExternalListing[] = [
     {
       id: "1",
       listing_type: "hotel",
@@ -51,7 +82,7 @@ const AdminExternalListings: React.FC = () => {
       listing_type: "transport",
       name: "Makkah-Madinah Transport",
       description: "Comfortable transportation between holy cities",
-      city: "Makkah & Madinah",
+      city: "Other",
       provider_name: "GetYourGuide",
       redirect_url: "https://getyourguide.com/example",
       image_url: "/placeholder.svg",
@@ -59,6 +90,62 @@ const AdminExternalListings: React.FC = () => {
       rating_indication: "4.6 (350 reviews)",
     },
   ];
+  
+  // Set up form with default values
+  const form = useForm<ExternalListingFormValues>({
+    resolver: zodResolver(externalListingSchema),
+    defaultValues: {
+      name: "",
+      listing_type: "hotel",
+      description: "",
+      city: "Makkah",
+      provider_name: "",
+      redirect_url: "",
+      image_url: "/placeholder.svg",
+      price_indication: "",
+      rating_indication: "",
+    },
+  });
+  
+  // Handle form submission
+  async function onSubmit(values: ExternalListingFormValues) {
+    setIsSubmitting(true);
+    
+    try {
+      // In a real implementation, we would save the external listing to Supabase here
+      
+      // Mock API call - would be replaced with Supabase insert
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success toast
+      toast({
+        title: "External listing created",
+        description: "The external listing has been created successfully.",
+      });
+      
+      // Close dialog and reset form
+      setIsAddDialogOpen(false);
+      form.reset();
+    } catch (error) {
+      console.error("Error creating external listing:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+  
+  // Handle delete
+  const handleDelete = (id: string) => {
+    // In a real implementation, we would delete the external listing from Supabase
+    toast({
+      title: "External listing deleted",
+      description: "The external listing has been deleted successfully.",
+    });
+  };
   
   return (
     <div>
@@ -72,9 +159,194 @@ const AdminExternalListings: React.FC = () => {
             <h1 className="text-3xl font-bold">External Listings</h1>
             <p className="text-muted-foreground">Manage redirections to external booking platforms</p>
           </div>
-          <Button className="mt-4 md:mt-0">
-            <Plus className="w-4 h-4 mr-2" /> Add New Listing
-          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="mt-4 md:mt-0">
+                <Plus className="w-4 h-4 mr-2" /> Add New Listing
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[550px]">
+              <DialogHeader>
+                <DialogTitle>Add External Listing</DialogTitle>
+                <DialogDescription>
+                  Create a new external listing that will redirect users to a partner website.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter listing name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="listing_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Listing Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="hotel">Hotel</SelectItem>
+                              <SelectItem value="flight">Flight</SelectItem>
+                              <SelectItem value="transport">Transport</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select city" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Makkah">Makkah</SelectItem>
+                              <SelectItem value="Madinah">Madinah</SelectItem>
+                              <SelectItem value="Jeddah">Jeddah</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Brief description of the listing" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="provider_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., Booking.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="redirect_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Redirect URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="price_indication"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price Indication</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., From $100/night" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Price range or starting price with unit
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="rating_indication"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rating Indication</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., 4.5 (200 reviews)" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Rating with number of reviews if available
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="image_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Image URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com/image.jpg" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Leave empty to use default placeholder image
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Saving..." : "Save Listing"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
         
         <Card className="mb-6">
@@ -139,7 +411,12 @@ const AdminExternalListings: React.FC = () => {
                   <Button variant="outline" size="sm" className="flex-1">
                     <Edit className="h-3 w-3 mr-1" /> Edit
                   </Button>
-                  <Button variant="destructive" size="sm" className="flex-1">
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleDelete(listing.id)}
+                  >
                     <Trash className="h-3 w-3 mr-1" /> Delete
                   </Button>
                 </div>

@@ -1,30 +1,43 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { CheckCircle2, Calendar, MapPin, Users, ArrowRight, FileText } from "lucide-react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+interface BookingSuccessState {
+  bookingRef: string;
+  itemName: string;
+  itemType: "hotel" | "package";
+}
 
 const BookingSuccessPage: React.FC = () => {
-  // In a real app, this would come from route state or API call
-  const bookingDetails = {
-    bookingRef: "INST-" + Math.floor(100000 + Math.random() * 900000),
-    hotelName: "Grand Makkah Hotel",
-    roomType: "Deluxe Double Room",
-    checkIn: "2023-11-10",
-    checkOut: "2023-11-13",
-    guests: 2,
-    totalAmount: 750,
-    status: "confirmed",
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, isRTL } = useLanguage();
   
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
+  // Extract booking details from location state
+  const state = location.state as BookingSuccessState | null;
+  
+  // If there's no booking reference, redirect to home
+  useEffect(() => {
+    if (!state || !state.bookingRef) {
+      navigate("/");
+    }
+  }, [state, navigate]);
+  
+  // If state is still loading or missing, show placeholder
+  if (!state || !state.bookingRef) {
+    return (
+      <div className="container mx-auto py-8 px-4 min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse">{t("loading")}...</div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto py-12 px-4">
@@ -32,101 +45,66 @@ const BookingSuccessPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-3xl mx-auto"
+        className="max-w-lg mx-auto"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-            <CheckCircle2 className="h-8 w-8 text-green-600" />
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <CheckCircle className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Booking Confirmed!</h1>
-          <p className="text-muted-foreground">
-            Your booking request has been received and confirmed. Thank you for choosing InstaSafar.
-          </p>
         </div>
         
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h2 className="text-lg font-medium mb-4">Booking Details</h2>
-                <div className="space-y-3">
-                  <div className="flex">
-                    <FileText className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Booking Reference</div>
-                      <div className="font-medium">{bookingDetails.bookingRef}</div>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <Calendar className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Stay Dates</div>
-                      <div className="font-medium">
-                        {formatDate(bookingDetails.checkIn)} - {formatDate(bookingDetails.checkOut)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <Users className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Guests</div>
-                      <div className="font-medium">{bookingDetails.guests} Adults</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h2 className="text-lg font-medium mb-4">Accommodation Details</h2>
-                <div className="space-y-3">
-                  <div className="flex">
-                    <MapPin className="h-5 w-5 text-primary mr-2" />
-                    <div>
-                      <div className="text-sm text-muted-foreground">Hotel</div>
-                      <div className="font-medium">{bookingDetails.hotelName}</div>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="h-5 w-5 mr-2" /> {/* Spacer for alignment */}
-                    <div>
-                      <div className="text-sm text-muted-foreground">Room Type</div>
-                      <div className="font-medium">{bookingDetails.roomType}</div>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    <div className="h-5 w-5 mr-2" /> {/* Spacer for alignment */}
-                    <div>
-                      <div className="text-sm text-muted-foreground">Amount Paid</div>
-                      <div className="font-medium">${bookingDetails.totalAmount}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">{t("booking.success.title")}</CardTitle>
+            <p className="text-muted-foreground mt-1">
+              {t("booking.success.subtitle")}
+            </p>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <div className="bg-muted/30 p-4 rounded-md">
+              <p className="text-center text-sm text-muted-foreground mb-1">
+                {t("booking.success.reference")}
+              </p>
+              <p className="text-center text-xl font-mono font-semibold">
+                {state.bookingRef}
+              </p>
             </div>
             
-            <Separator className="my-6" />
-            
-            <div className="bg-muted p-4 rounded-lg">
-              <h3 className="font-medium mb-2">What happens next?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                You'll receive a confirmation email with all the details of your booking. Our team might contact you if additional information is needed.
+            <div className="text-center">
+              <p className="text-muted-foreground">
+                Your booking for
               </p>
-              <div className="flex items-center text-sm text-primary">
-                <p>We're looking forward to hosting you on your spiritual journey</p>
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </div>
+              <p className="font-medium text-lg">
+                {state.itemName}
+              </p>
+              <p className="text-muted-foreground">
+                has been submitted successfully.
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-md text-sm">
+              <p className="text-blue-600 dark:text-blue-400">
+                We'll review your booking request and confirm it shortly. You'll receive a notification via email when the status changes.
+              </p>
             </div>
           </CardContent>
+          
+          <CardFooter className="flex flex-col space-y-2">
+            <Button asChild className="w-full">
+              <Link to="/account/bookings">
+                {t("booking.success.viewBookings")}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            
+            <Button variant="outline" asChild className="w-full">
+              <Link to="/">
+                Return to Home
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
-        
-        <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <Button variant="outline" asChild>
-            <Link to="/account/bookings">View My Bookings</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/">Return to Home</Link>
-          </Button>
-        </div>
       </motion.div>
     </div>
   );

@@ -1,187 +1,182 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, HotelIcon, CheckCircle, XCircle, ClockIcon, Eye } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { MapPin, Calendar, Users, ChevronRight, Package, Hotel } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
+// Define the booking interface
 interface Booking {
   id: string;
-  type: "hotel" | "package";
-  name: string;
-  location: string;
-  checkIn: string;
-  checkOut: string;
+  booking_ref: string;
+  user_id: string;
+  item_id: string;
+  item_name: string;
+  item_type: "hotel" | "package";
+  thumbnail: string;
+  start_date: string;
+  end_date: string;
   guests: number;
-  totalAmount: number;
+  total_price: number;
   status: "pending" | "confirmed" | "cancelled";
-  bookingRef: string;
+  created_at: string;
 }
 
+// Mock fetch bookings function
+const fetchUserBookings = (userId: string): Promise<Booking[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id: "booking-1",
+          booking_ref: "INS-12345678",
+          user_id: userId,
+          item_id: "hotel-1",
+          item_name: "Grand Makkah Hotel - Deluxe Room",
+          item_type: "hotel",
+          thumbnail: "/placeholder.svg",
+          start_date: "2023-11-15",
+          end_date: "2023-11-20",
+          guests: 2,
+          total_price: 1200,
+          status: "confirmed",
+          created_at: "2023-10-20T14:23:54Z"
+        },
+        {
+          id: "booking-2",
+          booking_ref: "INS-87654321",
+          user_id: userId,
+          item_id: "package-1",
+          item_name: "Complete Umrah Package",
+          item_type: "package",
+          thumbnail: "/placeholder.svg",
+          start_date: "2024-01-10",
+          end_date: "2024-01-17",
+          guests: 1,
+          total_price: 1200,
+          status: "pending",
+          created_at: "2023-10-25T09:15:32Z"
+        },
+        {
+          id: "booking-3",
+          booking_ref: "INS-24681357",
+          user_id: userId,
+          item_id: "hotel-2",
+          item_name: "Madinah Plaza Hotel - Standard Room",
+          item_type: "hotel",
+          thumbnail: "/placeholder.svg",
+          start_date: "2023-09-05",
+          end_date: "2023-09-10",
+          guests: 3,
+          total_price: 900,
+          status: "cancelled",
+          created_at: "2023-08-15T11:42:18Z"
+        }
+      ]);
+    }, 1500);
+  });
+};
+
+// Status badge component
+const StatusBadge: React.FC<{ status: Booking['status'] }> = ({ status }) => {
+  const { t } = useLanguage();
+  
+  switch (status) {
+    case "confirmed":
+      return (
+        <Badge className="bg-green-500 hover:bg-green-600">
+          {t("booking.status.confirmed")}
+        </Badge>
+      );
+    case "pending":
+      return (
+        <Badge variant="outline" className="text-amber-500 border-amber-500">
+          {t("booking.status.pending")}
+        </Badge>
+      );
+    case "cancelled":
+      return (
+        <Badge variant="outline" className="text-red-500 border-red-500">
+          {t("booking.status.cancelled")}
+        </Badge>
+      );
+    default:
+      return null;
+  }
+};
+
 const BookingsPage: React.FC = () => {
-  const { toast } = useToast();
-  const [bookings, setBookings] = useState<Booking[]>([
-    {
-      id: "1",
-      type: "hotel",
-      name: "Grand Makkah Hotel",
-      location: "Makkah",
-      checkIn: "2023-11-10",
-      checkOut: "2023-11-13",
-      guests: 2,
-      totalAmount: 750,
-      status: "confirmed",
-      bookingRef: "INST-123456",
-    },
-    {
-      id: "2",
-      type: "package",
-      name: "Complete Umrah Package",
-      location: "Makkah & Madinah",
-      checkIn: "2023-12-15",
-      checkOut: "2023-12-22",
-      guests: 1,
-      totalAmount: 1200,
-      status: "pending",
-      bookingRef: "INST-654321",
-    },
-    {
-      id: "3",
-      type: "hotel",
-      name: "Madinah Luxury Hotel",
-      location: "Madinah",
-      checkIn: "2023-10-05",
-      checkOut: "2023-10-08",
-      guests: 2,
-      totalAmount: 600,
-      status: "cancelled",
-      bookingRef: "INST-987654",
-    },
-  ]);
+  const { user, loading } = useAuth();
+  const { t } = useLanguage();
   
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("all");
   
-  const cancelBooking = (bookingId: string) => {
-    setBookings(bookings.map(booking => 
-      booking.id === bookingId 
-        ? { ...booking, status: "cancelled" } 
-        : booking
-    ));
+  // Fetch user bookings
+  useEffect(() => {
+    const getBookings = async () => {
+      if (!user) return;
+      
+      try {
+        setLoadingBookings(true);
+        const bookingsData = await fetchUserBookings(user.id);
+        setBookings(bookingsData);
+        setFilteredBookings(bookingsData);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      } finally {
+        setLoadingBookings(false);
+      }
+    };
     
-    toast({
-      title: "Booking cancelled",
-      description: "Your booking has been cancelled successfully.",
-    });
-  };
-  
-  const getActiveBookings = () => bookings.filter(booking => booking.status !== "cancelled");
-  const getPastBookings = () => bookings.filter(booking => 
-    new Date(booking.checkOut) < new Date() && booking.status !== "cancelled"
-  );
-  const getCancelledBookings = () => bookings.filter(booking => booking.status === "cancelled");
-  
-  const getStatusBadge = (status: string) => {
-    if (status === "confirmed") {
-      return <span className="flex items-center text-green-600"><CheckCircle className="w-4 h-4 mr-1" /> Confirmed</span>;
-    } else if (status === "pending") {
-      return <span className="flex items-center text-amber-600"><ClockIcon className="w-4 h-4 mr-1" /> Pending</span>;
-    } else {
-      return <span className="flex items-center text-red-600"><XCircle className="w-4 h-4 mr-1" /> Cancelled</span>;
+    if (user) {
+      getBookings();
     }
+  }, [user]);
+  
+  // Filter bookings based on active tab
+  useEffect(() => {
+    if (activeTab === "all") {
+      setFilteredBookings(bookings);
+    } else {
+      setFilteredBookings(bookings.filter(booking => booking.status === activeTab));
+    }
+  }, [activeTab, bookings]);
+  
+  // Show loading state if auth is still loading
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse text-center">{t("loading")}...</div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Helper to format date
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "MMM d, yyyy");
   };
   
-  const BookingCard = ({ booking }: { booking: Booking }) => (
-    <Card className="mb-4">
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row justify-between">
-          <div className="flex-1">
-            <div className="flex items-start">
-              <div className="mr-4 mt-1">
-                {booking.type === "hotel" ? (
-                  <HotelIcon className="w-5 h-5 text-primary" />
-                ) : (
-                  <Calendar className="w-5 h-5 text-primary" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">{booking.name}</h3>
-                <div className="flex items-center text-muted-foreground text-sm mt-1">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span>{booking.location}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:space-x-6 mt-4">
-                  <div className="mb-2 sm:mb-0">
-                    <div className="text-sm text-muted-foreground">Check-in</div>
-                    <div>{formatDate(booking.checkIn)}</div>
-                  </div>
-                  <div className="mb-2 sm:mb-0">
-                    <div className="text-sm text-muted-foreground">Check-out</div>
-                    <div>{formatDate(booking.checkOut)}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Guests</div>
-                    <div>{booking.guests}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="md:text-right mt-4 md:mt-0">
-            <div className="mb-2">{getStatusBadge(booking.status)}</div>
-            <div className="text-sm text-muted-foreground">Booking ref: {booking.bookingRef}</div>
-            <div className="font-bold mt-2">${booking.totalAmount}</div>
-            
-            <div className="mt-4 flex md:justify-end space-x-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link to={`/booking/${booking.id}`}>
-                  <Eye className="w-4 h-4 mr-1" /> Details
-                </Link>
-              </Button>
-              
-              {booking.status === "pending" && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" size="sm">Cancel</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Cancel Booking</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to cancel this booking? This action cannot be undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => document.getElementById('closeDialog')?.click()}>
-                        No, Keep Booking
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        onClick={() => {
-                          cancelBooking(booking.id);
-                          document.getElementById('closeDialog')?.click();
-                        }}
-                      >
-                        Yes, Cancel Booking
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  // Get icon based on item type
+  const getItemIcon = (itemType: "hotel" | "package") => {
+    return itemType === "hotel" ? (
+      <Hotel className="h-4 w-4" />
+    ) : (
+      <Package className="h-4 w-4" />
+    );
+  };
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -190,66 +185,136 @@ const BookingsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
-        
-        <Tabs defaultValue="active">
-          <TabsList className="mb-6">
-            <TabsTrigger value="active">Active Bookings</TabsTrigger>
-            <TabsTrigger value="past">Past Bookings</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          </TabsList>
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2">{t("account.bookings.title")}</h1>
+          <p className="text-muted-foreground mb-6">{t("account.bookings.subtitle")}</p>
           
-          <TabsContent value="active" className="mt-0">
-            {getActiveBookings().length > 0 ? (
-              getActiveBookings().map(booking => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-8 h-8 text-muted-foreground" />
+          <Tabs 
+            defaultValue="all"
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid grid-cols-4 mb-8">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value={activeTab} className="mt-0">
+              {loadingBookings ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i}>
+                      <CardContent className="p-0">
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div className="md:col-span-1">
+                            <Skeleton className="h-36 w-full rounded-l-lg" />
+                          </div>
+                          <div className="p-4 md:col-span-2 space-y-4">
+                            <div className="flex justify-between">
+                              <Skeleton className="h-6 w-1/3" />
+                              <Skeleton className="h-6 w-24" />
+                            </div>
+                            <Skeleton className="h-4 w-1/2" />
+                            <div className="grid grid-cols-2 gap-2">
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-full" />
+                            </div>
+                            <div className="flex justify-between">
+                              <Skeleton className="h-4 w-20" />
+                              <Skeleton className="h-10 w-32" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                <h3 className="text-lg font-medium mb-2">No active bookings</h3>
-                <p className="text-muted-foreground mb-6">You don't have any active bookings at the moment.</p>
-                <Button asChild>
-                  <Link to="/search">Find a Hotel</Link>
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="past" className="mt-0">
-            {getPastBookings().length > 0 ? (
-              getPastBookings().map(booking => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No past bookings</h3>
-                <p className="text-muted-foreground mb-6">You don't have any past bookings.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="cancelled" className="mt-0">
-            {getCancelledBookings().length > 0 ? (
-              getCancelledBookings().map(booking => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <XCircle className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No cancelled bookings</h3>
-                <p className="text-muted-foreground">You don't have any cancelled bookings.</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              ) : (
+                <>
+                  {filteredBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <h3 className="text-lg font-medium mb-2">No bookings found</h3>
+                      <p className="text-muted-foreground mb-6">
+                        {activeTab === "all" 
+                          ? t("account.bookings.noBookings")
+                          : `You don't have any ${activeTab} bookings.`
+                        }
+                      </p>
+                      <Button asChild>
+                        <Link to="/search">Browse Options</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {filteredBookings.map((booking) => (
+                        <Card key={booking.id} className="overflow-hidden">
+                          <CardContent className="p-0">
+                            <div className="grid md:grid-cols-3 gap-4">
+                              <div className="md:col-span-1">
+                                <div className="h-full bg-muted">
+                                  <img
+                                    src={booking.thumbnail}
+                                    alt={booking.item_name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="p-6 md:col-span-2">
+                                <div className="flex flex-wrap justify-between gap-2 mb-2">
+                                  <h3 className="font-semibold">
+                                    <div className="flex items-center">
+                                      {getItemIcon(booking.item_type)}
+                                      <span className="ml-2">{booking.item_name}</span>
+                                    </div>
+                                  </h3>
+                                  <StatusBadge status={booking.status} />
+                                </div>
+                                
+                                <p className="text-sm text-muted-foreground mb-4">
+                                  Booking Reference: <span className="font-mono font-medium">{booking.booking_ref}</span>
+                                </p>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 mb-4 text-sm">
+                                  <div className="flex items-center">
+                                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                    <span>
+                                      {formatDate(booking.start_date)} - {formatDate(booking.end_date)}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="flex items-center">
+                                    <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                                    <span>{booking.guests} guests</span>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                  <div className="font-medium">
+                                    Total: ${booking.total_price}
+                                  </div>
+                                  
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link to={`/account/bookings/${booking.id}`}>
+                                      {t("account.bookings.viewDetails")}
+                                      <ChevronRight className="ml-1 h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </motion.div>
     </div>
   );

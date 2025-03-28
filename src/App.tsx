@@ -36,6 +36,14 @@ const AdminExternalListings = lazy(() => import("./pages/admin/ExternalListingsP
 const AdminBookings = lazy(() => import("./pages/admin/BookingsPage"));
 const AdminUsers = lazy(() => import("./pages/admin/UsersPage"));
 const AdminReviews = lazy(() => import("./pages/admin/ReviewsPage"));
+const AdminProviders = lazy(() => import("./pages/admin/ProvidersPage"));
+
+// New Provider Dashboard Pages
+const ProviderLayout = lazy(() => import("./layouts/ProviderLayout"));
+const ProviderDashboard = lazy(() => import("./pages/provider/DashboardPage"));
+const ProviderListings = lazy(() => import("./pages/provider/ListingsPage"));
+const ProviderBookings = lazy(() => import("./pages/provider/BookingsPage"));
+const ProviderProfile = lazy(() => import("./pages/provider/ProfilePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +92,7 @@ const App = () => (
                   <Route element={<AuthLayout />}>
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
+                    <Route path="/auth/reset-password" element={<LoginPage />} /> {/* Placeholder */}
                   </Route>
 
                   {/* Account Routes - Protected */}
@@ -95,12 +104,71 @@ const App = () => (
                   {/* Admin Routes - Protected */}
                   <Route element={<AdminLayout />}>
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/hotels" element={<AdminHotels />} />
                     <Route path="/admin/packages" element={<AdminPackages />} />
                     <Route path="/admin/external-listings" element={<AdminExternalListings />} />
                     <Route path="/admin/bookings" element={<AdminBookings />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/providers" element={<AdminProviders />} />
                     <Route path="/admin/reviews" element={<AdminReviews />} />
+                  </Route>
+
+                  {/* Provider Routes - Protected */}
+                  <Route element={<ProviderLayout />}>
+                    <Route path="/provider" element={<ProviderDashboard />} />
+                    <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+                    <Route path="/provider/listings" element={<ProviderListings />} />
+                    <Route path="/provider/bookings" element={<ProviderBookings />} />
+                    <Route path="/provider/profile" element={<ProviderProfile />} />
+                  </Route>
+
+                  {/* Language-specific routes (for future) */}
+                  <Route path="/:lang">
+                    {/* Main Routes with language prefix */}
+                    <Route element={<MainLayout />}>
+                      <Route index element={<HomePage />} />
+                      <Route path="search" element={<SearchPage />} />
+                      <Route path="hotels/:hotelId" element={<HotelDetailPage />} />
+                      <Route path="packages/:packageId" element={<PackageDetailPage />} />
+                      <Route path="booking/confirm" element={<BookingConfirmPage />} />
+                      <Route path="booking/success" element={<BookingSuccessPage />} />
+                    </Route>
+
+                    {/* Auth Routes with language prefix */}
+                    <Route path="auth" element={<AuthLayout />}>
+                      <Route path="login" element={<LoginPage />} />
+                      <Route path="register" element={<RegisterPage />} />
+                      <Route path="reset-password" element={<LoginPage />} /> {/* Placeholder */}
+                    </Route>
+
+                    {/* Account Routes with language prefix - Protected */}
+                    <Route path="account" element={<MainLayout requireAuth />}>
+                      <Route path="profile" element={<ProfilePage />} />
+                      <Route path="bookings" element={<BookingsPage />} />
+                    </Route>
+
+                    {/* Admin Routes with language prefix - Protected */}
+                    <Route path="admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="hotels" element={<AdminHotels />} />
+                      <Route path="packages" element={<AdminPackages />} />
+                      <Route path="external-listings" element={<AdminExternalListings />} />
+                      <Route path="bookings" element={<AdminBookings />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="providers" element={<AdminProviders />} />
+                      <Route path="reviews" element={<AdminReviews />} />
+                    </Route>
+
+                    {/* Provider Routes with language prefix - Protected */}
+                    <Route path="provider" element={<ProviderLayout />}>
+                      <Route index element={<ProviderDashboard />} />
+                      <Route path="dashboard" element={<ProviderDashboard />} />
+                      <Route path="listings" element={<ProviderListings />} />
+                      <Route path="bookings" element={<ProviderBookings />} />
+                      <Route path="profile" element={<ProviderProfile />} />
+                    </Route>
                   </Route>
 
                   {/* 404 */}

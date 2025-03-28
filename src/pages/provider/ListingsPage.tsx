@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -9,13 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HotelCard } from "@/components/cards/HotelCard";
-import { PackageCard } from "@/components/cards/PackageCard";
+import HotelCard from "@/components/cards/HotelCard";
+import PackageCard from "@/components/cards/PackageCard";
 import { Plus, Hotel, Package, Calendar, Edit, Trash, Star, MapPin, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for provider listings
 const mockHotels = [
   {
     id: "hotel-1",
@@ -88,17 +86,14 @@ const ProviderListingsPage: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const { toast } = useToast();
   
-  // State for listings
   const [hotels, setHotels] = useState(mockHotels);
   const [packages, setPackages] = useState(mockPackages);
   
-  // State for dialogs
   const [isHotelDialogOpen, setIsHotelDialogOpen] = useState(false);
   const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'hotel' | 'package'} | null>(null);
   
-  // State for forms
   const [newHotel, setNewHotel] = useState({
     name: "",
     city: "Makkah",
@@ -123,7 +118,6 @@ const ProviderListingsPage: React.FC = () => {
     includes_transport: false
   });
 
-  // Handle hotel creation
   const handleCreateHotel = () => {
     const hotelId = `hotel-${Date.now()}`;
     const hotel = {
@@ -153,7 +147,6 @@ const ProviderListingsPage: React.FC = () => {
     });
   };
   
-  // Handle package creation
   const handleCreatePackage = () => {
     const packageId = `package-${Date.now()}`;
     const packageItem = {
@@ -185,7 +178,6 @@ const ProviderListingsPage: React.FC = () => {
     });
   };
   
-  // Handle deletion confirmation
   const handleDeleteConfirm = () => {
     if (!itemToDelete) return;
     
@@ -205,15 +197,12 @@ const ProviderListingsPage: React.FC = () => {
     });
   };
   
-  // Handle deletion request
   const handleDeleteItem = (id: string, type: 'hotel' | 'package') => {
     setItemToDelete({ id, type });
     setIsDeleteDialogOpen(true);
   };
   
-  // Handle view details
   const handleViewDetails = (id: string, type: 'hotel' | 'package') => {
-    // In a real app, this would navigate to a detail page
     console.log(`View details for ${type} with ID: ${id}`);
   };
   

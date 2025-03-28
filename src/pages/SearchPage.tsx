@@ -47,18 +47,9 @@ interface Package {
   is_internal: boolean;
 }
 
-interface ExternalListing {
-  id: string;
-  listing_type: "hotel" | "flight" | "transport";
-  name: string;
-  description: string;
-  city: string;
-  provider_name: string;
-  redirect_url: string;
-  image_url: string;
-  price_indication: string;
-  rating_indication: string;
-}
+// Import the ExternalListing type from ExternalListingCard to ensure consistency
+import type { ExternalListing as CardExternalListing } from "@/components/cards/ExternalListingCard";
+type ExternalListing = CardExternalListing;
 
 type ListingType = Hotel | Package | ExternalListing;
 

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ExternalLink, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface ExternalListing {
+export interface ExternalListing {
   id: string;
   listing_type: "hotel" | "flight" | "transport";
   name: string;

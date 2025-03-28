@@ -1,264 +1,599 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Calendar, Search, User, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Calendar, 
+  Clock, 
+  Hotel, 
+  Package, 
+  Search,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Users,
+  CreditCard,
+  CheckCircle2,
+  HelpCircle,
+  XCircle
+} from "lucide-react";
+import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Types
+interface Booking {
+  id: string;
+  reference: string;
+  created_at: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  total_price: number;
+  booking_type: 'hotel' | 'package';
+  check_in?: string;
+  check_out?: string;
+  guests: number;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  item: {
+    id: string;
+    name: string;
+    thumbnail: string;
+    location?: string;
+  };
+}
+
 const ProviderBookingsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  
+  // State for bookings
+  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  
+  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Mock data for bookings
-  const bookings = [
-    {
-      id: "booking-1",
-      guest_name: "Ahmed Mohamed",
-      guest_email: "ahmed@example.com",
-      listing_name: "Deluxe Room - Grand Makkah Hotel",
-      listing_type: "hotel",
-      dates: "Nov 15 - Nov 20, 2023",
-      guests: 2,
-      total_amount: 1200,
-      status: "confirmed",
-      created_at: "2023-10-25T14:30:00Z",
-    },
-    {
-      id: "booking-2",
-      guest_name: "Sarah Johnson",
-      guest_email: "sarah@example.com",
-      listing_name: "Family Suite - Madinah View Hotel",
-      listing_type: "hotel",
-      dates: "Dec 5 - Dec 10, 2023",
-      guests: 4,
-      total_amount: 2400,
-      status: "pending",
-      created_at: "2023-11-01T09:15:00Z",
-    },
-    {
-      id: "booking-3",
-      guest_name: "Mohammed Rahman",
-      guest_email: "mohammed@example.com",
-      listing_name: "Premium Umrah Package",
-      listing_type: "package",
-      dates: "Dec 20 - Dec 27, 2023",
-      guests: 2,
-      total_amount: 2400,
-      status: "confirmed",
-      created_at: "2023-11-05T16:45:00Z",
-    },
-    {
-      id: "booking-4",
-      guest_name: "Fatima Ali",
-      guest_email: "fatima@example.com",
-      listing_name: "Standard Room - Makkah Plaza",
-      listing_type: "hotel",
-      dates: "Jan 10 - Jan 15, 2024",
-      guests: 1,
-      total_amount: 900,
-      status: "pending",
-      created_at: "2023-11-10T11:20:00Z",
-    },
-  ];
-
-  // Filter bookings based on search term
-  const filteredBookings = bookings.filter(booking => 
-    booking.guest_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.listing_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  
+  // Fetch bookings (mock)
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      const mockBookings: Booking[] = [
+        {
+          id: "booking-1",
+          reference: "INS-12345",
+          created_at: "2023-10-15T12:30:00Z",
+          status: "confirmed",
+          total_price: 750,
+          booking_type: "hotel",
+          check_in: "2023-11-10",
+          check_out: "2023-11-15",
+          guests: 2,
+          customer: {
+            name: "Ahmed Ali",
+            email: "ahmed.ali@example.com",
+            phone: "+966 50 123 4567"
+          },
+          item: {
+            id: "hotel-1",
+            name: "Al Safwah Royale Orchid Hotel",
+            thumbnail: "/placeholder.svg",
+            location: "Makkah, 250m from Haram"
+          }
+        },
+        {
+          id: "booking-2",
+          reference: "INS-12346",
+          created_at: "2023-10-16T15:45:00Z",
+          status: "pending",
+          total_price: 1200,
+          booking_type: "package",
+          check_in: "2023-11-20",
+          check_out: "2023-11-27",
+          guests: 1,
+          customer: {
+            name: "Fatima Hassan",
+            email: "fatima.h@example.com",
+            phone: "+966 55 987 6543"
+          },
+          item: {
+            id: "package-1",
+            name: "Premium Umrah Package - 7 Days",
+            thumbnail: "/placeholder.svg",
+            location: "Makkah & Madinah"
+          }
+        },
+        {
+          id: "booking-3",
+          reference: "INS-12347",
+          created_at: "2023-10-18T09:15:00Z",
+          status: "cancelled",
+          total_price: 450,
+          booking_type: "hotel",
+          check_in: "2023-12-05",
+          check_out: "2023-12-10",
+          guests: 3,
+          customer: {
+            name: "Mohammad Sayed",
+            email: "mohammad.s@example.com",
+            phone: "+966 55 111 2222"
+          },
+          item: {
+            id: "hotel-2",
+            name: "Elaf Ajyad Hotel",
+            thumbnail: "/placeholder.svg",
+            location: "Makkah, 450m from Haram"
+          }
+        },
+        {
+          id: "booking-4",
+          reference: "INS-12348",
+          created_at: "2023-10-20T14:10:00Z",
+          status: "confirmed",
+          total_price: 1500,
+          booking_type: "package",
+          check_in: "2023-12-15",
+          check_out: "2023-12-25",
+          guests: 2,
+          customer: {
+            name: "Aisha Mahmoud",
+            email: "aisha.m@example.com",
+            phone: "+966 50 444 5555"
+          },
+          item: {
+            id: "package-2",
+            name: "Standard Umrah Package - 10 Days",
+            thumbnail: "/placeholder.svg",
+            location: "Makkah & Madinah"
+          }
+        }
+      ];
+      
+      setBookings(mockBookings);
+      setFilteredBookings(mockBookings);
+      setLoading(false);
+    }, 1500);
+  }, []);
+  
+  // Apply filters
+  useEffect(() => {
+    let result = bookings;
+    
+    // Apply search term
+    if (searchTerm.trim()) {
+      result = result.filter(booking => 
+        booking.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      result = result.filter(booking => booking.status === statusFilter);
+    }
+    
+    // Apply type filter
+    if (typeFilter !== "all") {
+      result = result.filter(booking => booking.booking_type === typeFilter);
+    }
+    
+    // Apply date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+      const ninetyDaysAgo = new Date(now.setDate(now.getDate() - 90));
+      
+      switch (dateFilter) {
+        case "30days":
+          result = result.filter(booking => new Date(booking.created_at) >= thirtyDaysAgo);
+          break;
+        case "90days":
+          result = result.filter(booking => new Date(booking.created_at) >= ninetyDaysAgo);
+          break;
+        // Additional date filters could be added here
+      }
+    }
+    
+    setFilteredBookings(result);
+  }, [searchTerm, statusFilter, typeFilter, dateFilter, bookings]);
+  
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return <Badge className="bg-green-500/90">Confirmed</Badge>;
+      case "pending":
+        return <Badge className="bg-amber-500/90">Pending</Badge>;
+      case "cancelled":
+        return <Badge className="bg-red-500/90">Cancelled</Badge>;
+      default:
+        return <Badge className="bg-slate-500/90">Unknown</Badge>;
+    }
+  };
+  
+  // Get type icon
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "hotel":
+        return <Hotel className="h-4 w-4" />;
+      case "package":
+        return <Package className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "MMM d, yyyy");
+  };
+  
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Bookings</h1>
-            <p className="text-muted-foreground">Manage bookings for your listings</p>
-          </div>
-          <div className="relative w-full md:w-64 mt-4 md:mt-0">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search bookings..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <Tabs defaultValue="all" className="mt-6">
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">All Bookings</TabsTrigger>
-            <TabsTrigger value="pending">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              Pending
-            </TabsTrigger>
-            <TabsTrigger value="confirmed">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Confirmed
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all" className="space-y-4">
-            {filteredBookings.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground">No bookings found</p>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Bookings Management</h1>
+      </div>
+      
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="search" className="text-sm">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  type="search"
+                  placeholder="Search by reference, name..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="status" className="text-sm">Status</Label>
+              <Select defaultValue={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="type" className="text-sm">Type</Label>
+              <Select defaultValue={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="hotel">Hotels</SelectItem>
+                  <SelectItem value="package">Packages</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="date" className="text-sm">Date Range</Label>
+              <Select defaultValue={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger id="date">
+                  <SelectValue placeholder="Filter by date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row justify-between">
+                    <div className="flex gap-4 mb-4 md:mb-0">
+                      <Skeleton className="w-16 h-16 rounded" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-5 w-40" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <>
+            {filteredBookings.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center p-10">
+                  <Calendar className="h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Bookings Found</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    There are no bookings matching your current filters. Try adjusting your search criteria.
+                  </p>
+                  <Button onClick={() => {
+                    setSearchTerm("");
+                    setStatusFilter("all");
+                    setTypeFilter("all");
+                    setDateFilter("all");
+                  }}>
+                    Reset Filters
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
               <div className="space-y-4">
                 {filteredBookings.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center">
-                            <h3 className="font-semibold">{booking.listing_name}</h3>
-                            <Badge className={`ml-2 ${
-                              booking.status === 'confirmed' 
-                                ? 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-500' 
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-800/20 dark:text-amber-500'
-                            }`}>
-                              {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                            </Badge>
+                  <Card key={booking.id} className="overflow-hidden">
+                    <Tabs defaultValue="summary">
+                      <div className="bg-muted/30 p-4 border-b">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
+                              <img 
+                                src={booking.item.thumbnail} 
+                                alt={booking.item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+                                  {getTypeIcon(booking.booking_type)}
+                                  <span className="ml-1 capitalize">{booking.booking_type}</span>
+                                </span>
+                                {getStatusBadge(booking.status)}
+                              </div>
+                              <h3 className="font-medium">{booking.item.name}</h3>
+                              <div className="text-xs text-muted-foreground flex items-center">
+                                <MapPin className="h-3 w-3 mr-1" /> 
+                                {booking.item.location}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="h-3.5 w-3.5 mr-1" />
-                            <span>{booking.dates}</span>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <User className="h-3.5 w-3.5 mr-1" />
-                            <span>{booking.guest_name} • {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}</span>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5 mr-1" />
-                            <span>Booked on {new Date(booking.created_at).toLocaleDateString()}</span>
+                          
+                          <div className="flex flex-col items-end">
+                            <div className="text-sm font-medium">#{booking.reference}</div>
+                            <div className="text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3 inline mr-1" />
+                              {formatDate(booking.created_at)}
+                            </div>
+                            <div className="text-sm font-semibold mt-1">
+                              Total: ${booking.total_price}
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="flex flex-col items-end gap-2">
-                          <div className="text-lg font-semibold">${booking.total_amount}</div>
-                          <div className="text-sm text-muted-foreground">Total Amount</div>
-                          <Button variant="outline" size="sm">
-                            View Details
-                          </Button>
-                        </div>
+                        <TabsList className="mt-4">
+                          <TabsTrigger value="summary">
+                            Summary
+                          </TabsTrigger>
+                          <TabsTrigger value="customer">
+                            Customer Details
+                          </TabsTrigger>
+                        </TabsList>
                       </div>
-                    </CardContent>
+                      
+                      <CardContent className="p-6">
+                        <TabsContent value="summary" className="m-0">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Booking Details</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Booking Date:</span>
+                                  <span>{formatDate(booking.created_at)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Reference:</span>
+                                  <span className="font-mono">{booking.reference}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Status:</span>
+                                  <span>{getStatusBadge(booking.status)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Stay Information</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Check-in:</span>
+                                  <span>{booking.check_in ? formatDate(booking.check_in) : 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Check-out:</span>
+                                  <span>{booking.check_out ? formatDate(booking.check_out) : 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Guests:</span>
+                                  <span>{booking.guests}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Payment Information</h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Total Amount:</span>
+                                  <span className="font-bold">${booking.total_price}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Payment Status:</span>
+                                  <span>
+                                    {booking.status === 'confirmed' ? (
+                                      <Badge className="bg-green-500/90">Paid</Badge>
+                                    ) : booking.status === 'pending' ? (
+                                      <Badge className="bg-amber-500/90">Pending</Badge>
+                                    ) : (
+                                      <Badge className="bg-red-500/90">Cancelled</Badge>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-6 flex justify-end gap-2">
+                            {booking.status === 'pending' && (
+                              <div className="text-xs text-muted-foreground flex items-center mr-auto">
+                                <HelpCircle className="h-3 w-3 mr-1" />
+                                This booking is awaiting confirmation by the admin team
+                              </div>
+                            )}
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="customer" className="m-0">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="col-span-1 md:col-span-2">
+                              <h4 className="text-sm font-medium mb-2">Customer Information</h4>
+                              <div className="space-y-3">
+                                <div className="flex items-start">
+                                  <User className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
+                                  <div>
+                                    <div className="font-medium">{booking.customer.name}</div>
+                                    <div className="text-xs text-muted-foreground">Primary Guest</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-start">
+                                  <Mail className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
+                                  <div>
+                                    <div>{booking.customer.email}</div>
+                                    <div className="text-xs text-muted-foreground">Email Address</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-start">
+                                  <Phone className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
+                                  <div>
+                                    <div>{booking.customer.phone}</div>
+                                    <div className="text-xs text-muted-foreground">Phone Number</div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <Separator className="my-4" />
+                              
+                              <h4 className="text-sm font-medium mb-2">Guest Details</h4>
+                              <div className="bg-muted/30 p-3 rounded-md">
+                                <div className="flex items-center">
+                                  <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  <span>{booking.guests} {booking.guests === 1 ? 'Guest' : 'Guests'}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {booking.status === 'pending' ? 
+                                    'Additional guest details will be available after confirmation' : 
+                                    'View the full booking confirmation for detailed guest information'}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Booking Status</h4>
+                              <div className="space-y-4">
+                                <div className={`flex items-center ${booking.status === 'confirmed' || booking.status === 'pending' || booking.status === 'cancelled' ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                  <CheckCircle2 className="h-5 w-5 mr-2" />
+                                  <div>
+                                    <div className="font-medium">Booking Received</div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {formatDate(booking.created_at)}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className={`flex items-center ${booking.status === 'confirmed' ? 'text-green-500' : booking.status === 'pending' ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                  {booking.status === 'confirmed' ? (
+                                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                                  ) : booking.status === 'pending' ? (
+                                    <HelpCircle className="h-5 w-5 mr-2" />
+                                  ) : (
+                                    <XCircle className="h-5 w-5 mr-2" />
+                                  )}
+                                  <div>
+                                    <div className="font-medium">
+                                      {booking.status === 'confirmed' ? 'Booking Confirmed' : 
+                                       booking.status === 'pending' ? 'Awaiting Confirmation' : 
+                                       'Booking Cancelled'}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {booking.status === 'pending' ? 
+                                        'The booking is being processed' : 
+                                        'Status updated by admin'}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className={`flex items-center ${booking.status === 'confirmed' ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                  {booking.status === 'confirmed' ? (
+                                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                                  ) : (
+                                    <CreditCard className="h-5 w-5 mr-2" />
+                                  )}
+                                  <div>
+                                    <div className="font-medium">Payment {booking.status === 'confirmed' ? 'Completed' : 'Pending'}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {booking.status === 'confirmed' ? 
+                                        'Payment has been processed' : 
+                                        'Awaiting payment processing'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      </CardContent>
+                    </Tabs>
                   </Card>
                 ))}
               </div>
             )}
-          </TabsContent>
-          
-          <TabsContent value="pending" className="space-y-4">
-            {filteredBookings.filter(b => b.status === 'pending').length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground">No pending bookings found</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredBookings
-                  .filter(booking => booking.status === 'pending')
-                  .map((booking) => (
-                    <Card key={booking.id}>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center">
-                              <h3 className="font-semibold">{booking.listing_name}</h3>
-                              <Badge className="ml-2 bg-amber-100 text-amber-800 dark:bg-amber-800/20 dark:text-amber-500">
-                                Pending
-                              </Badge>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Calendar className="h-3.5 w-3.5 mr-1" />
-                              <span>{booking.dates}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <User className="h-3.5 w-3.5 mr-1" />
-                              <span>{booking.guest_name} • {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              <span>Booked on {new Date(booking.created_at).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="text-lg font-semibold">${booking.total_amount}</div>
-                            <div className="text-sm text-muted-foreground">Total Amount</div>
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="confirmed" className="space-y-4">
-            {filteredBookings.filter(b => b.status === 'confirmed').length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground">No confirmed bookings found</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredBookings
-                  .filter(booking => booking.status === 'confirmed')
-                  .map((booking) => (
-                    <Card key={booking.id}>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center">
-                              <h3 className="font-semibold">{booking.listing_name}</h3>
-                              <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-500">
-                                Confirmed
-                              </Badge>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Calendar className="h-3.5 w-3.5 mr-1" />
-                              <span>{booking.dates}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <User className="h-3.5 w-3.5 mr-1" />
-                              <span>{booking.guest_name} • {booking.guests} {booking.guests === 1 ? 'guest' : 'guests'}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              <span>Booked on {new Date(booking.created_at).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="text-lg font-semibold">${booking.total_amount}</div>
-                            <div className="text-sm text-muted-foreground">Total Amount</div>
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </motion.div>
-    </div>
+          </>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

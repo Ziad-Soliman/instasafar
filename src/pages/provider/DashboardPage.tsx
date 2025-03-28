@@ -1,292 +1,481 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { HotelCard } from "@/components/cards/HotelCard";
+import { PackageCard } from "@/components/cards/PackageCard";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building, Calendar, Hotel, Package, Plus, User, Users } from "lucide-react";
+import { 
+  Hotel, 
+  Package, 
+  TrendingUp, 
+  Calendar, 
+  Users, 
+  Star, 
+  DollarSign, 
+  Plus,
+  Bell,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  CalendarRange,
+  Wallet
+} from "lucide-react";
 
-const ProviderDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const { t } = useLanguage();
+// Mock data for dashboard
+// Recent bookings
+const recentBookings = [
+  {
+    id: "booking-1",
+    reference: "INS-12345",
+    created_at: "2023-10-15T12:30:00Z",
+    status: "confirmed",
+    total_price: 750,
+    item_name: "Al Safwah Royale Orchid Hotel",
+    customer_name: "Ahmed Ali",
+    check_in: "2023-11-10",
+    check_out: "2023-11-15",
+    type: "hotel"
+  },
+  {
+    id: "booking-2",
+    reference: "INS-12346",
+    created_at: "2023-10-16T15:45:00Z",
+    status: "pending",
+    total_price: 1200,
+    item_name: "Premium Umrah Package - 7 Days",
+    customer_name: "Fatima Hassan",
+    check_in: "2023-11-20",
+    check_out: "2023-11-27",
+    type: "package"
+  },
+  {
+    id: "booking-3",
+    reference: "INS-12347",
+    created_at: "2023-10-18T09:15:00Z",
+    status: "confirmed",
+    total_price: 450,
+    item_name: "Elaf Ajyad Hotel",
+    customer_name: "Mohammad Sayed",
+    check_in: "2023-12-05",
+    check_out: "2023-12-10",
+    type: "hotel"
+  }
+];
 
-  // Mock statistics
-  const stats = [
-    {
-      title: "Total Listings",
-      value: "5",
-      description: "Active properties",
-      icon: <Building className="h-5 w-5 text-blue-500" />,
-    },
-    {
-      title: "Active Bookings",
-      value: "12",
-      description: "For upcoming dates",
-      icon: <Calendar className="h-5 w-5 text-green-500" />,
-    },
-    {
-      title: "Total Guests",
-      value: "54",
-      description: "This month",
-      icon: <Users className="h-5 w-5 text-amber-500" />,
-    },
-    {
-      title: "Inquiries",
-      value: "3",
-      description: "Pending responses",
-      icon: <User className="h-5 w-5 text-purple-500" />,
-    },
-  ];
+// Featured listings
+const featuredHotel = {
+  id: "hotel-1",
+  name: "Al Safwah Royale Orchid Hotel",
+  city: "Makkah",
+  address: "Ajyad Street, Near Haram",
+  description: "Luxurious 5-star hotel with direct views of the Holy Masjid Al Haram, offering elegant rooms and suites with modern amenities and exceptional service.",
+  rating: 4.7,
+  price_per_night: 350,
+  distance_to_haram: "250 meters",
+  amenities: ["Free WiFi", "24/7 Room Service", "Prayer Room", "Restaurant", "Concierge"],
+  thumbnail: "/placeholder.svg",
+  is_internal: true
+};
 
-  // Mock recent bookings
-  const recentBookings = [
-    {
-      id: "b1",
-      guest: "Ahmed Mohamed",
-      property: "Deluxe Room - Grand Makkah Hotel",
-      dates: "Nov 15 - Nov 20, 2023",
-      status: "confirmed",
-    },
-    {
-      id: "b2",
-      guest: "Sarah Johnson",
-      property: "Family Suite - Madinah View Hotel",
-      dates: "Dec 5 - Dec 10, 2023",
-      status: "pending",
-    },
-    {
-      id: "b3",
-      guest: "Mohammed Rahman",
-      property: "Standard Room - Makkah Plaza",
-      dates: "Dec 20 - Dec 25, 2023",
-      status: "confirmed",
-    },
-  ];
+const featuredPackage = {
+  id: "package-1",
+  name: "Premium Umrah Package - 7 Days",
+  description: "All-inclusive 7-day Umrah package with 5-star accommodations in Makkah and Madinah, private transportation, guided tours, and all necessary arrangements.",
+  price: 1500,
+  duration_days: 7,
+  start_date: "2023-11-15",
+  end_date: "2023-11-22",
+  thumbnail: "/placeholder.svg",
+  includes_hotel: true,
+  includes_flight: true,
+  includes_transport: true,
+  city: "Makkah & Madinah",
+  is_internal: true
+};
 
+// Notifications
+const notifications = [
+  {
+    id: "notif-1",
+    message: "New booking received for Al Safwah Royale Orchid Hotel",
+    time: "2 hours ago",
+    read: false
+  },
+  {
+    id: "notif-2",
+    message: "Your listing 'Premium Umrah Package' has been approved",
+    time: "1 day ago",
+    read: false
+  },
+  {
+    id: "notif-3",
+    message: "Booking #INS-12345 has been confirmed by admin",
+    time: "2 days ago",
+    read: true
+  },
+  {
+    id: "notif-4",
+    message: "Your profile information has been updated successfully",
+    time: "3 days ago",
+    read: true
+  }
+];
+
+// Chart data
+const bookingChartData = [
+  { name: 'Jan', bookings: 4 },
+  { name: 'Feb', bookings: 6 },
+  { name: 'Mar', bookings: 8 },
+  { name: 'Apr', bookings: 10 },
+  { name: 'May', bookings: 12 },
+  { name: 'Jun', bookings: 8 },
+  { name: 'Jul', bookings: 14 },
+  { name: 'Aug', bookings: 18 },
+  { name: 'Sep', bookings: 20 },
+  { name: 'Oct', bookings: 15 },
+  { name: 'Nov', bookings: 22 },
+  { name: 'Dec', bookings: 25 }
+];
+
+const revenueData = [
+  { name: 'Hotels', value: 65000 },
+  { name: 'Packages', value: 45000 },
+  { name: 'Transport', value: 25000 }
+];
+
+// Stats data
+const stats = {
+  total_listings: 15,
+  total_bookings: 187,
+  completed_bookings: 152,
+  total_revenue: 75680,
+  avg_rating: 4.8
+};
+
+const ProviderDashboardPage: React.FC = () => {
+  const { t, isRTL } = useLanguage();
+  const navigate = useNavigate();
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+  
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+  
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return <Badge className="bg-green-500/90">Confirmed</Badge>;
+      case "pending":
+        return <Badge className="bg-amber-500/90">Pending</Badge>;
+      case "cancelled":
+        return <Badge className="bg-red-500/90">Cancelled</Badge>;
+      default:
+        return <Badge className="bg-slate-500/90">Unknown</Badge>;
+    }
+  };
+  
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Provider Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.full_name}</p>
-          </div>
-          <div className="flex gap-2 mt-4 md:mt-0">
-            <Button asChild>
-              <Link to="/provider/listings/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Listing
-              </Link>
-            </Button>
-          </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Provider Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back to your InstaSafar provider portal.</p>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                {stat.icon}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/provider/listings')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Listing
+          </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Recent Bookings */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Recent Bookings</CardTitle>
-              <CardDescription>Recent booking activity for your properties</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {recentBookings.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-muted-foreground">No recent bookings found</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentBookings.map((booking) => (
-                    <div key={booking.id} className="flex items-start justify-between border-b pb-4 last:border-0 last:pb-0">
-                      <div>
-                        <p className="font-medium">{booking.guest}</p>
-                        <p className="text-sm text-muted-foreground">{booking.property}</p>
-                        <p className="text-sm">{booking.dates}</p>
-                      </div>
-                      <div>
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          booking.status === 'confirmed' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-800/20 dark:text-green-500' 
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-800/20 dark:text-amber-500'
-                        }`}>
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4 text-center">
-                <Button variant="outline" asChild>
-                  <Link to="/provider/bookings">
-                    View All Bookings
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Links */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common tasks and resources</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <Link to="/provider/listings">
-                  <Hotel className="mr-2 h-4 w-4" />
-                  Manage Hotels
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <Link to="/provider/listings?type=package">
-                  <Package className="mr-2 h-4 w-4" />
-                  Manage Packages
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <Link to="/provider/bookings?status=pending">
+      </div>
+      
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <Card>
+          <CardContent className="flex flex-row items-center justify-between p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Listings</p>
+              <h3 className="text-2xl font-bold">{stats.total_listings}</h3>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Hotel className="h-6 w-6 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex flex-row items-center justify-between p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Bookings</p>
+              <h3 className="text-2xl font-bold">{stats.total_bookings}</h3>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Calendar className="h-6 w-6 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex flex-row items-center justify-between p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Completed</p>
+              <h3 className="text-2xl font-bold">{stats.completed_bookings}</h3>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle2 className="h-6 w-6 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex flex-row items-center justify-between p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Revenue</p>
+              <h3 className="text-2xl font-bold">${Math.floor(stats.total_revenue/1000)}k</h3>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex flex-row items-center justify-between p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Avg. Rating</p>
+              <h3 className="text-2xl font-bold">{stats.avg_rating}</h3>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Star className="h-6 w-6 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Charts Section */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Booking Analytics</CardTitle>
+            <CardDescription>Overview of your booking performance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="bookings">
+              <TabsList className="mb-4">
+                <TabsTrigger value="bookings">
                   <Calendar className="mr-2 h-4 w-4" />
-                  Review Pending Bookings
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <Link to="/provider/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Update Provider Profile
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Listing Tab Section */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Your Listings Overview</h2>
-          <Tabs defaultValue="hotels">
-            <TabsList className="mb-4">
-              <TabsTrigger value="hotels">Hotels</TabsTrigger>
-              <TabsTrigger value="packages">Packages</TabsTrigger>
-            </TabsList>
-            <TabsContent value="hotels" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="h-40 bg-muted">
-                      <img 
-                        src="/placeholder.svg" 
-                        alt="Hotel thumbnail" 
-                        className="w-full h-full object-cover" 
+                  Bookings
+                </TabsTrigger>
+                <TabsTrigger value="revenue">
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Revenue
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="bookings">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={bookingChartData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#9b87f5" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="bookings" 
+                        stroke="#9b87f5" 
+                        fillOpacity={1} 
+                        fill="url(#colorBookings)" 
                       />
-                    </div>
-                    <CardContent className="p-4">
-                      <CardTitle className="text-base">Grand Makkah Hotel</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1 mb-3">
-                        500m from Haram • Makkah
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">3 rooms available</p>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/provider/listings/hotel-${i}`}>
-                            Edit
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {/* Add New Listing Card */}
-                <Card className="overflow-hidden border-dashed">
-                  <div className="h-full p-4 flex flex-col items-center justify-center min-h-[200px]">
-                    <Plus className="h-10 w-10 text-muted-foreground mb-4" />
-                    <h3 className="text-center font-medium mb-2">Add New Hotel</h3>
-                    <p className="text-center text-sm text-muted-foreground mb-4">
-                      List a new property on InstaSafar
-                    </p>
-                    <Button asChild>
-                      <Link to="/provider/listings/new?type=hotel">
-                        Get Started
-                      </Link>
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="packages" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="h-40 bg-muted">
-                      <img 
-                        src="/placeholder.svg" 
-                        alt="Package thumbnail" 
-                        className="w-full h-full object-cover" 
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="revenue">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={revenueData}
+                      margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value) => [`${formatCurrency(Number(value))}`, 'Revenue']}
                       />
-                    </div>
-                    <CardContent className="p-4">
-                      <CardTitle className="text-base">Premium Umrah Package</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1 mb-3">
-                        7 days • Hotel + Transport
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">$1,200 per person</p>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/provider/listings/package-${i}`}>
-                            Edit
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {/* Add New Package Card */}
-                <Card className="overflow-hidden border-dashed">
-                  <div className="h-full p-4 flex flex-col items-center justify-center min-h-[200px]">
-                    <Plus className="h-10 w-10 text-muted-foreground mb-4" />
-                    <h3 className="text-center font-medium mb-2">Add New Package</h3>
-                    <p className="text-center text-sm text-muted-foreground mb-4">
-                      Create a new Hajj or Umrah package
+                      <Bar dataKey="value" fill="#9b87f5" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+        
+        {/* Notifications */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Notifications</CardTitle>
+              <CardDescription>Recent updates and alerts</CardDescription>
+            </div>
+            <Badge className="bg-primary">{notifications.filter(n => !n.read).length} New</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {notifications.map((notification) => (
+                <div 
+                  key={notification.id} 
+                  className={`flex gap-4 p-3 rounded-lg ${notification.read ? 'bg-muted/30' : 'bg-primary/5'}`}
+                >
+                  <div className={`mt-1 h-2 w-2 rounded-full ${notification.read ? 'bg-muted-foreground' : 'bg-primary'}`}></div>
+                  <div>
+                    <p className={`text-sm ${notification.read ? 'text-muted-foreground' : 'font-medium'}`}>
+                      {notification.message}
                     </p>
-                    <Button asChild>
-                      <Link to="/provider/listings/new?type=package">
-                        Get Started
-                      </Link>
-                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
                   </div>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </motion.div>
-    </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              View All Notifications
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Bookings */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Recent Bookings</CardTitle>
+            <CardDescription>Latest booking activity for your listings</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentBookings.map((booking) => (
+                <div key={booking.id} className="flex flex-col sm:flex-row justify-between p-4 border rounded-lg">
+                  <div className="flex gap-4 mb-4 sm:mb-0">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted/60">
+                      {booking.type === 'hotel' ? (
+                        <Hotel className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <Package className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">#{booking.reference}</span>
+                        {getStatusBadge(booking.status)}
+                      </div>
+                      <p className="text-sm">{booking.item_name}</p>
+                      <div className="text-xs text-muted-foreground flex items-center mt-1">
+                        <Users className="h-3 w-3 mr-1" />
+                        {booking.customer_name}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col sm:items-end">
+                    <div className="font-medium">{formatCurrency(booking.total_price)}</div>
+                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                      <CalendarRange className="h-3 w-3 mr-1" />
+                      {formatDate(booking.check_in)} - {formatDate(booking.check_out)}
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Booked {new Date(booking.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/provider/bookings')}>
+              View All Bookings
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        {/* Featured Listings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Featured Listings</CardTitle>
+            <CardDescription>Your top performing listings</CardDescription>
+          </CardHeader>
+          <CardContent className="px-3">
+            <Tabs defaultValue="hotel">
+              <TabsList className="mb-4 w-full">
+                <TabsTrigger value="hotel">
+                  <Hotel className="mr-2 h-4 w-4" />
+                  Hotel
+                </TabsTrigger>
+                <TabsTrigger value="package">
+                  <Package className="mr-2 h-4 w-4" />
+                  Package
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="hotel" className="m-0">
+                <HotelCard hotel={featuredHotel} buttonText="View Details" />
+              </TabsContent>
+              
+              <TabsContent value="package" className="m-0">
+                <PackageCard package={featuredPackage} buttonText="View Details" />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/provider/listings')}>
+              Manage All Listings
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </motion.div>
   );
 };
 
-export default ProviderDashboard;
+export default ProviderDashboardPage;

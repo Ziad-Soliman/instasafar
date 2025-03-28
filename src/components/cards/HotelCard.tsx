@@ -21,9 +21,11 @@ interface Hotel {
 
 interface HotelCardProps {
   hotel: Hotel;
+  onButtonClick?: () => void;
+  buttonText?: string;
 }
 
-const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
+const HotelCard: React.FC<HotelCardProps> = ({ hotel, onButtonClick, buttonText = "View Details" }) => {
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -83,8 +85,8 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel }) => {
         </div>
         
         <div className="mt-auto">
-          <Button asChild className="w-full">
-            <Link to={`/hotels/${hotel.id}`}>View Details</Link>
+          <Button asChild className="w-full" onClick={onButtonClick}>
+            <Link to={`/hotels/${hotel.id}`}>{buttonText}</Link>
           </Button>
         </div>
       </div>

@@ -23,9 +23,11 @@ interface Package {
 
 interface PackageCardProps {
   package: Package;
+  onButtonClick?: () => void;
+  buttonText?: string;
 }
 
-const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
+const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, onButtonClick, buttonText = "View Package" }) => {
   const startDate = new Date(pkg.start_date);
   const endDate = new Date(pkg.end_date);
 
@@ -107,8 +109,8 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
         </div>
         
         <div className="mt-auto">
-          <Button asChild className="w-full">
-            <Link to={`/packages/${pkg.id}`}>View Package</Link>
+          <Button asChild className="w-full" onClick={onButtonClick}>
+            <Link to={`/packages/${pkg.id}`}>{buttonText}</Link>
           </Button>
         </div>
       </div>

@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const AdminLayout: React.FC = () => {
   const { user, loading, isAdmin } = useAuth();
+  const { isRTL } = useLanguage();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -24,7 +26,7 @@ const AdminLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className={`flex h-screen overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       

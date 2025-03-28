@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const AuthLayout: React.FC = () => {
   const { user, loading } = useAuth();
+  const { t, isRTL } = useLanguage();
 
   // If user is already logged in, redirect to home
   if (!loading && user) {
@@ -15,7 +17,7 @@ const AuthLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="absolute top-4 right-4 z-10">
         <LanguageSwitcher />
       </div>
@@ -32,7 +34,7 @@ const AuthLayout: React.FC = () => {
               <Link to="/" className="block mb-8">
                 <img 
                   src="/logo-white.png" 
-                  alt="InstaSafar" 
+                  alt={t("app.name")} 
                   className="h-10"
                   onError={(e) => {
                     // Fallback if logo image doesn't exist yet
@@ -43,8 +45,8 @@ const AuthLayout: React.FC = () => {
                 />
               </Link>
               <div className="text-white">
-                <h1 className="text-3xl font-bold mb-4">Hajj & Umrah Journey</h1>
-                <p className="text-white/80">Begin your spiritual journey with us.</p>
+                <h1 className="text-3xl font-bold mb-4">{t("home.hero.title")}</h1>
+                <p className="text-white/80">{t("home.hero.subtitle")}</p>
               </div>
             </motion.div>
           </div>
@@ -62,7 +64,7 @@ const AuthLayout: React.FC = () => {
               <Link to="/" className="inline-block">
                 <img 
                   src="/logo.png" 
-                  alt="InstaSafar" 
+                  alt={t("app.name")}
                   className="h-10 mx-auto mb-4"
                   onError={(e) => {
                     // Fallback if logo image doesn't exist yet

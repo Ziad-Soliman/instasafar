@@ -94,6 +94,14 @@ export default {
 					from: { transform: 'translateX(0)' },
 					to: { transform: 'translateX(-100%)' }
 				},
+				'slide-in-from-left': {
+					from: { transform: 'translateX(-100%)' },
+					to: { transform: 'translateX(0)' }
+				},
+				'slide-out-to-right': {
+					from: { transform: 'translateX(0)' },
+					to: { transform: 'translateX(100%)' }
+				},
 				'slide-in-from-top': {
 					from: { transform: 'translateY(-100%)' },
 					to: { transform: 'translateY(0)' }
@@ -123,12 +131,20 @@ export default {
 				'slide-in-from-top': 'slide-in-from-top 0.3s ease-out',
 				'slide-in-from-bottom': 'slide-in-from-bottom 0.3s ease-out',
 				'slide-in-from-right': 'slide-in-from-right 0.3s ease-out',
+				'slide-in-from-left': 'slide-in-from-left 0.3s ease-out',
 				'slide-out-to-left': 'slide-out-to-left 0.3s ease-in',
+				'slide-out-to-right': 'slide-out-to-right 0.3s ease-in',
 				'scale-in': 'scale-in 0.2s ease-out',
 				'scale-out': 'scale-out 0.2s ease-in',
 				'float': 'float 6s ease-in-out infinite'
+			},
+			fontFamily: {
+				arabic: ['var(--font-arabic)', 'sans-serif'],
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require('tailwindcss-rtl'),
+	],
 } satisfies Config;

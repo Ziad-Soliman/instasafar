@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MainLayoutProps {
   requireAuth?: boolean;
@@ -12,6 +13,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ requireAuth = false }) => {
   const { user, loading } = useAuth();
+  const { isRTL } = useLanguage();
   const location = useLocation();
 
   // If this route requires authentication and there's no user, redirect to login
@@ -27,7 +29,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ requireAuth = false }) => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${isRTL ? 'rtl' : 'ltr'}`}>
       <Header />
       <motion.main 
         className="flex-grow"

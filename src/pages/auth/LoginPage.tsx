@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Define the form schema
 const loginSchema = z.object({
@@ -23,6 +24,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { t, isRTL } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -56,15 +58,15 @@ const LoginPage: React.FC = () => {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Welcome back</h1>
+        <h1 className="text-2xl font-bold">{t("auth.login.title")}</h1>
         <p className="text-muted-foreground mt-2">
-          Sign in to your account to continue
+          {t("auth.login.subtitle")}
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             placeholder="m@example.com"
@@ -80,12 +82,12 @@ const LoginPage: React.FC = () => {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <Link
               to="/auth/reset-password"
               className="text-xs text-primary hover:underline"
             >
-              Forgot password?
+              {t("auth.forgotPassword")}
             </Link>
           </div>
           <div className="relative">
@@ -98,7 +100,7 @@ const LoginPage: React.FC = () => {
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-muted-foreground`}
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -114,18 +116,18 @@ const LoginPage: React.FC = () => {
           className="w-full"
           disabled={isLoading}
         >
-          {isLoading ? "Signing in..." : "Sign In"}
+          {isLoading ? `${t("loading")}...` : t("auth.signIn")}
         </Button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          {t("auth.noAccount")}{" "}
           <Link
             to="/auth/register"
             className="text-primary font-medium hover:underline"
           >
-            Sign up
+            {t("auth.signUp")}
           </Link>
         </p>
       </div>
@@ -138,7 +140,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              Quick Login
+              {t("auth.quickLogin")}
             </span>
           </div>
         </div>
@@ -152,7 +154,7 @@ const LoginPage: React.FC = () => {
               navigate(from, { replace: true });
             }}
           >
-            Login as User
+            {t("auth.loginAsUser")}
           </Button>
           <Button
             variant="outline"
@@ -162,7 +164,7 @@ const LoginPage: React.FC = () => {
               navigate("/admin", { replace: true });
             }}
           >
-            Login as Admin
+            {t("auth.loginAsAdmin")}
           </Button>
         </div>
       </div>

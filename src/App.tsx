@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Suspense, lazy, useEffect } from "react";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/hooks/useAuth";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout";
@@ -58,54 +60,58 @@ const RouteChangeObserver = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <RouteChangeObserver />
-        <AnimatePresence mode="wait">
-          <Suspense fallback={<LoadingPage />}>
-            <Routes>
-              {/* Main Routes */}
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/hotels/:hotelId" element={<HotelDetailPage />} />
-                <Route path="/packages/:packageId" element={<PackageDetailPage />} />
-                <Route path="/booking/confirm" element={<BookingConfirmPage />} />
-                <Route path="/booking/success" element={<BookingSuccessPage />} />
-              </Route>
+    <AuthProvider>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <RouteChangeObserver />
+            <AnimatePresence mode="wait">
+              <Suspense fallback={<LoadingPage />}>
+                <Routes>
+                  {/* Main Routes */}
+                  <Route element={<MainLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/hotels/:hotelId" element={<HotelDetailPage />} />
+                    <Route path="/packages/:packageId" element={<PackageDetailPage />} />
+                    <Route path="/booking/confirm" element={<BookingConfirmPage />} />
+                    <Route path="/booking/success" element={<BookingSuccessPage />} />
+                  </Route>
 
-              {/* Auth Routes */}
-              <Route element={<AuthLayout />}>
-                <Route path="/auth/login" element={<LoginPage />} />
-                <Route path="/auth/register" element={<RegisterPage />} />
-              </Route>
+                  {/* Auth Routes */}
+                  <Route element={<AuthLayout />}>
+                    <Route path="/auth/login" element={<LoginPage />} />
+                    <Route path="/auth/register" element={<RegisterPage />} />
+                  </Route>
 
-              {/* Account Routes - Protected */}
-              <Route element={<MainLayout requireAuth />}>
-                <Route path="/account/profile" element={<ProfilePage />} />
-                <Route path="/account/bookings" element={<BookingsPage />} />
-              </Route>
+                  {/* Account Routes - Protected */}
+                  <Route element={<MainLayout requireAuth />}>
+                    <Route path="/account/profile" element={<ProfilePage />} />
+                    <Route path="/account/bookings" element={<BookingsPage />} />
+                  </Route>
 
-              {/* Admin Routes - Protected */}
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/hotels" element={<AdminHotels />} />
-                <Route path="/admin/packages" element={<AdminPackages />} />
-                <Route path="/admin/external-listings" element={<AdminExternalListings />} />
-                <Route path="/admin/bookings" element={<AdminBookings />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/reviews" element={<AdminReviews />} />
-              </Route>
+                  {/* Admin Routes - Protected */}
+                  <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/hotels" element={<AdminHotels />} />
+                    <Route path="/admin/packages" element={<AdminPackages />} />
+                    <Route path="/admin/external-listings" element={<AdminExternalListings />} />
+                    <Route path="/admin/bookings" element={<AdminBookings />} />
+                    <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/reviews" element={<AdminReviews />} />
+                  </Route>
 
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AnimatePresence>
-      </BrowserRouter>
-    </TooltipProvider>
+                  {/* 404 */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </AnimatePresence>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

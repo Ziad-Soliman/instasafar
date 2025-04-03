@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -37,7 +38,7 @@ interface PackageType {
 }
 
 const PackagesPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [filteredPackages, setFilteredPackages] = useState<PackageType[]>([]);
@@ -165,10 +166,10 @@ const PackagesPage: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8 text-primary" />
-              Hajj & Umrah Packages
+              {t("home.featured.title")}
             </h1>
             <p className="text-muted-foreground mt-2">
-              Discover complete packages for your spiritual journey
+              {t("home.hero.subtitle")}
             </p>
           </div>
           
@@ -176,7 +177,7 @@ const PackagesPage: React.FC = () => {
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search packages..."
+                placeholder={t("search.placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -186,7 +187,7 @@ const PackagesPage: React.FC = () => {
               variant="outline"
               size="icon"
               onClick={resetFilters}
-              title="Reset filters"
+              title={t("action.filter")}
             >
               <FilterX className="h-4 w-4" />
             </Button>
@@ -198,18 +199,18 @@ const PackagesPage: React.FC = () => {
           <Card className="lg:sticky top-24 h-fit">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h3 className="font-medium mb-2">Package Type</h3>
+                <h3 className="font-medium mb-2">{t("package.type.custom")}</h3>
                 <Tabs defaultValue={currentTab} onValueChange={setCurrentTab} className="w-full">
                   <TabsList className="grid grid-cols-3 w-full">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="hajj">Hajj</TabsTrigger>
-                    <TabsTrigger value="umrah">Umrah</TabsTrigger>
+                    <TabsTrigger value="all">{t("search.tab.all")}</TabsTrigger>
+                    <TabsTrigger value="hajj">{t("package.type.hajj")}</TabsTrigger>
+                    <TabsTrigger value="umrah">{t("package.type.umrah")}</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
               
               <div>
-                <h3 className="font-medium mb-2">Price Range</h3>
+                <h3 className="font-medium mb-2">{t("search.price")}</h3>
                 <div className="pt-2 px-2">
                   <Slider
                     defaultValue={priceRange}
@@ -219,14 +220,14 @@ const PackagesPage: React.FC = () => {
                     onValueChange={setPriceRange}
                   />
                   <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span>{priceRange[0]} ﷼</span>
+                    <span>{priceRange[1]} ﷼</span>
                   </div>
                 </div>
               </div>
               
               <div>
-                <h3 className="font-medium mb-2">Duration (days)</h3>
+                <h3 className="font-medium mb-2">{t("package.duration")} ({t("date.days")})</h3>
                 <div className="pt-2 px-2">
                   <Slider
                     defaultValue={durationRange}
@@ -236,14 +237,14 @@ const PackagesPage: React.FC = () => {
                     onValueChange={setDurationRange}
                   />
                   <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                    <span>{durationRange[0]} days</span>
-                    <span>{durationRange[1]} days</span>
+                    <span>{durationRange[0]} {t("date.days")}</span>
+                    <span>{durationRange[1]} {t("date.days")}</span>
                   </div>
                 </div>
               </div>
               
               <div>
-                <h3 className="font-medium mb-2">Travel Date</h3>
+                <h3 className="font-medium mb-2">{t("booking.dates")}</h3>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -251,7 +252,7 @@ const PackagesPage: React.FC = () => {
                       className="w-full justify-start text-left font-normal"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : "Select date"}
+                      {date ? format(date, "PPP") : t("search.placeholder")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -269,13 +270,13 @@ const PackagesPage: React.FC = () => {
                     className="w-full mt-2 text-xs"
                     onClick={() => setDate(undefined)}
                   >
-                    Clear Date
+                    {t("action.cancel")}
                   </Button>
                 )}
               </div>
               
               <div>
-                <h3 className="font-medium mb-2">Inclusions</h3>
+                <h3 className="font-medium mb-2">{t("booking.includes")}</h3>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -285,7 +286,7 @@ const PackagesPage: React.FC = () => {
                         setFilters({...filters, includesHotel: checked === true})
                       }
                     />
-                    <Label htmlFor="includesHotel">Includes Hotel</Label>
+                    <Label htmlFor="includesHotel">{t("package.includes.hotel")}</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -295,7 +296,7 @@ const PackagesPage: React.FC = () => {
                         setFilters({...filters, includesFlight: checked === true})
                       }
                     />
-                    <Label htmlFor="includesFlight">Includes Flight</Label>
+                    <Label htmlFor="includesFlight">{t("package.includes.flight")}</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -305,7 +306,7 @@ const PackagesPage: React.FC = () => {
                         setFilters({...filters, includesTransport: checked === true})
                       }
                     />
-                    <Label htmlFor="includesTransport">Includes Transport</Label>
+                    <Label htmlFor="includesTransport">{t("package.includes.transport")}</Label>
                   </div>
                 </div>
               </div>
@@ -314,7 +315,7 @@ const PackagesPage: React.FC = () => {
                 className="w-full"
                 onClick={resetFilters}
               >
-                Reset All Filters
+                {t("action.filter")}
               </Button>
             </CardContent>
           </Card>
@@ -341,30 +342,30 @@ const PackagesPage: React.FC = () => {
                 {filteredPackages.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No packages match your filters</h3>
-                    <p className="text-muted-foreground mb-6">Try adjusting your search criteria to find the perfect package</p>
-                    <Button onClick={resetFilters}>Reset Filters</Button>
+                    <h3 className="text-lg font-medium mb-2">{t("search.noResults")}</h3>
+                    <p className="text-muted-foreground mb-6">{t("search.noResults")}</p>
+                    <Button onClick={resetFilters}>{t("action.filter")}</Button>
                   </div>
                 ) : (
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <p className="text-muted-foreground">
-                        Showing <span className="font-medium">{filteredPackages.length}</span> packages
+                        {t("showing")} <span className="font-medium">{filteredPackages.length}</span> {t("packages")}
                       </p>
                       <div className="flex gap-2">
                         {currentTab !== "all" && (
                           <Badge variant="outline" className="flex items-center gap-1">
-                            {currentTab === "hajj" ? "Hajj" : "Umrah"}
+                            {currentTab === "hajj" ? t("package.type.hajj") : t("package.type.umrah")}
                           </Badge>
                         )}
                         {(priceRange[0] > 0 || priceRange[1] < 5000) && (
                           <Badge variant="outline">
-                            ${priceRange[0]} - ${priceRange[1]}
+                            {priceRange[0]} ﷼ - {priceRange[1]} ﷼
                           </Badge>
                         )}
                         {(durationRange[0] > 0 || durationRange[1] < 30) && (
                           <Badge variant="outline">
-                            {durationRange[0]}-{durationRange[1]} days
+                            {durationRange[0]}-{durationRange[1]} {t("date.days")}
                           </Badge>
                         )}
                       </div>

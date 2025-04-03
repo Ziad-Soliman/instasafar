@@ -1,8 +1,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star, Plane, Hotel, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Badge } from "@/components/ui/badge";
 
 export interface ExternalListing {
   id: string;
@@ -22,9 +24,25 @@ interface ExternalListingCardProps {
 }
 
 const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) => {
+  const { t, isRTL } = useLanguage();
+  
   const handleClick = () => {
     // Open in new tab
     window.open(listing.redirect_url, "_blank", "noopener,noreferrer");
+  };
+
+  // Icon based on listing type
+  const getIcon = () => {
+    switch (listing.listing_type) {
+      case "hotel":
+        return <Hotel className="h-4 w-4 mr-1" />;
+      case "flight":
+        return <Plane className="h-4 w-4 mr-1" />;
+      case "transport":
+        return <Bus className="h-4 w-4 mr-1" />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -48,6 +66,15 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
           )}
 
           <div className="absolute top-2 left-2">
+            <Badge variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1 font-medium shadow-sm">
+              {getIcon()}
+              {listing.listing_type === "hotel" ? t("listing.type.hotel") : 
+               listing.listing_type === "flight" ? t("listing.type.flight") : 
+               t("listing.type.transport")}
+            </Badge>
+          </div>
+          
+          <div className="absolute top-2 right-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium shadow-sm">
               {listing.provider_name}
             </div>
@@ -68,7 +95,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
         <h3 className="font-medium text-base line-clamp-1 mb-1">{listing.name}</h3>
         
         <div className="text-xs text-muted-foreground mb-2">
-          {listing.city}
+          {listing.city === "Both" ? `${t("location.makkah")} - ${t("location.madinah")}` : listing.city}
         </div>
 
         {listing.description && (
@@ -89,7 +116,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
             variant="outline" 
             className="w-full text-xs h-9 gap-1"
           >
-            View on {listing.provider_name}
+            {t("listing.viewOn")} {listing.provider_name}
             <ExternalLink className="h-3 w-3" />
           </Button>
         </div>

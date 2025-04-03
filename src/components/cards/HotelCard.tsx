@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface HotelCardProps {
   hotel: {
@@ -30,6 +31,8 @@ const HotelCard: React.FC<HotelCardProps> = ({
   buttonText = "View Details",
   className 
 }) => {
+  const { t, isRTL } = useLanguage();
+  
   return (
     <motion.div
       whileHover={{ y: -5 }}
@@ -64,7 +67,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
         <h3 className="font-medium text-base line-clamp-1 mb-1">{hotel.name}</h3>
         
         <div className="text-xs text-muted-foreground mb-2">
-          {hotel.distance_to_haram} from Haram
+          {hotel.distance_to_haram} {t("distance.from")} {t("distance.haram")}
         </div>
         
         <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
@@ -82,15 +85,15 @@ const HotelCard: React.FC<HotelCardProps> = ({
           ))}
           {hotel.amenities.length > 3 && (
             <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
-              +{hotel.amenities.length - 3} more
+              +{hotel.amenities.length - 3} {t("more")}
             </span>
           )}
         </div>
         
         <div className="flex justify-between items-center mb-3">
           <div>
-            <div className="text-sm font-medium">${hotel.price_per_night}</div>
-            <div className="text-xs text-muted-foreground">per night</div>
+            <div className="text-sm font-medium">{hotel.price_per_night} ﷼</div>
+            <div className="text-xs text-muted-foreground">{t("listing.perNight")}</div>
           </div>
         </div>
         

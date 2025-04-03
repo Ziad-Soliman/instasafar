@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type LanguageType = "en" | "ar";
@@ -62,6 +61,9 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "listing.viewOn": "View on",
     "listing.perNight": "/night",
     "listing.person": "/person",
+    "listing.type.hotel": "Hotel",
+    "listing.type.flight": "Flight",
+    "listing.type.transport": "Transport",
 
     // Auth pages
     "auth.login.title": "Sign in to your account",
@@ -124,6 +126,7 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "action.continue": "Continue",
     "action.viewDetails": "View Details",
     "loading": "Loading",
+    "more": "more",
     
     // Dates and location formatting
     "date.from": "From",
@@ -131,6 +134,35 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "date.days": "days",
     "distance.from": "from",
     "distance.haram": "Haram",
+    
+    // Location names
+    "location.makkah": "Makkah",
+    "location.madinah": "Madinah",
+    "location.jeddah": "Jeddah",
+    
+    // Package types
+    "package.type.hajj": "Hajj",
+    "package.type.umrah": "Umrah",
+    "package.type.custom": "Custom",
+    "package.includes.hotel": "Hotel Included",
+    "package.includes.flight": "Flight Included",
+    "package.includes.transport": "Transport Included",
+    "package.duration": "Duration",
+    "package.days": "days",
+    
+    // New additions
+    "wishlist.add": "Add to Wishlist",
+    "wishlist.remove": "Remove from Wishlist",
+    "wishlist.empty": "Your wishlist is empty",
+    "notification.new": "New notification",
+    "notification.empty": "No notifications",
+    "search.placeholder": "Search for hotels, packages...",
+    "review.rating": "Rating",
+    "review.comment": "Comment",
+    "review.submit": "Submit Review",
+    "review.date": "Review Date",
+    "review.helpful": "Was this review helpful?",
+    "currency.sar": "SAR",
   },
   ar: {
     // App general
@@ -170,6 +202,9 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "listing.viewOn": "عرض على",
     "listing.perNight": "/ليلة",
     "listing.person": "/شخص",
+    "listing.type.hotel": "فندق",
+    "listing.type.flight": "رحلة طيران",
+    "listing.type.transport": "مواصلات",
     
     // Auth pages
     "auth.login.title": "تسجيل الدخول إلى حسابك",
@@ -232,6 +267,7 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "action.continue": "متابعة",
     "action.viewDetails": "عرض التفاصيل",
     "loading": "جاري التحميل",
+    "more": "المزيد",
     
     // Dates and location formatting
     "date.from": "من",
@@ -239,6 +275,35 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "date.days": "أيام",
     "distance.from": "من",
     "distance.haram": "الحرم",
+    
+    // Location names
+    "location.makkah": "مكة المكرمة",
+    "location.madinah": "المدينة المنورة",
+    "location.jeddah": "جدة",
+    
+    // Package types
+    "package.type.hajj": "حج",
+    "package.type.umrah": "عمرة",
+    "package.type.custom": "مخصص",
+    "package.includes.hotel": "يشمل الفندق",
+    "package.includes.flight": "يشمل الطيران",
+    "package.includes.transport": "يشمل المواصلات",
+    "package.duration": "المدة",
+    "package.days": "أيام",
+    
+    // New additions
+    "wishlist.add": "أضف إلى المفضلة",
+    "wishlist.remove": "إزالة من المفضلة",
+    "wishlist.empty": "قائمة المفضلة فارغة",
+    "notification.new": "إشعار جديد",
+    "notification.empty": "لا توجد إشعارات",
+    "search.placeholder": "ابحث عن فنادق وباقات...",
+    "review.rating": "التقييم",
+    "review.comment": "التعليق",
+    "review.submit": "إرسال المراجعة",
+    "review.date": "تاريخ المراجعة",
+    "review.helpful": "هل كانت هذه المراجعة مفيدة؟",
+    "currency.sar": "ر.س",
   },
 };
 

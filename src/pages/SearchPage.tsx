@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -66,10 +67,10 @@ const fetchListings = () => {
             address: "King Fahd Road, Makkah",
             description: "Luxury hotel with excellent amenities near Haram",
             rating: 4.7,
-            price_per_night: 240,
+            price_per_night: 750,
             distance_to_haram: "500m",
             amenities: ["Free WiFi", "Breakfast", "Prayer Room", "Shuttle"],
-            thumbnail: "/placeholder.svg",
+            thumbnail: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             is_internal: true
           },
           {
@@ -79,10 +80,10 @@ const fetchListings = () => {
             address: "Central Area, Madinah",
             description: "Modern hotel with top-notch facilities",
             rating: 4.5,
-            price_per_night: 180,
+            price_per_night: 680,
             distance_to_haram: "800m",
             amenities: ["Free WiFi", "Restaurant", "Prayer Room"],
-            thumbnail: "/placeholder.svg",
+            thumbnail: "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             is_internal: true
           },
           {
@@ -92,10 +93,10 @@ const fetchListings = () => {
             address: "Al Shohada District, Makkah",
             description: "Comfortable stay with great views",
             rating: 4.2,
-            price_per_night: 160,
+            price_per_night: 560,
             distance_to_haram: "1.2km",
             amenities: ["Free WiFi", "Breakfast", "Laundry"],
-            thumbnail: "/placeholder.svg",
+            thumbnail: "https://images.unsplash.com/photo-1519449556851-5720b33024e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             is_internal: false
           }
         ],
@@ -104,11 +105,11 @@ const fetchListings = () => {
             id: "package-1",
             name: "Complete Umrah Package",
             description: "7-day Umrah package including hotel, flights, and guided tours",
-            price: 1200,
+            price: 4500,
             duration_days: 7,
             start_date: "2023-11-15",
             end_date: "2023-11-22",
-            thumbnail: "/placeholder.svg",
+            thumbnail: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             includes_hotel: true,
             includes_flight: true,
             includes_transport: true,
@@ -119,11 +120,11 @@ const fetchListings = () => {
             id: "package-2",
             name: "Economy Hajj Package",
             description: "10-day Hajj package with all essentials covered",
-            price: 2500,
+            price: 9500,
             duration_days: 10,
             start_date: "2024-06-10",
             end_date: "2024-06-20",
-            thumbnail: "/placeholder.svg",
+            thumbnail: "https://images.unsplash.com/photo-1604331465963-e4b8812eba2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             includes_hotel: true,
             includes_flight: true,
             includes_transport: true,
@@ -140,21 +141,20 @@ const fetchListings = () => {
             city: "Makkah",
             provider_name: "Booking.com",
             redirect_url: "https://booking.com/example",
-            image_url: "/placeholder.svg",
-            price_indication: "From $200/night",
+            image_url: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            price_indication: "من 750 ﷼",
             rating_indication: "4.7 (1,245 reviews)"
           },
           {
             id: "ext-2",
             listing_type: "flight",
-            name: "Jeddah to Makkah Flights",
-            description: "Direct flights from major cities to Jeddah",
+            name: "رحلات إلى مكة",
+            description: "رحلات مباشرة من المدن الرئيسية إلى جدة",
             city: "Jeddah",
             provider_name: "Skyscanner",
             redirect_url: "https://skyscanner.com/example",
-            image_url: "/placeholder.svg",
-            price_indication: "From $450",
-            rating_indication: "Multiple airlines"
+            image_url: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            price_indication: "من 2250 ﷼"
           }
         ]
       });
@@ -172,7 +172,7 @@ const SearchPage: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [externalListings, setExternalListings] = useState<ExternalListing[]>([]);
   
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [selectedCity, setSelectedCity] = useState<"makkah" | "madinah" | "all">("all");
   const [selectedRating, setSelectedRating] = useState<"5" | "4" | "3" | "any">("any");
   const [currentTab, setCurrentTab] = useState("all");
@@ -275,14 +275,14 @@ const SearchPage: React.FC = () => {
                   <Label className="text-base">{t("search.price")}</Label>
                   <div className="pt-4">
                     <Slider
-                      defaultValue={[0, 1000]}
-                      max={5000}
+                      defaultValue={[0, 10000]}
+                      max={10000}
                       step={100}
                       onValueChange={(value) => setPriceRange(value)}
                     />
                     <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
+                      <span>{priceRange[0]} ﷼</span>
+                      <span>{priceRange[1]} ﷼</span>
                     </div>
                   </div>
                 </div>
@@ -318,19 +318,19 @@ const SearchPage: React.FC = () => {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="5" id="5-stars" />
-                      <Label htmlFor="5-stars">5 Stars</Label>
+                      <Label htmlFor="5-stars">5 {t("stars")}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="4" id="4-stars" />
-                      <Label htmlFor="4-stars">4+ Stars</Label>
+                      <Label htmlFor="4-stars">4+ {t("stars")}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="3" id="3-stars" />
-                      <Label htmlFor="3-stars">3+ Stars</Label>
+                      <Label htmlFor="3-stars">3+ {t("stars")}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="any-stars" />
-                      <Label htmlFor="any-stars">Any Rating</Label>
+                      <Label htmlFor="any-stars">{t("any")} {t("rating")}</Label>
                     </div>
                   </RadioGroup>
                 </div>

@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface PackageCardProps {
   package: {
@@ -19,15 +20,18 @@ export interface PackageCardProps {
     includes_transport: boolean;
     city: string;
     is_internal?: boolean;
+    package_type?: "Hajj" | "Umrah" | "Custom";
   };
   onButtonClick?: () => void;
   buttonText?: string;
+  className?: string; // Add className prop
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ 
   package: pkg, 
   onButtonClick,
-  buttonText = "View Package" 
+  buttonText = "View Package",
+  className
 }) => {
   // Format dates
   const formatDate = (dateString: string) => {
@@ -39,7 +43,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className="card-custom group h-full flex flex-col"
+      className={cn("card-custom group h-full flex flex-col", className)}
     >
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="h-40 bg-muted/50">

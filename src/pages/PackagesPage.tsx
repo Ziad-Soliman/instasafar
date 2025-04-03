@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -66,14 +65,18 @@ const PackagesPage: React.FC = () => {
         // In a real implementation, this would be an API call
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Add package_type to mock data
+        // Add package_type and is_internal to mock data
         const packagesWithType = featuredPackages.map(pkg => {
           const randomType = Math.random() > 0.5 ? "Hajj" : "Umrah";
-          return { ...pkg, package_type: randomType as "Hajj" | "Umrah" | "Custom" };
+          return { 
+            ...pkg, 
+            package_type: randomType as "Hajj" | "Umrah" | "Custom",
+            is_internal: true // Add the required is_internal property
+          };
         });
         
-        setPackages(packagesWithType);
-        setFilteredPackages(packagesWithType);
+        setPackages(packagesWithType as PackageType[]);
+        setFilteredPackages(packagesWithType as PackageType[]);
       } catch (error) {
         console.error("Error fetching packages:", error);
       } finally {

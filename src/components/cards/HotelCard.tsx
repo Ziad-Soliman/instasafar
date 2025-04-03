@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface HotelCardProps {
   hotel: {
@@ -20,18 +21,20 @@ export interface HotelCardProps {
   };
   onButtonClick?: () => void;
   buttonText?: string;
+  className?: string; // Add className prop
 }
 
 const HotelCard: React.FC<HotelCardProps> = ({ 
   hotel, 
   onButtonClick,
-  buttonText = "View Details" 
+  buttonText = "View Details",
+  className 
 }) => {
   return (
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className="card-custom group h-full flex flex-col"
+      className={cn("card-custom group h-full flex flex-col", className)}
     >
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="h-40 bg-muted/50">

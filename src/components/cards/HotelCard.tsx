@@ -31,7 +31,18 @@ const HotelCard: React.FC<HotelCardProps> = ({
   buttonText = "View Details",
   className 
 }) => {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, locale } = useLanguage();
+  
+  // Format price to SAR
+  const formatPrice = (price: number): string => {
+    if (isRTL) {
+      // Arabic format
+      return `${price} ${t("currency.sar")}`;
+    } else {
+      // English format
+      return `${price} ${t("currency.sar")}`;
+    }
+  };
   
   return (
     <motion.div
@@ -50,7 +61,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
           <div className="absolute top-2 left-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
               <MapPin className="w-3 h-3 mr-1" />
-              {hotel.city}
+              {locale === 'ar' ? t(`location.${hotel.city.toLowerCase()}`) : hotel.city}
             </div>
           </div>
           
@@ -92,7 +103,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
         
         <div className="flex justify-between items-center mb-3">
           <div>
-            <div className="text-sm font-medium">{hotel.price_per_night} {t("currency.sar")}</div>
+            <div className="text-sm font-medium rtl:font-arabic">{formatPrice(hotel.price_per_night)}</div>
             <div className="text-xs text-muted-foreground">{t("listing.perNight")}</div>
           </div>
         </div>

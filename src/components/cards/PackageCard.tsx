@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface PackageCardProps {
   package: {
@@ -33,10 +34,24 @@ const PackageCard: React.FC<PackageCardProps> = ({
   buttonText = "View Package",
   className
 }) => {
+  const { t, isRTL, locale } = useLanguage();
+  
   // Format dates
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return new Date(dateString).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', options);
+  };
+
+  // Format price to SAR
+  const formatPrice = (price: number): string => {
+    if (isRTL) {
+      // Arabic format
+      return `${price} ${t("currency.sar")}`;
+    } else {
+      // English format
+      return `${price} ${t("currency.sar")}`;
+    }
   };
 
   return (
@@ -56,21 +71,21 @@ const PackageCard: React.FC<PackageCardProps> = ({
           <div className="absolute top-2 left-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
               <MapPin className="w-3 h-3 mr-1" />
-              {pkg.city}
+              {locale === 'ar' ? t(`location.${pkg.city.toLowerCase()}`) : pkg.city}
             </div>
           </div>
           
           <div className="absolute bottom-2 right-2">
             <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm backdrop-blur-sm">
               <Clock className="w-3 h-3 mr-1" />
-              {pkg.duration_days} days
+              {pkg.duration_days} {t("package.days")}
             </div>
           </div>
           
           {pkg.package_type && (
             <div className="absolute top-2 right-2">
               <div className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded font-medium shadow-sm">
-                {pkg.package_type}
+                {t(`package.type.${pkg.package_type.toLowerCase()}`)}
               </div>
             </div>
           )}
@@ -80,10 +95,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
       <div className="p-4 flex-grow flex flex-col">
         <h3 className="font-medium text-base line-clamp-1 mb-1">{pkg.name}</h3>
         
-        <div className="text-xs text-muted-foreground mb-2 flex items-center">
-          <Calendar className="w-3 h-3 mr-1" />
-          {formatDate(pkg.start_date)} - {formatDate(pkg.end_date)}
-        </div>
+        {pkg.start_date && pkg.end_date && (
+          <div className="text-xs text-muted-foreground mb-2 flex items-center">
+            <Calendar className="w-3 h-3 mr-1" />
+            {formatDate(pkg.start_date)} - {formatDate(pkg.end_date)}
+          </div>
+        )}
         
         <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
           {pkg.description}
@@ -92,22 +109,22 @@ const PackageCard: React.FC<PackageCardProps> = ({
         <div className="grid grid-cols-3 gap-1 text-xs mb-3">
           <div className={`flex items-center ${pkg.includes_hotel ? 'text-primary' : 'text-muted-foreground'}`}>
             {pkg.includes_hotel ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
-            Hotel
+            {t("package.includes.hotel")}
           </div>
           <div className={`flex items-center ${pkg.includes_flight ? 'text-primary' : 'text-muted-foreground'}`}>
             {pkg.includes_flight ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
-            Flight
+            {t("package.includes.flight")}
           </div>
           <div className={`flex items-center ${pkg.includes_transport ? 'text-primary' : 'text-muted-foreground'}`}>
             {pkg.includes_transport ? <Check className="w-3 h-3 mr-1" /> : <span className="w-3 h-3 mr-1" />}
-            Transport
+            {t("package.includes.transport")}
           </div>
         </div>
         
         <div className="flex justify-between items-center mb-3">
           <div>
-            <div className="text-sm font-medium">${pkg.price}</div>
-            <div className="text-xs text-muted-foreground">per person</div>
+            <div className="text-sm font-medium rtl:font-arabic">{formatPrice(pkg.price)}</div>
+            <div className="text-xs text-muted-foreground">{t("package.perPerson")}</div>
           </div>
         </div>
         

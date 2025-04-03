@@ -5,19 +5,7 @@ import { ExternalLink, Star, Plane, Hotel, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
-
-export interface ExternalListing {
-  id: string;
-  listing_type: "hotel" | "flight" | "transport";
-  name: string;
-  description?: string;
-  city: "Makkah" | "Madinah" | "Jeddah" | "Other";
-  provider_name: string;
-  redirect_url: string;
-  image_url?: string;
-  price_indication?: string;
-  rating_indication?: string;
-}
+import { ExternalListing } from "@/data/externalListings";
 
 interface ExternalListingCardProps {
   listing: ExternalListing;
@@ -96,17 +84,17 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
         <h3 className="font-medium text-base line-clamp-1 mb-1">{listing.name}</h3>
         
         <div className="text-xs text-muted-foreground mb-2">
-          {listing.city === "Both" ? `${t("location.makkah")} - ${t("location.madinah")}` : listing.city}
+          {listing.city === "Both" ? `${t("location.makkah")} - ${t("location.madinah")}` : t(`location.${listing.city.toLowerCase()}`)}
         </div>
 
         {listing.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-3 rtl:font-arabic">
             {listing.description}
           </p>
         )}
 
         {listing.price_indication && (
-          <div className="text-sm font-medium mb-3">
+          <div className="text-sm font-medium mb-3 rtl:font-arabic">
             {listing.price_indication}
           </div>
         )}

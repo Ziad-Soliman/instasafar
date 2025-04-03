@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +30,7 @@ const BookingConfirmPage = lazy(() => import("./pages/BookingConfirmPage"));
 const BookingSuccessPage = lazy(() => import("./pages/BookingSuccessPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const ProviderRegisterPage = lazy(() => import("./pages/auth/ProviderRegisterPage"));
 const ProfilePage = lazy(() => import("./pages/account/ProfilePage"));
 const BookingsPage = lazy(() => import("./pages/account/BookingsPage"));
 const WishlistPage = lazy(() => import("./pages/account/WishlistPage"));
@@ -41,7 +43,7 @@ const AdminUsers = lazy(() => import("./pages/admin/UsersPage"));
 const AdminReviews = lazy(() => import("./pages/admin/ReviewsPage"));
 const AdminProviders = lazy(() => import("./pages/admin/ProvidersPage"));
 
-// New Provider Dashboard Pages
+// Provider Dashboard Pages
 const ProviderLayout = lazy(() => import("./layouts/ProviderLayout"));
 const ProviderDashboard = lazy(() => import("./pages/provider/DashboardPage"));
 const ProviderListings = lazy(() => import("./pages/provider/ListingsPage"));
@@ -105,6 +107,7 @@ const App = () => (
                       <Route element={<AuthLayout />}>
                         <Route path="/auth/login" element={<LoginPage />} />
                         <Route path="/auth/register" element={<RegisterPage />} />
+                        <Route path="/auth/register-provider" element={<ProviderRegisterPage />} />
                         <Route path="/auth/reset-password" element={<LoginPage />} /> {/* Placeholder */}
                       </Route>
 
@@ -156,6 +159,7 @@ const App = () => (
                         <Route path="auth" element={<AuthLayout />}>
                           <Route path="login" element={<LoginPage />} />
                           <Route path="register" element={<RegisterPage />} />
+                          <Route path="register-provider" element={<ProviderRegisterPage />} />
                           <Route path="reset-password" element={<LoginPage />} /> {/* Placeholder */}
                         </Route>
 

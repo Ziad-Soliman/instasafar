@@ -1,293 +1,144 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff, Building, User, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-
-// Define the form schema
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginPage: React.FC = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-  const { t, isRTL } = useLanguage();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginMode, setLoginMode] = useState<"user" | "provider">("user");
-
-  // Get the redirect path from state or default to home
-  const from = (location.state as any)?.from?.pathname || "/";
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
+  const { loginWithSupabase, loading } = useSupabaseAuth();
+  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  
+  const validate = () => {
+    const newErrors: {[key: string]: string} = {};
+    
+    if (!email.trim()) newErrors.email = t("validation.required");
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = t("validation.email");
+    
+    if (!password) newErrors.password = t("validation.required");
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validate()) return;
+    
     try {
-      await login(data.email, data.password);
+      const { success, data } = await loginWithSupabase(email, password);
       
-      // Show success toast
-      toast({
-        title: loginMode === "provider" ? "Provider Login Successful" : "Login Successful",
-        description: "Welcome back to InstaSafar!",
-        variant: "default",
-      });
-      
-      // Redirect based on login type
-      if (loginMode === "provider") {
-        navigate("/provider/dashboard", { replace: true });
-      } else {
-        navigate(from, { replace: true });
+      if (success && data) {
+        // Determine where to redirect based on user role
+        const role = data.user?.user_metadata?.role;
+        
+        if (role === 'admin') {
+          navigate("/admin/dashboard");
+        } else if (role === 'provider') {
+          navigate("/provider/dashboard");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast({
-        title: "Login Failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
-
+  
   return (
-    <div className="container max-w-md mx-auto py-10">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="border-2 shadow-lg">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
-              {loginMode === "provider" 
-                ? t("auth.providerLogin.title") || "Provider Login" 
-                : t("auth.login.title")}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {loginMode === "provider"
-                ? t("auth.providerLogin.subtitle") || "Access your provider dashboard to manage your listings and bookings"
-                : t("auth.login.subtitle")}
-            </CardDescription>
-          </CardHeader>
-
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="flex justify-center items-center min-h-[80vh] px-4"
+    >
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-2xl">{t("auth.login")}</CardTitle>
+          <CardDescription>
+            {t("auth.loginDescription")}
+          </CardDescription>
+        </CardHeader>
+        
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {/* Toggle between user and provider login */}
-            <Tabs 
-              defaultValue={loginMode} 
-              onValueChange={(v) => setLoginMode(v as "user" | "provider")}
-              className="w-full"
-            >
-              <TabsList className="grid grid-cols-2 w-full mb-4">
-                <TabsTrigger value="user" className="flex items-center justify-center gap-2">
-                  <User size={16} />
-                  <span>User</span>
-                </TabsTrigger>
-                <TabsTrigger value="provider" className="flex items-center justify-center gap-2">
-                  <Building size={16} />
-                  <span>Provider</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("auth.email")}</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email">{t("auth.email")}</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
-                  placeholder="m@example.com"
                   type="email"
-                  autoComplete="email"
-                  disabled={isLoading}
-                  {...register("email")}
-                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) {
+                      const { email, ...rest } = errors;
+                      setErrors(rest);
+                    }
+                  }}
+                  className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
+                  placeholder={t("auth.emailPlaceholder")}
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
-                )}
               </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">{t("auth.password")}</Label>
-                  <Link
-                    to="/auth/reset-password"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    {t("auth.forgotPassword")}
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    disabled={isLoading}
-                    {...register("password")}
-                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors`}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
+              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password">{t("auth.password")}</Label>
+                <Link to="/auth/reset-password" className="text-xs text-primary hover:underline">
+                  {t("auth.forgotPassword")}
+                </Link>
               </div>
-
-              <Button
-                type="submit"
-                className="w-full group"
-                disabled={isLoading}
-                size="lg"
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="h-4 w-4 border-2 border-current border-t-transparent rounded-full"
-                    />
-                    {t("loading")}...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    {loginMode === "provider" ? "Access Provider Dashboard" : t("auth.signIn")}
-                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-                  </span>
-                )}
-              </Button>
-            </form>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) {
+                      const { password, ...rest } = errors;
+                      setErrors(rest);
+                    }
+                  }}
+                  className={`pl-10 ${errors.password ? 'border-destructive' : ''}`}
+                  placeholder={t("auth.passwordPlaceholder")}
+                />
+              </div>
+              {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
+            </div>
           </CardContent>
           
-          <CardFooter className="flex flex-col space-y-4">
-            {loginMode === "user" ? (
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t("auth.noAccount")}{" "}
-                  <Link
-                    to="/auth/register"
-                    className="text-primary font-medium hover:underline"
-                  >
-                    {t("auth.signUp")}
-                  </Link>
-                </p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  Want to become a provider?{" "}
-                  <Link
-                    to="/provider/register"
-                    className="text-primary font-medium hover:underline"
-                  >
-                    Apply here
-                  </Link>
-                </p>
-              </div>
-            )}
-
-            {/* Quick Login Options */}
-            <div className="w-full">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-muted" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    {t("auth.quickLogin")}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-2">
-                {loginMode === "provider" ? (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      login("provider@example.com", "password");
-                      navigate("/provider/dashboard", { replace: true });
-                    }}
-                  >
-                    <Building className="mr-2 h-4 w-4" />
-                    {t("auth.loginAsProvider")}
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        login("user@example.com", "password");
-                        navigate(from, { replace: true });
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      {t("auth.loginAsUser")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        login("admin@example.com", "password");
-                        navigate("/admin", { replace: true });
-                      }}
-                    >
-                      {t("auth.loginAsAdmin")}
-                    </Button>
-                  </>
-                )}
-              </div>
+          <CardFooter className="flex flex-col space-y-3">
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? t("auth.loggingIn") : t("auth.login")}
+            </Button>
+            
+            <div className="text-center text-sm">
+              {t("auth.noAccount")} <Link to="/auth/register" className="text-primary hover:underline">{t("auth.register")}</Link>
             </div>
           </CardFooter>
-        </Card>
-      </motion.div>
-    </div>
+        </form>
+      </Card>
+    </motion.div>
   );
 };
 

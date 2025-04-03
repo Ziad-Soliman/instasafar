@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-  DropdownMenuFooter,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -114,7 +113,7 @@ const NotificationDropdown: React.FC = () => {
         {notifications.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuFooter className="flex justify-center">
+            <div className="p-2">
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -123,7 +122,7 @@ const NotificationDropdown: React.FC = () => {
               >
                 Clear All
               </Button>
-            </DropdownMenuFooter>
+            </div>
           </>
         )}
       </DropdownMenuContent>

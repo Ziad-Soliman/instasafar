@@ -21,9 +21,10 @@ export interface ExternalListing {
 
 interface ExternalListingCardProps {
   listing: ExternalListing;
+  className?: string;
 }
 
-const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) => {
+const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, className }) => {
   const { t, isRTL } = useLanguage();
   
   const handleClick = () => {
@@ -49,7 +50,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className="card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm"
+      className={`card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm ${className || ''}`}
     >
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="h-48 bg-muted/50 relative">

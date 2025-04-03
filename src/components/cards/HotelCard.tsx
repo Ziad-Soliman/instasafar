@@ -92,7 +92,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
         
         <div className="flex justify-between items-center mb-3">
           <div>
-            <div className="text-sm font-medium">{hotel.price_per_night} ﷼</div>
+            <div className="text-sm font-medium">{hotel.price_per_night} {t("currency.sar")}</div>
             <div className="text-xs text-muted-foreground">{t("listing.perNight")}</div>
           </div>
         </div>

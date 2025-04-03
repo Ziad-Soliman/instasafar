@@ -31,15 +31,15 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className="card-custom group h-full flex flex-col"
+      className="card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm"
     >
       <div className="relative overflow-hidden rounded-t-lg">
-        <div className="h-40 bg-muted/50 relative">
+        <div className="h-48 bg-muted/50 relative">
           {listing.image_url ? (
             <img
               src={listing.image_url}
               alt={listing.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-primary/10">
@@ -48,14 +48,14 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
           )}
 
           <div className="absolute top-2 left-2">
-            <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium">
+            <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium shadow-sm">
               {listing.provider_name}
             </div>
           </div>
 
           {listing.rating_indication && (
             <div className="absolute bottom-2 right-2">
-              <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center">
+              <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm backdrop-blur-sm">
                 <Star className="w-3 h-3 mr-1 fill-primary" />
                 {listing.rating_indication}
               </div>
@@ -65,7 +65,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing }) =>
       </div>
 
       <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm line-clamp-1 mb-1">{listing.name}</h3>
+        <h3 className="font-medium text-base line-clamp-1 mb-1">{listing.name}</h3>
         
         <div className="text-xs text-muted-foreground mb-2">
           {listing.city}

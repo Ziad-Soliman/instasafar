@@ -21,7 +21,7 @@ export interface HotelCardProps {
   };
   onButtonClick?: () => void;
   buttonText?: string;
-  className?: string; // Add className prop
+  className?: string;
 }
 
 const HotelCard: React.FC<HotelCardProps> = ({ 
@@ -34,25 +34,25 @@ const HotelCard: React.FC<HotelCardProps> = ({
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
-      className={cn("card-custom group h-full flex flex-col", className)}
+      className={cn("card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm", className)}
     >
       <div className="relative overflow-hidden rounded-t-lg">
-        <div className="h-40 bg-muted/50">
+        <div className="h-48 bg-muted/50">
           <img
             src={hotel.thumbnail || "/placeholder.svg"}
             alt={hotel.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           
           <div className="absolute top-2 left-2">
-            <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center">
+            <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
               <MapPin className="w-3 h-3 mr-1" />
               {hotel.city}
             </div>
           </div>
           
           <div className="absolute bottom-2 right-2">
-            <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center">
+            <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm backdrop-blur-sm">
               <Star className="w-3 h-3 mr-1 fill-primary" />
               {hotel.rating}
             </div>
@@ -61,7 +61,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
       </div>
       
       <div className="p-4 flex-grow flex flex-col">
-        <h3 className="font-medium text-sm line-clamp-1 mb-1">{hotel.name}</h3>
+        <h3 className="font-medium text-base line-clamp-1 mb-1">{hotel.name}</h3>
         
         <div className="text-xs text-muted-foreground mb-2">
           {hotel.distance_to_haram} from Haram

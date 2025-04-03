@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -23,6 +24,8 @@ import {
 import { format, addDays, differenceInDays } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import ImageCarousel from "@/components/ImageCarousel";
+import { hotelDetails } from "@/data/hotels";
 
 // Define interfaces
 interface Hotel {
@@ -31,7 +34,7 @@ interface Hotel {
   city: "Makkah" | "Madinah";
   address: string;
   description: string;
-  long_description?: string;
+  detailed_description?: string;
   rating: number;
   price_per_night: number;
   discount_price?: number;
@@ -39,41 +42,50 @@ interface Hotel {
   amenities: string[];
   thumbnail: string;
   images?: string[];
-  popularity?: number;
-  is_featured?: boolean;
+  map_coordinates?: {
+    lat: number;
+    lng: number;
+  };
   is_internal: boolean;
 }
 
 interface Room {
   id: string;
-  name: string;
-  hotel_id: string;
+  room_type: string;
   price_per_night: number;
   capacity: number;
   description: string;
   amenities: string[];
-  image: string;
+  images: string[];
 }
 
 // Mock fetch hotel data function
 const fetchHotel = (hotelId: string): Promise<Hotel> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // First check if the hotel exists in our detailed data
+      if (hotelDetails[hotelId]) {
+        resolve({
+          ...hotelDetails[hotelId],
+          is_internal: true
+        });
+        return;
+      }
+
+      // Fallback to generic data if not found
       resolve({
         id: hotelId,
         name: "Grand Makkah Hotel",
         city: "Makkah",
         address: "King Fahd Road, Makkah",
         description: "Luxury hotel with excellent amenities near Haram",
-        long_description: "Experience luxury and comfort at the Grand Makkah Hotel, located just a short walk from the Haram. Our hotel offers spacious rooms, excellent service, and a range of amenities to make your stay comfortable and spiritually fulfilling. The hotel features a dedicated prayer area, restaurant serving international cuisine, and friendly staff to assist with your needs throughout your stay.",
+        detailed_description: "Experience luxury and comfort at the Grand Makkah Hotel, located just a short walk from the Haram. Our hotel offers spacious rooms, excellent service, and a range of amenities to make your stay comfortable and spiritually fulfilling. The hotel features a dedicated prayer area, restaurant serving international cuisine, and friendly staff to assist with your needs throughout your stay.",
         rating: 4.7,
         price_per_night: 240,
         distance_to_haram: "500m",
         amenities: ["Free WiFi", "Breakfast Included", "Prayer Room", "Shuttle Service", "Room Service", "Air Conditioning", "Concierge", "24/7 Front Desk"],
         thumbnail: "/placeholder.svg",
         images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
-        popularity: 95,
-        is_featured: true,
         is_internal: true
       });
     }, 1000);
@@ -84,36 +96,40 @@ const fetchHotel = (hotelId: string): Promise<Hotel> => {
 const fetchRooms = (hotelId: string): Promise<Room[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // First check if the hotel exists in our detailed data
+      if (hotelDetails[hotelId] && hotelDetails[hotelId].rooms) {
+        resolve(hotelDetails[hotelId].rooms);
+        return;
+      }
+      
+      // Fallback to generic data if not found
       resolve([
         {
           id: "room-1",
-          name: "Standard Room",
-          hotel_id: hotelId,
+          room_type: "Standard Room",
           price_per_night: 240,
           capacity: 2,
           description: "Comfortable standard room with two single beds",
           amenities: ["Free WiFi", "Air Conditioning", "TV", "Private Bathroom"],
-          image: "/placeholder.svg"
+          images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
         },
         {
           id: "room-2",
-          name: "Deluxe Room",
-          hotel_id: hotelId,
+          room_type: "Deluxe Room",
           price_per_night: 320,
           capacity: 3,
           description: "Spacious deluxe room with Haram view, king bed and additional single bed",
           amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Haram View"],
-          image: "/placeholder.svg"
+          images: ["https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
         },
         {
           id: "room-3",
-          name: "Family Suite",
-          hotel_id: hotelId,
+          room_type: "Family Suite",
           price_per_night: 480,
           capacity: 5,
           description: "Large family suite with two bedrooms and a living area",
           amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Living Room", "Two Bathrooms"],
-          image: "/placeholder.svg"
+          images: ["https://images.unsplash.com/photo-1630660664869-c9d3cc676880?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1970&q=80"]
         }
       ]);
     }, 1500);
@@ -178,9 +194,9 @@ const HotelDetailPage: React.FC = () => {
       state: {
         bookingItem: {
           id: roomToBook.id,
-          name: `${hotel.name} - ${roomToBook.name}`,
+          name: `${hotel.name} - ${roomToBook.room_type}`,
           type: "hotel",
-          image: roomToBook.image || hotel.thumbnail,
+          image: roomToBook.images[0] || hotel.thumbnail,
           price: roomToBook.price_per_night,
           nights: nights,
           start_date: checkIn,
@@ -281,29 +297,15 @@ const HotelDetailPage: React.FC = () => {
               )}
             </div>
             
-            {/* Main Image */}
-            <div className="aspect-video relative rounded-lg overflow-hidden bg-muted">
-              <img 
-                src={hotel.thumbnail || "/placeholder.svg"} 
-                alt={hotel.name} 
-                className="w-full h-full object-cover"
+            {/* Main Image Carousel */}
+            <div className="rounded-lg overflow-hidden">
+              <ImageCarousel 
+                images={hotel.images || [hotel.thumbnail]}
+                aspectRatio={16/9}
+                allowFullscreen={true}
+                caption={`${hotel.name} - ${hotel.city}`}
               />
             </div>
-            
-            {/* Image Gallery */}
-            {hotel.images && hotel.images.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {hotel.images.map((image, index) => (
-                  <div key={index} className="aspect-square rounded-md overflow-hidden bg-muted">
-                    <img 
-                      src={image} 
-                      alt={`${hotel.name} - Image ${index + 1}`} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Hotel Details */}
@@ -324,7 +326,7 @@ const HotelDetailPage: React.FC = () => {
                   {/* Description */}
                   <div>
                     <h2 className="text-xl font-semibold mb-2">Description</h2>
-                    <p className="text-muted-foreground">{hotel.long_description || hotel.description}</p>
+                    <p className="text-muted-foreground">{hotel.detailed_description || hotel.description}</p>
                   </div>
                   
                   {/* Amenities */}
@@ -357,8 +359,8 @@ const HotelDetailPage: React.FC = () => {
                               <div className="md:col-span-1">
                                 <div className="h-full bg-muted">
                                   <img 
-                                    src={room.image || "/placeholder.svg"} 
-                                    alt={room.name} 
+                                    src={room.images[0] || "/placeholder.svg"} 
+                                    alt={room.room_type} 
                                     className="w-full h-full object-cover aspect-square md:aspect-auto" 
                                   />
                                 </div>
@@ -366,7 +368,7 @@ const HotelDetailPage: React.FC = () => {
                               <div className="md:col-span-3 p-4">
                                 <div className="flex flex-wrap justify-between gap-2">
                                   <div>
-                                    <h3 className="font-semibold">{room.name}</h3>
+                                    <h3 className="font-semibold">{room.room_type}</h3>
                                     <p className="text-sm text-muted-foreground mb-2">{room.description}</p>
                                     
                                     <div className="flex flex-wrap gap-2 mb-4">

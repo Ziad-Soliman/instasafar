@@ -1,177 +1,225 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, Plane, Car, Package, Building } from "lucide-react";
+import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Building, Facebook, Instagram, Twitter, MapPin, Mail, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Footer: React.FC = () => {
+  const { t, isRTL } = useLanguage();
+  const currentYear = new Date().getFullYear();
+
+  // Footer links organized by section
+  const footerLinks = {
+    company: [
+      { label: "About Us", href: "/about" },
+      { label: "Our Services", href: "/services" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Career", href: "/careers" },
+    ],
+    services: [
+      { label: "Hajj Packages", href: "/packages?type=hajj" },
+      { label: "Umrah Packages", href: "/packages?type=umrah" },
+      { label: "Hotel Booking", href: "/search" },
+      { label: "Flight Booking", href: "/flights" },
+      { label: "Transport Services", href: "/transport" },
+    ],
+    support: [
+      { label: "Help Center", href: "/help" },
+      { label: "FAQs", href: "/faqs" },
+      { label: "Visa Information", href: "/visa-info" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
+    ],
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <footer className="bg-muted border-t">
-      <div className="container-custom py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo and about */}
-          <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="block mb-4">
-              <img 
-                src="/logo.png" 
-                alt="InstaSafar" 
-                className="h-8"
-                onError={(e) => {
-                  // Fallback if logo image doesn't exist yet
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yMCAyNUgxODBNOTAgMTVIOTVNOTAgMzVIOTUiIHN0cm9rZT0iIzAwOTliZiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iNDAiIHk9IjMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDk5YmYiPkluc3RhU2FmYXI8L3RleHQ+PC9zdmc+";
-                }}
-              />
-            </Link>
-            <p className="text-sm text-muted-foreground mb-4">
-              Making your Hajj & Umrah journey easier, comfortable, and memorable with our premium services.
-            </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
+    <footer className="bg-muted/30 border-t">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.div variants={itemVariants}>
+              <Link to="/" className="flex items-center">
+                <span className="text-2xl font-bold text-primary">InstaSafar</span>
+              </Link>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Your trusted partner for Hajj and Umrah journeys, committed to making your spiritual experience memorable and comfortable.
+              </p>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex space-x-4 mt-4">
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Facebook"
+              >
                 <Facebook size={18} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Twitter"
+              >
                 <Twitter size={18} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Instagram"
+              >
                 <Instagram size={18} />
               </a>
-            </div>
-          </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="pt-4">
+              <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-start">
+                  <MapPin size={16} className="mr-2 mt-0.5 flex-shrink-0" />
+                  <span>123 Business Avenue, Makkah, Saudi Arabia</span>
+                </div>
+                <div className="flex items-center">
+                  <Phone size={16} className="mr-2 flex-shrink-0" />
+                  <span>+966 123 456 7890</span>
+                </div>
+                <div className="flex items-center">
+                  <Mail size={16} className="mr-2 flex-shrink-0" />
+                  <span>info@instasafar.com</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="font-medium text-sm tracking-wide uppercase mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/search?type=hotel" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  Hotels
-                </Link>
-              </li>
-              <li>
-                <Link to="/search?type=package" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
-                  <Package className="h-3 w-3 mr-1" />
-                  Packages
-                </Link>
-              </li>
-              <li>
-                <Link to="/flights" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
-                  <Plane className="h-3 w-3 mr-1" />
-                  Flights
-                </Link>
-              </li>
-              <li>
-                <Link to="/transport" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
-                  <Car className="h-3 w-3 mr-1" />
-                  Transport
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Company
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.company.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
 
-          {/* Support */}
-          <div>
-            <h3 className="font-medium text-sm tracking-wide uppercase mb-4">Support</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Terms & Conditions
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/refund" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/provider" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
-                  <Building className="h-3 w-3 mr-1" />
-                  Provider Portal
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Services */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Services
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.services.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-medium text-sm tracking-wide uppercase mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin size={18} className="mr-2 mt-0.5 text-primary" />
-                <span className="text-sm text-muted-foreground">
-                  123 Makkah Road, Riyadh, Saudi Arabia
-                </span>
-              </li>
-              <li className="flex items-center">
-                <Phone size={18} className="mr-2 text-primary" />
-                <a href="tel:+966123456789" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  +966 12 345 6789
-                </a>
-              </li>
-              <li className="flex items-center">
-                <Mail size={18} className="mr-2 text-primary" />
-                <a href="mailto:info@instasafar.com" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  info@instasafar.com
-                </a>
-              </li>
-            </ul>
-          </div>
+          {/* Support & Newsletter */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Support
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.support.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+
+            <motion.div variants={itemVariants} className="pt-4">
+              <h3 className="text-sm font-semibold mb-3">Newsletter</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Subscribe to receive updates on new packages and offers.
+              </p>
+              <div className="flex space-x-2">
+                <Input
+                  type="email"
+                  placeholder="Your email"
+                  className="max-w-[220px]"
+                />
+                <Button size="sm">Subscribe</Button>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="border-t">
-        <div className="container-custom py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} InstaSafar. All rights reserved.
-            </p>
-            <div className="mt-4 md:mt-0">
-              <ul className="flex space-x-6">
-                <li>
-                  <Link to="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/cookies" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                    Cookies
-                  </Link>
-                </li>
-              </ul>
-            </div>
+        {/* Provider Link & Copyright */}
+        <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-8 border-t">
+          <div className="mb-4 md:mb-0">
+            <Link
+              to="/provider"
+              className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Building size={16} className="mr-2" />
+              Provider Portal
+            </Link>
           </div>
+          <p className="text-sm text-muted-foreground">
+            &copy; {currentYear} InstaSafar. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -1,224 +1,327 @@
 
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, User, LogIn, LogOut, Book, Plane, Car } from "lucide-react";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import LanguageSwitcher from "./LanguageSwitcher";
-import { useAuth } from "@/hooks/useAuth";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Menu, X, User, Package, LogOut, Heart, MapPin,
+  Calendar, Home, Search, Plane, Bus, Building
+} from "lucide-react";
+import NotificationDropdown from "./NotificationDropdown";
+import { useMobile } from "@/hooks/use-mobile";
+import { motion } from "framer-motion";
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
-
-  // Update scroll state
-  useEffect(() => {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const isMobile = useMobile();
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  
+  // Navigation items
+  const navItems = [
+    { name: t("nav.home"), path: "/", icon: Home },
+    { name: t("nav.search"), path: "/search", icon: Search },
+    { name: t("nav.packages"), path: "/packages", icon: Package },
+    { name: t("nav.flights"), path: "/flights", icon: Plane },
+    { name: t("nav.transport"), path: "/transport", icon: Bus },
+  ];
+  
+  // Check if window has scrolled
+  React.useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
     };
-
+    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const navItems = [
-    { label: "Home", path: "/" },
-    { label: "Hotels", path: "/search?type=hotel" },
-    { label: "Packages", path: "/search?type=package" },
-    { label: "Flights", path: "/flights", icon: <Plane className="h-4 w-4 mr-1" /> },
-    { label: "Transport", path: "/transport", icon: <Car className="h-4 w-4 mr-1" /> },
-    { label: "About", path: "/about" },
-    { label: "Contact", path: "/contact" },
-  ];
-
+  
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+  
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!user || !user.name) return "U";
+    
+    const nameParts = user.name.split(" ");
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+    }
+    return nameParts[0][0].toUpperCase();
+  };
+  
   return (
     <header
-      className={`sticky top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled || isMobileMenuOpen
-          ? "bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm"
-          : "bg-transparent"
+      className={`sticky top-0 z-50 backdrop-blur-md transition-all duration-300 ${
+        isScrolled ? "bg-background/80 border-b shadow-sm" : "bg-transparent"
       }`}
     >
-      <div className="container-custom mx-auto">
-        <div className="flex items-center justify-between h-16 md:h-20">
+      <div className="container mx-auto py-3 px-4">
+        <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center hover-lift"
-            aria-label="InstaSafar"
-          >
-            <motion.div
+          <Link to="/" className="flex items-center">
+            <motion.span 
+              className="text-xl font-bold text-primary"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <img 
-                src="/logo.png" 
-                alt="InstaSafar" 
-                className="h-8 md:h-10"
-                onError={(e) => {
-                  // Fallback if logo image doesn't exist yet
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yMCAyNUgxODBNOTAgMTVIOTVNOTAgMzVIOTUiIHN0cm9rZT0iIzAwOTliZiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iNDAiIHk9IjMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDk5YmYiPkluc3RhU2FmYXI8L3RleHQ+PC9zdmc+";
-                }}
-              />
-            </motion.div>
+              InstaSafar
+            </motion.span>
           </Link>
-
+          
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item, index) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                  location.pathname === item.path
-                    ? "text-primary"
-                    : "text-foreground/80 hover:text-foreground hover:bg-accent"
-                }`}
-              >
-                <motion.span
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="flex items-center"
-                >
-                  {item.icon}
-                  {item.label}
-                </motion.span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* Right Side - Actions */}
-          <div className="flex items-center space-x-2">
-            <LanguageSwitcher />
-
-            {/* User Menu */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <User size={16} />
-                    <span className="hidden sm:inline truncate max-w-[80px]">
-                      {user.full_name || user.email.split("@")[0]}
-                    </span>
-                    <ChevronDown size={14} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-3 py-2 text-sm font-medium">
-                    {user.full_name || user.email.split("@")[0]}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/account/profile" className="cursor-pointer w-full flex items-center">
-                      <User size={16} className="mr-2" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/account/bookings" className="cursor-pointer w-full flex items-center">
-                      <Book size={16} className="mr-2" />
-                      My Bookings
-                    </Link>
-                  </DropdownMenuItem>
-                  {user.role === "admin" && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className="cursor-pointer w-full">
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {user.role === "provider" && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/provider" className="cursor-pointer w-full">
-                        Provider Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => logout()}
-                    className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground"
-                  >
-                    <LogOut size={16} className="mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Link to="/auth/login">
-                  <LogIn size={16} />
-                  <span className="hidden sm:inline">Sign In</span>
-                </Link>
-              </Button>
-            )}
-
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-background border-t"
-          >
-            <nav className="container-custom py-4 flex flex-col">
+          {!isMobile && (
+            <nav className="hidden md:flex items-center space-x-6">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors flex items-center ${
-                    location.pathname === item.path
-                      ? "text-primary bg-accent"
-                      : "text-foreground hover:bg-accent"
-                  }`}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
-                  {item.icon}
-                  {item.label}
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.name}</span>
                 </Link>
               ))}
             </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+          
+          {/* User Menu & Actions */}
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            
+            {user ? (
+              <>
+                <NotificationDropdown />
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name || "User"}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem onClick={() => navigate("/account/profile")}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>{t("nav.profile")}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/account/bookings")}>
+                        <Calendar className="mr-2 h-4 w-4" />
+                        <span>{t("nav.bookings")}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate("/account/wishlist")}>
+                        <Heart className="mr-2 h-4 w-4" />
+                        <span>Wishlist</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>{t("nav.logout")}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size={isMobile ? "icon" : "default"}
+                  className="hidden sm:flex"
+                  onClick={() => navigate("/auth/register")}
+                >
+                  {!isMobile && t("auth.signUp")}
+                  {isMobile && <User className="h-4 w-4" />}
+                </Button>
+                <Button 
+                  size={isMobile ? "icon" : "default"}
+                  onClick={() => navigate("/auth/login")}
+                >
+                  {!isMobile && t("auth.signIn")}
+                  {isMobile && <LogOut className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
+            
+            {/* Mobile Menu Trigger */}
+            {isMobile && (
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+                  <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center py-4">
+                      <span className="text-lg font-bold">InstaSafar</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                    </div>
+                    
+                    <nav className="flex flex-col space-y-5 py-6">
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className="flex items-center space-x-3 px-1 py-2 rounded-md hover:bg-muted transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <item.icon className="h-5 w-5 text-primary" />
+                          <span className="font-medium">{item.name}</span>
+                        </Link>
+                      ))}
+                      
+                      <div className="border-t pt-4">
+                        <Link
+                          to="/provider"
+                          className="flex items-center space-x-3 px-1 py-2 rounded-md hover:bg-muted transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Building className="h-5 w-5 text-primary" />
+                          <span className="font-medium">Provider Portal</span>
+                        </Link>
+                      </div>
+                    </nav>
+                    
+                    <div className="mt-auto">
+                      {user ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={user.avatar} />
+                              <AvatarFallback className="bg-primary text-primary-foreground">
+                                {getUserInitials()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{user.name || "User"}</p>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col space-y-2">
+                            <Button 
+                              variant="outline" 
+                              className="justify-start"
+                              onClick={() => {
+                                navigate("/account/profile");
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              <User className="mr-2 h-4 w-4" />
+                              {t("nav.profile")}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="justify-start"
+                              onClick={() => {
+                                navigate("/account/bookings");
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {t("nav.bookings")}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="justify-start"
+                              onClick={() => {
+                                navigate("/account/wishlist");
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              <Heart className="mr-2 h-4 w-4" />
+                              Wishlist
+                            </Button>
+                            <Button 
+                              variant="default" 
+                              className="justify-start mt-2"
+                              onClick={() => {
+                                handleLogout();
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              <LogOut className="mr-2 h-4 w-4" />
+                              {t("nav.logout")}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              navigate("/auth/register");
+                              setMobileMenuOpen(false);
+                            }}
+                          >
+                            {t("auth.signUp")}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              navigate("/auth/login");
+                              setMobileMenuOpen(false);
+                            }}
+                          >
+                            {t("auth.signIn")}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
+        </div>
+      </div>
     </header>
   );
 };

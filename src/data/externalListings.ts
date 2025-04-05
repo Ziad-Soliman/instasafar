@@ -1,7 +1,4 @@
 
-// This file now serves as a fallback when Supabase connection isn't available
-// The actual data should be fetched from Supabase external_listings table
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -82,6 +79,11 @@ export const fetchExternalListings = async (): Promise<ExternalListing[]> => {
         description: "Using fallback data instead.",
         variant: "destructive",
       });
+      return externalListings;
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('No external listings found in database, using fallback data');
       return externalListings;
     }
     

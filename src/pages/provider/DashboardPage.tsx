@@ -1,443 +1,425 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import HotelCard from "@/components/cards/HotelCard";
-import PackageCard from "@/components/cards/PackageCard";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building, Calendar, CreditCard, Hotel, Package, Percent, Tag, Users } from "lucide-react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { CalendarIcon, Hotel, Package, MapPin, Users, CreditCard, Clock, TrendingUp, BedDouble, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
 
-// Mock data for the dashboard
-const mockBookingStats = [
-  { month: 'Jan', bookings: 30 },
-  { month: 'Feb', bookings: 40 },
-  { month: 'Mar', bookings: 45 },
-  { month: 'Apr', bookings: 60 },
-  { month: 'May', bookings: 75 },
-  { month: 'Jun', bookings: 65 },
-  { month: 'Jul', bookings: 90 },
-  { month: 'Aug', bookings: 120 },
-  { month: 'Sep', bookings: 80 },
-  { month: 'Oct', bookings: 70 },
-  { month: 'Nov', bookings: 50 },
-  { month: 'Dec', bookings: 45 },
+interface BookingStats {
+  total: number;
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+  completed: number;
+}
+
+interface RecentBooking {
+  id: string;
+  user_name: string;
+  booking_type: "hotel" | "package";
+  item_name: string;
+  check_in_date: string;
+  check_out_date: string;
+  total_price: number;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  created_at: string;
+}
+
+interface DashboardData {
+  totalHotels: number;
+  totalPackages: number;
+  bookingStats: BookingStats;
+  recentBookings: RecentBooking[];
+  monthlyBookings: { month: string; count: number }[];
+  monthlyRevenue: { month: string; amount: number }[];
+}
+
+const mockMonthlyBookings = [
+  { month: "Jan", count: 10 },
+  { month: "Feb", count: 15 },
+  { month: "Mar", count: 12 },
+  { month: "Apr", count: 8 },
+  { month: "May", count: 20 },
+  { month: "Jun", count: 25 },
 ];
 
-const mockRevenueStats = [
-  { month: 'Jan', revenue: 3000 },
-  { month: 'Feb', revenue: 4000 },
-  { month: 'Mar', revenue: 4500 },
-  { month: 'Apr', revenue: 6000 },
-  { month: 'May', revenue: 7500 },
-  { month: 'Jun', revenue: 6500 },
-  { month: 'Jul', revenue: 9000 },
-  { month: 'Aug', revenue: 12000 },
-  { month: 'Sep', revenue: 8000 },
-  { month: 'Oct', revenue: 7000 },
-  { month: 'Nov', revenue: 5000 },
-  { month: 'Dec', revenue: 4500 },
-];
-
-const mockHotels = [
-  {
-    id: "hotel-1",
-    name: "فندق جراند مكة",
-    city: "Makkah",
-    address: "طريق الملك عبد العزيز",
-    description: "فندق فاخر مع إطلالة على الحرم",
-    rating: 4.7,
-    price_per_night: 750,
-    distance_to_haram: "500م",
-    amenities: ["واي فاي مجاني", "فطور", "موقف سيارات", "غرفة صلاة"],
-    thumbnail: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-    is_internal: true
-  },
-  {
-    id: "hotel-2",
-    name: "فندق هيلتون المدينة",
-    city: "Madinah",
-    address: "شارع قربان",
-    description: "فندق فاخر قريب من المسجد النبوي",
-    rating: 4.5,
-    price_per_night: 650,
-    distance_to_haram: "300م",
-    amenities: ["واي فاي مجاني", "مطعم", "مسبح", "مواقف سيارات"],
-    thumbnail: "https://images.unsplash.com/photo-1606402179428-a57976d71fa4?auto=format&fit=crop&w=800&q=80",
-    is_internal: true
-  }
-];
-
-const mockPackages = [
-  {
-    id: "package-1",
-    name: "باقة العمرة الممتازة",
-    description: "تجربة عمرة شاملة لمدة 10 أيام مع إقامة 5 نجوم",
-    price: 5500,
-    duration_days: 10,
-    start_date: "2023-12-15",
-    end_date: "2023-12-25",
-    thumbnail: "https://images.unsplash.com/photo-1519074069390-2e4a98b5cc21?auto=format&fit=crop&w=800&q=80",
-    includes_hotel: true,
-    includes_flight: true,
-    includes_transport: true,
-    city: "Makkah",
-    is_internal: true,
-    package_type: "Umrah" as "Hajj" | "Umrah" | "Custom"
-  },
-  {
-    id: "package-2",
-    name: "باقة الحج الاقتصادية",
-    description: "تجربة حج شاملة لمدة 14 يوم بأسعار معقولة",
-    price: 12000,
-    duration_days: 14,
-    start_date: "2024-06-01",
-    end_date: "2024-06-15",
-    thumbnail: "https://images.unsplash.com/photo-1604693617852-c40c3092a6a5?auto=format&fit=crop&w=800&q=80",
-    includes_hotel: true,
-    includes_flight: true,
-    includes_transport: true,
-    city: "Both",
-    is_internal: true,
-    package_type: "Hajj" as "Hajj" | "Umrah" | "Custom"
-  }
-];
-
-const mockRecentBookings = [
-  {
-    id: "booking-1",
-    customer_name: "محمد أحمد",
-    item_name: "فندق جراند مكة",
-    booking_date: "2023-11-05",
-    check_in: "2023-12-15",
-    check_out: "2023-12-20",
-    amount: 3750,
-    status: "confirmed"
-  },
-  {
-    id: "booking-2",
-    customer_name: "سارة خان",
-    item_name: "باقة العمرة الممتازة",
-    booking_date: "2023-11-02",
-    check_in: "2023-12-10",
-    check_out: "2023-12-20",
-    amount: 5500,
-    status: "pending"
-  },
-  {
-    id: "booking-3",
-    customer_name: "عبدالله علي",
-    item_name: "فندق جراند مكة",
-    booking_date: "2023-10-28",
-    check_in: "2023-11-15",
-    check_out: "2023-11-20",
-    amount: 3750,
-    status: "confirmed"
-  },
-  {
-    id: "booking-4",
-    customer_name: "فاطمة حسن",
-    item_name: "باقة العمرة القياسية",
-    booking_date: "2023-10-25",
-    check_in: "2023-11-10",
-    check_out: "2023-11-17",
-    amount: 4250,
-    status: "confirmed"
-  }
+const mockMonthlyRevenue = [
+  { month: "Jan", amount: 5000 },
+  { month: "Feb", amount: 7500 },
+  { month: "Mar", amount: 6000 },
+  { month: "Apr", amount: 4000 },
+  { month: "May", amount: 9000 },
+  { month: "Jun", amount: 12000 },
 ];
 
 const ProviderDashboard: React.FC = () => {
+  const { t, locale, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const { t, isRTL, language } = useLanguage();
-  
+  const { user } = useSupabaseAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    totalHotels: 0,
+    totalPackages: 0,
+    bookingStats: { total: 0, pending: 0, confirmed: 0, cancelled: 0, completed: 0 },
+    recentBookings: [],
+    monthlyBookings: mockMonthlyBookings,
+    monthlyRevenue: mockMonthlyRevenue,
+  });
+
+  // Status badge component
+  const StatusBadge = ({ status }: { status: string }) => {
+    let variant: "outline" | "default" | "secondary" | "destructive" = "outline";
+    
+    switch (status) {
+      case "confirmed":
+        variant = "default";
+        break;
+      case "pending":
+        variant = "secondary";
+        break;
+      case "cancelled":
+        variant = "destructive";
+        break;
+      case "completed":
+        variant = "outline";
+        break;
+    }
+    
+    return (
+      <Badge variant={variant}>
+        {t(`booking.status.${status}`)}
+      </Badge>
+    );
+  };
+
+  // Format date based on language
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return format(date, "PPP", { locale: locale === 'ar' ? ar : enUS });
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      try {
+        // Fetch hotels count
+        const { count: hotelsCount, error: hotelsError } = await supabase
+          .from('hotels')
+          .select('*', { count: 'exact', head: true })
+          .eq('provider_id', user.id);
+        
+        if (hotelsError) throw hotelsError;
+        
+        // Fetch packages count
+        const { count: packagesCount, error: packagesError } = await supabase
+          .from('packages')
+          .select('*', { count: 'exact', head: true })
+          .eq('provider_id', user.id);
+        
+        if (packagesError) throw packagesError;
+        
+        // Fetch bookings
+        const { data: bookings, error: bookingsError } = await supabase
+          .from('bookings')
+          .select(`
+            id,
+            booking_type,
+            check_in_date,
+            check_out_date,
+            total_price,
+            status,
+            created_at,
+            profiles!bookings_user_id_fkey(full_name),
+            hotels!bookings_hotel_id_fkey(name),
+            packages!bookings_package_id_fkey(name)
+          `)
+          .or(`hotels.provider_id.eq.${user.id},packages.provider_id.eq.${user.id}`)
+          .order('created_at', { ascending: false });
+        
+        if (bookingsError) throw bookingsError;
+        
+        // Process bookings data
+        const processedBookings = bookings?.map(booking => ({
+          id: booking.id,
+          user_name: booking.profiles?.full_name || 'Unknown User',
+          booking_type: booking.booking_type as 'hotel' | 'package',
+          item_name: (booking.booking_type === 'hotel' ? booking.hotels?.name : booking.packages?.name) || 'Unknown',
+          check_in_date: booking.check_in_date,
+          check_out_date: booking.check_out_date,
+          total_price: booking.total_price,
+          status: booking.status as 'pending' | 'confirmed' | 'cancelled' | 'completed',
+          created_at: booking.created_at,
+        })) || [];
+        
+        // Calculate booking stats
+        const stats = {
+          total: processedBookings.length,
+          pending: processedBookings.filter(b => b.status === 'pending').length,
+          confirmed: processedBookings.filter(b => b.status === 'confirmed').length,
+          cancelled: processedBookings.filter(b => b.status === 'cancelled').length,
+          completed: processedBookings.filter(b => b.status === 'completed').length,
+        };
+        
+        setDashboardData({
+          totalHotels: hotelsCount || 0,
+          totalPackages: packagesCount || 0,
+          bookingStats: stats,
+          recentBookings: processedBookings.slice(0, 5),
+          monthlyBookings: mockMonthlyBookings, // TODO: Calculate from actual data
+          monthlyRevenue: mockMonthlyRevenue, // TODO: Calculate from actual data
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, [user]);
+
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">{language === 'ar' ? 'لوحة تحكم المزود' : 'Provider Dashboard'}</h1>
-          <p className="text-muted-foreground">
-            {language === 'ar' ? 'مرحباً بعودتك، فنادق وخدمات الحرم' : 'Welcome back, Al-Haram Hotels & Services'}
-          </p>
+    <div className="container mx-auto py-8 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">{t("provider.dashboard.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("provider.dashboard.subtitle")}</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <Button onClick={() => navigate("/provider/listings")} className="flex items-center gap-2">
+              <Hotel className="h-4 w-4" />
+              {t("provider.dashboard.manageListings")}
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={() => navigate('/provider/listings')}>
-            {language === 'ar' ? 'إدارة القوائم' : 'Manage Listings'}
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/provider/bookings')}>
-            {language === 'ar' ? 'عرض الحجوزات' : 'View Bookings'}
-          </Button>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.totalListings")}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold">{dashboardData.totalHotels + dashboardData.totalPackages}</p>
+                )}
+              </div>
+              <div className="bg-primary/10 p-3 rounded-full">
+                <BedDouble className="h-6 w-6 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.totalBookings")}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold">{dashboardData.bookingStats.total}</p>
+                )}
+              </div>
+              <div className="bg-primary/10 p-3 rounded-full">
+                <CalendarIcon className="h-6 w-6 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.pendingBookings")}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold">{dashboardData.bookingStats.pending}</p>
+                )}
+              </div>
+              <div className="bg-orange-100 p-3 rounded-full">
+                <Clock className="h-6 w-6 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.activeBookings")}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold">{dashboardData.bookingStats.confirmed}</p>
+                )}
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <Users className="h-6 w-6 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1.5">
-                <span className="text-muted-foreground text-sm">
-                  {language === 'ar' ? 'إجمالي القوائم' : 'Total Listings'}
-                </span>
-                <span className="text-3xl font-bold">8</span>
-                <div className="flex items-center text-xs text-green-500 mt-1">
-                  <span>+2 {language === 'ar' ? 'هذا الشهر' : 'this month'}</span>
-                </div>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Building className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1.5">
-                <span className="text-muted-foreground text-sm">
-                  {language === 'ar' ? 'الحجوزات النشطة' : 'Active Bookings'}
-                </span>
-                <span className="text-3xl font-bold">24</span>
-                <div className="flex items-center text-xs text-green-500 mt-1">
-                  <span>+5 {language === 'ar' ? 'منذ الأسبوع الماضي' : 'since last week'}</span>
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("provider.dashboard.bookingTrends")}</CardTitle>
+              <CardDescription>{t("provider.dashboard.bookingTrendsDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="w-full h-64 flex items-center justify-center">
+                  <Skeleton className="h-64 w-full" />
                 </div>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Calendar className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart
+                    data={dashboardData.monthlyBookings}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value) => [value, t("provider.dashboard.bookings")]}
+                      labelFormatter={(label) => `${t("date.month."+label.toLowerCase())}`}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="count" name={t("provider.dashboard.bookings")} stroke="#6366f1" activeDot={{ r: 8 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("provider.dashboard.revenue")}</CardTitle>
+              <CardDescription>{t("provider.dashboard.revenueDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="w-full h-64 flex items-center justify-center">
+                  <Skeleton className="h-64 w-full" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={dashboardData.monthlyRevenue}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value) => [`${value} ${t("currency.sar")}`, t("provider.dashboard.revenue")]}
+                      labelFormatter={(label) => `${t("date.month."+label.toLowerCase())}`}
+                    />
+                    <Legend />
+                    <Bar dataKey="amount" name={t("provider.dashboard.revenue")} fill="#10b981" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
         
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1.5">
-                <span className="text-muted-foreground text-sm">
-                  {language === 'ar' ? 'الإيرادات الشهرية' : 'Monthly Revenue'}
-                </span>
-                <span className="text-3xl font-bold">٥٥,٧٠٠ {t("currency.sar")}</span>
-                <div className="flex items-center text-xs text-green-500 mt-1">
-                  <span>+12% {language === 'ar' ? 'عن الشهر الماضي' : 'from last month'}</span>
-                </div>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <CreditCard className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex flex-col space-y-1.5">
-                <span className="text-muted-foreground text-sm">
-                  {language === 'ar' ? 'متوسط التقييم' : 'Average Rating'}
-                </span>
-                <span className="text-3xl font-bold">4.8/5</span>
-                <div className="flex items-center text-xs text-amber-500 mt-1">
-                  <span>{language === 'ar' ? 'بناءً على ١٥٦ تقييم' : 'Based on 156 reviews'}</span>
-                </div>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Percent className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Bookings */}
         <Card>
           <CardHeader>
-            <CardTitle>{language === 'ar' ? 'اتجاهات الحجز' : 'Booking Trends'}</CardTitle>
-            <CardDescription>
-              {language === 'ar' ? 'اتجاهات الحجز الشهرية للأشهر الـ 12 الماضية' : 'Monthly booking trends for the last 12 months'}
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <CardTitle>{t("provider.dashboard.recentBookings")}</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => navigate("/provider/bookings")}>
+                {t("provider.dashboard.viewAll")}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={mockBookingStats}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value) => [`${value} ${language === 'ar' ? 'حجز' : 'bookings'}`, '']}
-                    labelFormatter={(label) => language === 'ar' ? `شهر ${label}` : `Month ${label}`}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="bookings" 
-                    stroke="hsl(var(--primary))" 
-                    fill="hsla(var(--primary), 0.1)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>{language === 'ar' ? 'نظرة عامة على الإيرادات' : 'Revenue Overview'}</CardTitle>
-            <CardDescription>
-              {language === 'ar' ? 'الإيرادات الشهرية (بالريال السعودي) للأشهر الـ 12 الماضية' : 'Monthly revenue (in SAR) for the last 12 months'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={mockRevenueStats}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value) => [`${value} ${t("currency.sar")}`, '']}
-                    labelFormatter={(label) => language === 'ar' ? `شهر ${label}` : `Month ${label}`}
-                  />
-                  <Bar 
-                    dataKey="revenue" 
-                    fill="hsla(var(--primary), 0.8)"
-                    radius={[4, 4, 0, 0]} 
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Bookings */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{language === 'ar' ? 'الحجوزات الأخيرة' : 'Recent Bookings'}</CardTitle>
-            <CardDescription>
-              {language === 'ar' ? 'أحدث طلبات الحجز والتأكيدات' : 'Your most recent booking requests and confirmations'}
-            </CardDescription>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => navigate('/provider/bookings')}>
-            {language === 'ar' ? 'عرض الكل' : 'View All'}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-2 font-medium">
-                    {language === 'ar' ? 'العميل' : 'Customer'}
-                  </th>
-                  <th className="text-left p-2 font-medium">
-                    {language === 'ar' ? 'العنصر' : 'Item'}
-                  </th>
-                  <th className="text-left p-2 font-medium">
-                    {language === 'ar' ? 'التاريخ' : 'Date'}
-                  </th>
-                  <th className="text-left p-2 font-medium">
-                    {language === 'ar' ? 'المبلغ' : 'Amount'}
-                  </th>
-                  <th className="text-left p-2 font-medium">
-                    {language === 'ar' ? 'الحالة' : 'Status'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockRecentBookings.map(booking => (
-                  <tr key={booking.id} className="border-b hover:bg-muted/50">
-                    <td className="p-2">{booking.customer_name}</td>
-                    <td className="p-2">{booking.item_name}</td>
-                    <td className="p-2">{booking.check_in} {language === 'ar' ? 'إلى' : 'to'} {booking.check_out}</td>
-                    <td className="p-2">{booking.amount} {t("currency.sar")}</td>
-                    <td className="p-2">
-                      <Badge 
-                        variant={
-                          booking.status === "confirmed" ? "default" : 
-                          booking.status === "pending" ? "secondary" : 
-                          "destructive"
-                        }
-                      >
-                        {language === 'ar' 
-                          ? (booking.status === "confirmed" ? "مؤكد" : 
-                             booking.status === "pending" ? "قيد الانتظار" : "ملغى")
-                          : (booking.status.charAt(0).toUpperCase() + booking.status.slice(1))
-                        }
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Featured Listings Preview */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{language === 'ar' ? 'القوائم الخاصة بك' : 'Your Listings'}</CardTitle>
-            <CardDescription>
-              {language === 'ar' ? 'معاينة للعروض الحالية' : 'A preview of your current offerings'}
-            </CardDescription>
-          </div>
-          <Button onClick={() => navigate('/provider/listings')}>
-            {language === 'ar' ? 'إدارة جميع القوائم' : 'Manage All'}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="hotels">
-            <TabsList className="mb-4">
-              <TabsTrigger value="hotels">
-                {language === 'ar' ? 'الفنادق' : 'Hotels'}
-              </TabsTrigger>
-              <TabsTrigger value="packages">
-                {language === 'ar' ? 'الباقات' : 'Packages'}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="hotels" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockHotels.map(hotel => (
-                  <motion.div key={hotel.id} whileHover={{ y: -5 }} transition={{ duration: 0.2 }}>
-                    <HotelCard 
-                      hotel={hotel} 
-                      buttonText={language === 'ar' ? 'عرض التفاصيل' : 'View Details'} 
-                      onButtonClick={() => navigate(`/provider/listings/hotels/${hotel.id}`)}
-                    />
-                  </motion.div>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[250px]" />
+                      <Skeleton className="h-4 w-[200px]" />
+                    </div>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
-            <TabsContent value="packages" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockPackages.map(pkg => (
-                  <motion.div key={pkg.id} whileHover={{ y: -5 }} transition={{ duration: 0.2 }}>
-                    <PackageCard 
-                      package={pkg} 
-                      buttonText={language === 'ar' ? 'عرض التفاصيل' : 'View Details'} 
-                      onButtonClick={() => navigate(`/provider/listings/packages/${pkg.id}`)}
-                    />
-                  </motion.div>
+            ) : dashboardData.recentBookings.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-muted-foreground">{t("provider.dashboard.noBookings")}</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {dashboardData.recentBookings.map((booking) => (
+                  <div key={booking.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{booking.user_name}</p>
+                        <StatusBadge status={booking.status} />
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground mt-1">
+                        {booking.booking_type === 'hotel' ? (
+                          <Hotel className="h-4 w-4 mr-1" />
+                        ) : (
+                          <Package className="h-4 w-4 mr-1" />
+                        )}
+                        <span>{booking.item_name}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                      <div className="text-sm">
+                        <div className="flex items-center gap-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          <span>{formatDate(booking.check_in_date)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm md:border-l md:border-r px-4">
+                        <span className="font-medium">{booking.total_price} {t("currency.sar")}</span>
+                      </div>
+                      
+                      <div className="text-xs text-muted-foreground">
+                        {t("booking.bookedOn")} {formatDate(booking.created_at)}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+          <CardFooter className="border-t pt-4 text-center text-muted-foreground text-sm">
+            {t("provider.dashboard.managedBy")}
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 };

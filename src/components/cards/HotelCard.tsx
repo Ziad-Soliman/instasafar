@@ -33,7 +33,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
 }) => {
   const { t, isRTL, locale } = useLanguage();
   
-  // Format price to SAR
+  // Format price to SAR consistently
   const formatPrice = (price: number): string => {
     if (isRTL) {
       // Arabic format
@@ -49,6 +49,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
       className={cn("card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm", className)}
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="h-48 bg-muted/50">
@@ -60,14 +61,14 @@ const HotelCard: React.FC<HotelCardProps> = ({
           
           <div className="absolute top-2 left-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
-              <MapPin className="w-3 h-3 mr-1" />
+              <MapPin className={cn("w-3 h-3", isRTL ? "mr-0 ml-1" : "mr-1")} />
               {locale === 'ar' ? t(`location.${hotel.city.toLowerCase()}`) : hotel.city}
             </div>
           </div>
           
           <div className="absolute bottom-2 right-2">
             <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm backdrop-blur-sm">
-              <Star className="w-3 h-3 mr-1 fill-primary" />
+              <Star className={cn("w-3 h-3 fill-primary", isRTL ? "mr-0 ml-1" : "mr-1")} />
               {hotel.rating}
             </div>
           </div>
@@ -81,7 +82,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
           {hotel.distance_to_haram} {t("distance.from")} {t("distance.haram")}
         </div>
         
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 rtl:font-arabic">
           {hotel.description}
         </p>
         
@@ -91,7 +92,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
               key={index}
               className="text-xs bg-muted px-2 py-0.5 rounded-full"
             >
-              {amenity}
+              {t(`amenity.${amenity.toLowerCase().replace(/\s+/g, '_')}`, amenity)}
             </span>
           ))}
           {hotel.amenities.length > 3 && (

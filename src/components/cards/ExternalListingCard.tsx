@@ -5,7 +5,19 @@ import { ExternalLink, Star, Plane, Hotel, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
-import { ExternalListing } from "@/data/externalListings";
+
+export interface ExternalListing {
+  id: string;
+  listing_type: "hotel" | "flight" | "transport";
+  name: string;
+  description?: string;
+  city: "Makkah" | "Madinah" | "Jeddah" | "Other" | "Both";
+  provider_name: string;
+  redirect_url: string;
+  image_url?: string;
+  price_indication?: string;
+  rating_indication?: string;
+}
 
 interface ExternalListingCardProps {
   listing: ExternalListing;
@@ -24,11 +36,11 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
   const getIcon = () => {
     switch (listing.listing_type) {
       case "hotel":
-        return <Hotel className="h-4 w-4 mr-1" />;
+        return <Hotel className="h-4 w-4" />;
       case "flight":
-        return <Plane className="h-4 w-4 mr-1" />;
+        return <Plane className="h-4 w-4" />;
       case "transport":
-        return <Bus className="h-4 w-4 mr-1" />;
+        return <Bus className="h-4 w-4" />;
       default:
         return null;
     }
@@ -39,6 +51,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
       className={`card-custom group h-full flex flex-col rounded-lg overflow-hidden border border-border shadow-sm ${className || ''}`}
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="relative overflow-hidden rounded-t-lg">
         <div className="h-48 bg-muted/50 relative">
@@ -57,9 +70,9 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
           <div className="absolute top-2 left-2">
             <Badge variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1 font-medium shadow-sm">
               {getIcon()}
-              {listing.listing_type === "hotel" ? t("listing.type.hotel") : 
+              <span className={isRTL ? "mr-1" : ""}>{listing.listing_type === "hotel" ? t("listing.type.hotel") : 
                listing.listing_type === "flight" ? t("listing.type.flight") : 
-               t("listing.type.transport")}
+               t("listing.type.transport")}</span>
             </Badge>
           </div>
           
@@ -72,7 +85,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
           {listing.rating_indication && (
             <div className="absolute bottom-2 right-2">
               <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm backdrop-blur-sm">
-                <Star className="w-3 h-3 mr-1 fill-primary" />
+                <Star className={`w-3 h-3 fill-primary ${isRTL ? "ml-1" : "mr-1"}`} />
                 {listing.rating_indication}
               </div>
             </div>
@@ -103,10 +116,10 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
           <Button 
             onClick={handleClick}
             variant="outline" 
-            className="w-full text-xs h-9 gap-1"
+            className="w-full text-xs h-9 gap-1 flex items-center justify-center"
           >
             {t("listing.viewOn")} {listing.provider_name}
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink className="h-3 w-3 mx-1" />
           </Button>
         </div>
       </div>

@@ -26,7 +26,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register: registerUser } = useAuth();
+  const { signUp } = useAuth(); // Changed from register to signUp
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,8 +48,12 @@ const RegisterPage: React.FC = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      await registerUser(data.email, data.password, data.full_name);
-      navigate("/");
+      const result = await signUp(data.email, data.password, data.full_name);
+      if (result.success) {
+        navigate("/");
+      } else if (result.error) {
+        console.error("Registration error:", result.error.message);
+      }
     } catch (error) {
       console.error("Registration error:", error);
     } finally {

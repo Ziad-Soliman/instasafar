@@ -1,164 +1,105 @@
-
-import React from "react";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
-import { cn } from "@/lib/utils";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ChevronLeft, ChevronRight, ZoomIn, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageCarouselProps {
   images: string[];
-  aspectRatio?: number;
-  className?: string;
-  showControls?: boolean;
-  allowFullscreen?: boolean;
-  caption?: string;
+  height?: number;
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ 
-  images, 
-  aspectRatio = 16/9,
-  className,
-  showControls = true,
-  allowFullscreen = false,
-  caption
-}) => {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [fullscreenImage, setFullscreenImage] = React.useState<string | null>(null);
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, height = 300 }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const handleFullscreen = (image: string) => {
-    if (allowFullscreen) {
-      setFullscreenImage(image);
-    }
+  const goToPrevious = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
   };
 
-  const closeFullscreen = () => {
-    setFullscreenImage(null);
+  const goToNext = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      goToNext();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [images.length, currentImageIndex]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const imageVariants = {
+    hidden: { x: '100%', opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: 'easeInOut',
+      },
+    },
+    exit: {
+      x: '-100%',
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: 'easeInOut',
+      },
+    },
   };
 
   return (
-    <div className={cn("relative", className)}>
-      <Carousel
-        className="w-full"
-        onSelect={(index) => setCurrentIndex(index)}
-        opts={{
-          align: "start",
-          loop: true,
-        }}
+    <div className="relative w-full overflow-hidden rounded-lg" style={{ height: height }}>
+      <AnimatePresence initial={false} custom={1}>
+        <motion.img
+          key={currentImageIndex}
+          src={images[currentImageIndex] || "/placeholder.svg"}
+          alt={`Carousel Image ${currentImageIndex + 1}`}
+          className="absolute w-full h-full object-cover"
+          variants={imageVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        />
+      </AnimatePresence>
+
+      <button
+        onClick={goToPrevious}
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full z-10"
+        aria-label="Previous"
       >
-        <CarouselContent>
-          {images.map((image, index) => (
-            <CarouselItem key={index}>
-              <AspectRatio ratio={aspectRatio} className="bg-muted overflow-hidden rounded-lg">
-                <img
-                  src={image}
-                  alt={`Image ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 cursor-pointer"
-                  onClick={() => handleFullscreen(image)}
-                />
-                {allowFullscreen && (
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute bottom-2 right-2 opacity-80 hover:opacity-100 z-10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFullscreen(image);
-                    }}
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                )}
-              </AspectRatio>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        
-        {showControls && images.length > 1 && (
-          <>
-            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2" />
-            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2" />
-          </>
-        )}
-      </Carousel>
+        <ChevronLeft className="h-6 w-6" />
+      </button>
 
-      {caption && (
-        <p className="text-sm text-muted-foreground text-center mt-2">{caption}</p>
-      )}
-      
-      {/* Image indicators */}
-      {images.length > 1 && (
-        <div className="flex justify-center gap-1 mt-2">
-          {images.map((_, index) => (
-            <div
-              key={index}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                index === currentIndex ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
-              )}
-            />
-          ))}
-        </div>
-      )}
+      <button
+        onClick={goToNext}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full z-10"
+        aria-label="Next"
+      >
+        <ChevronRight className="h-6 w-6" />
+      </button>
 
-      {/* Fullscreen overlay */}
-      {fullscreenImage && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={closeFullscreen}>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute top-4 right-4 text-white"
-            onClick={closeFullscreen}
-          >
-            <ExternalLink className="h-6 w-6" />
-          </Button>
-          <div className="relative max-w-5xl max-h-[90vh]">
-            <img
-              src={fullscreenImage}
-              alt="Fullscreen view"
-              className="max-w-full max-h-[90vh] object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-          
-          {images.length > 1 && (
-            <>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const currentIdx = images.indexOf(fullscreenImage);
-                  const prevIdx = (currentIdx - 1 + images.length) % images.length;
-                  setFullscreenImage(images[prevIdx]);
-                }}
-              >
-                <ChevronLeft className="h-8 w-8" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const currentIdx = images.indexOf(fullscreenImage);
-                  const nextIdx = (currentIdx + 1) % images.length;
-                  setFullscreenImage(images[nextIdx]);
-                }}
-              >
-                <ChevronRight className="h-8 w-8" />
-              </Button>
-            </>
-          )}
-        </div>
-      )}
+      <div className="absolute bottom-2 left-0 w-full flex justify-center space-x-2">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 w-2 rounded-full ${
+              index === currentImageIndex ? 'bg-primary' : 'bg-gray-500'
+            }`}
+            onClick={() => setCurrentImageIndex(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

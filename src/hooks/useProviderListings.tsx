@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +26,7 @@ export interface Package {
   duration_days: number;
   start_date: string;
   end_date: string;
-  city: "Makkah" | "Madinah" | "Both";
+  city: string;
   thumbnail: string;
   includes_hotel: boolean;
   includes_flight: boolean;
@@ -103,7 +102,8 @@ export function useProviderListings() {
         throw packagesError;
       }
       
-      setPackages(packagesData);
+      // Safely cast the data to the Package type
+      setPackages(packagesData as unknown as Package[]);
       
     } catch (error) {
       console.error('Error fetching provider listings:', error);

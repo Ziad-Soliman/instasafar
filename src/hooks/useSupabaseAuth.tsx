@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from './useAuth';
 
 interface AuthResult {
   success: boolean;
@@ -13,28 +14,20 @@ interface AuthResult {
 export function useSupabaseAuth() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const auth = useAuth();
+
+  // Map existing useAuth functions for compatibility
+  const user = auth.user;
+  const signIn = auth.signIn;
+  const signUp = auth.signUp;
 
   // Regular user registration
   const registerUser = async (email: string, password: string, fullName: string): Promise<AuthResult> => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: 'user'
-          }
-        }
-      });
-
-      if (error) {
-        return { success: false, error: { message: error.message } };
-      }
-
-      return { success: true };
+      const result = await auth.signUp(email, password, fullName);
+      return result;
     } catch (error) {
       return { 
         success: false, 
@@ -57,25 +50,15 @@ export function useSupabaseAuth() {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: 'provider',
-            company_name: companyName,
-            company_address: companyAddress,
-            contact_phone: contactPhone
-          }
-        }
-      });
-
-      if (error) {
-        return { success: false, error: { message: error.message } };
-      }
-
-      return { success: true };
+      const result = await auth.registerProvider(
+        email, 
+        password, 
+        fullName, 
+        companyName, 
+        companyAddress, 
+        contactPhone
+      );
+      return result;
     } catch (error) {
       return { 
         success: false, 
@@ -91,16 +74,8 @@ export function useSupabaseAuth() {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return { success: false, error: { message: error.message } };
-      }
-
-      return { success: true };
+      const result = await auth.signIn(email, password);
+      return result;
     } catch (error) {
       return { 
         success: false, 
@@ -116,12 +91,7 @@ export function useSupabaseAuth() {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        return { success: false, error: { message: error.message } };
-      }
-
+      await auth.signOut();
       return { success: true };
     } catch (error) {
       return { 
@@ -134,10 +104,13 @@ export function useSupabaseAuth() {
   };
 
   return {
+    user,
     loading,
     registerUser,
     registerProvider,
     login,
-    logout
+    logout,
+    signIn,
+    signUp
   };
 }

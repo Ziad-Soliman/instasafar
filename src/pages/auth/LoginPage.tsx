@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,24 +15,21 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const LoginPage: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useSupabaseAuth();
+  const { signIn, signUp, user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<string>("login");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   
-  // Register form state
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
-  // If user is already logged in, redirect to home
   React.useEffect(() => {
     if (user) {
       navigate("/");
@@ -46,7 +42,10 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await signIn(loginEmail, loginPassword);
+      const result = await signIn(loginEmail, loginPassword);
+      if (!result.success && result.error) {
+        setError(result.error.message);
+      }
       // Redirects will happen automatically via the auth state change listener
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
@@ -59,7 +58,6 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     
-    // Validate form
     if (!registerEmail || !registerPassword || !registerConfirmPassword || !fullName) {
       setError("Please fill in all fields");
       return;
@@ -78,11 +76,11 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await signUp(registerEmail, registerPassword, {
-        full_name: fullName,
-        role: "user",
-      });
-      // Show the login tab after successful registration
+      const result = await signUp(registerEmail, registerPassword, fullName);
+      if (!result.success && result.error) {
+        setError(result.error.message);
+        return;
+      }
       setActiveTab("login");
     } catch (error: any) {
       setError(error.message || "Failed to sign up");

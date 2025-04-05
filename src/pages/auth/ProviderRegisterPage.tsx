@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -32,7 +31,6 @@ const ProviderRegisterPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -116,7 +114,6 @@ const ProviderRegisterPage: React.FC = () => {
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {/* Personal Information */}
             <div className="space-y-2">
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 {t("auth.personalInformation")}
@@ -194,7 +191,6 @@ const ProviderRegisterPage: React.FC = () => {
               </div>
             </div>
             
-            {/* Company Information */}
             <div className="pt-2 space-y-2">
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 {t("auth.companyInformation")}

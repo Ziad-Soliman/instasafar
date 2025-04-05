@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +19,7 @@ import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 
 const ListingsPage: React.FC = () => {
-  const { t, locale, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   const { toast } = useToast();
   
   const {
@@ -54,6 +53,7 @@ const ListingsPage: React.FC = () => {
     distance_to_haram: "",
     amenities: "",
     thumbnail: "",
+    rating: 0,
   });
   
   // Package form state
@@ -75,7 +75,7 @@ const ListingsPage: React.FC = () => {
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return format(date, "PPP", { locale: locale === 'ar' ? ar : enUS });
+      return format(date, "PPP", { locale: language === 'ar' ? ar : enUS });
     } catch (error) {
       return dateStr;
     }
@@ -92,6 +92,7 @@ const ListingsPage: React.FC = () => {
       distance_to_haram: "",
       amenities: "",
       thumbnail: "",
+      rating: 0,
     });
     setEditingHotel(null);
   };
@@ -121,12 +122,12 @@ const ListingsPage: React.FC = () => {
       name: hotel.name,
       city: hotel.city,
       address: hotel.address,
-      description: hotel.description,
+      description: hotel.description || "",
       price_per_night: hotel.price_per_night,
-      distance_to_haram: hotel.distance_to_haram,
-      // Amenities should be fetched from hotel_amenities table in a real implementation
-      amenities: "",
-      thumbnail: hotel.thumbnail,
+      distance_to_haram: hotel.distance_to_haram || "",
+      amenities: hotel.amenities ? hotel.amenities.join(', ') : "",
+      thumbnail: hotel.thumbnail || "",
+      rating: hotel.rating,
     });
     setShowAddHotelDialog(true);
   };
@@ -136,13 +137,13 @@ const ListingsPage: React.FC = () => {
     setEditingPackage(pkg);
     setPackageForm({
       name: pkg.name,
-      description: pkg.description,
+      description: pkg.description || "",
       price: pkg.price,
       duration_days: pkg.duration_days,
       start_date: pkg.start_date,
       end_date: pkg.end_date,
       city: pkg.city,
-      thumbnail: pkg.thumbnail,
+      thumbnail: pkg.thumbnail || "",
       includes_hotel: pkg.includes_hotel,
       includes_flight: pkg.includes_flight,
       includes_transport: pkg.includes_transport,
@@ -169,6 +170,7 @@ const ListingsPage: React.FC = () => {
         price_per_night: hotelForm.price_per_night,
         distance_to_haram: hotelForm.distance_to_haram,
         thumbnail: hotelForm.thumbnail,
+        rating: hotelForm.rating,
       }, amenitiesArray);
       
       if (success) {
@@ -184,7 +186,7 @@ const ListingsPage: React.FC = () => {
         description: hotelForm.description,
         price_per_night: hotelForm.price_per_night,
         distance_to_haram: hotelForm.distance_to_haram,
-        rating: 0,
+        rating: hotelForm.rating,
         thumbnail: hotelForm.thumbnail,
         amenities: [],
       }, amenitiesArray);
@@ -209,7 +211,7 @@ const ListingsPage: React.FC = () => {
         duration_days: packageForm.duration_days,
         start_date: packageForm.start_date,
         end_date: packageForm.end_date,
-        city: packageForm.city,
+        city: packageForm.city as "Makkah" | "Madinah" | "Both",
         thumbnail: packageForm.thumbnail,
         includes_hotel: packageForm.includes_hotel,
         includes_flight: packageForm.includes_flight,

@@ -1,20 +1,23 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type LanguageType = "en" | "ar";
 
 interface LanguageContextType {
   language: LanguageType;
+  locale: string; // Add locale property
   setLanguage: (language: LanguageType) => void;
   isRTL: boolean;
-  t: (key: string) => string;
+  t: (key: string, defaultValue?: string) => string; // Update t function to accept a default value
 }
 
 // Create a context with default values
 const LanguageContext = createContext<LanguageContextType>({
   language: "en",
+  locale: "en-US", // Default locale
   setLanguage: () => {},
   isRTL: false,
-  t: (key) => key,
+  t: (key, defaultValue) => defaultValue || key,
 });
 
 interface LanguageProviderProps {
@@ -310,6 +313,7 @@ const translations: Record<LanguageType, Record<string, string>> = {
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguageState] = useState<LanguageType>("en");
   const isRTL = language === "ar";
+  const locale = language === "ar" ? "ar-SA" : "en-US"; // Add locale value
 
   useEffect(() => {
     // Check for saved language preference on component mount
@@ -339,12 +343,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   };
 
   // Translation function
-  const t = (key: string): string => {
-    return translations[language][key] || key;
+  const t = (key: string, defaultValue?: string): string => {
+    return translations[language][key] || defaultValue || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, isRTL, t }}>
+    <LanguageContext.Provider value={{ language, locale, setLanguage, isRTL, t }}>
       {children}
     </LanguageContext.Provider>
   );

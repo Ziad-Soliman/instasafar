@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface Hotel {
   id: string;
@@ -10,12 +10,13 @@ export interface Hotel {
   city: string;
   address: string;
   description: string;
+  distance_to_haram: string;
   rating: number;
   price_per_night: number;
-  distance_to_haram: string;
   thumbnail: string;
   created_at: string;
   updated_at: string;
+  amenities: string[];
 }
 
 export interface Package {
@@ -26,7 +27,7 @@ export interface Package {
   duration_days: number;
   start_date: string;
   end_date: string;
-  city: string;
+  city: "Makkah" | "Madinah" | "Both";
   thumbnail: string;
   includes_hotel: boolean;
   includes_flight: boolean;
@@ -35,37 +36,62 @@ export interface Package {
   updated_at: string;
 }
 
-export interface HotelAmenity {
-  id: string;
-  hotel_id: string;
-  name: string;
-}
-
-export const useProviderListings = () => {
+export function useProviderListings() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useSupabaseAuth();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchListings = async () => {
-    if (!user) {
-      setHotels([]);
-      setPackages([]);
-      setIsLoading(false);
-      return;
-    }
-
+    if (!user?.id) return;
+    
     setIsLoading(true);
     
     try {
       // Fetch hotels
       const { data: hotelsData, error: hotelsError } = await supabase
         .from('hotels')
-        .select('*')
+        .select(`
+          id, 
+          name, 
+          city, 
+          address, 
+          description, 
+          rating, 
+          price_per_night, 
+          distance_to_haram, 
+          thumbnail,
+          created_at,
+          updated_at
+        `)
         .eq('provider_id', user.id);
       
-      if (hotelsError) throw hotelsError;
+      if (hotelsError) {
+        throw hotelsError;
+      }
+      
+      // Fetch amenities for each hotel
+      const hotelsWithAmenities = await Promise.all(
+        hotelsData.map(async (hotel) => {
+          const { data: amenitiesData, error: amenitiesError } = await supabase
+            .from('hotel_amenities')
+            .select('name')
+            .eq('hotel_id', hotel.id);
+            
+          if (amenitiesError) {
+            console.error('Error fetching amenities:', amenitiesError);
+            return { ...hotel, amenities: [] };
+          }
+          
+          return { 
+            ...hotel, 
+            amenities: amenitiesData.map(amenity => amenity.name) 
+          };
+        })
+      );
+      
+      setHotels(hotelsWithAmenities);
       
       // Fetch packages
       const { data: packagesData, error: packagesError } = await supabase
@@ -73,320 +99,311 @@ export const useProviderListings = () => {
         .select('*')
         .eq('provider_id', user.id);
       
-      if (packagesError) throw packagesError;
+      if (packagesError) {
+        throw packagesError;
+      }
       
-      setHotels(hotelsData || []);
-      setPackages(packagesData || []);
-    } catch (error: any) {
+      setPackages(packagesData);
+      
+    } catch (error) {
       console.error('Error fetching provider listings:', error);
       toast({
-        title: "Failed to load your listings",
-        description: error.message,
+        title: "Failed to fetch listings",
+        description: "Please try again later.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Fetch hotel amenities for a specific hotel
-  const fetchHotelAmenities = async (hotelId: string): Promise<HotelAmenity[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('hotel_amenities')
-        .select('*')
-        .eq('hotel_id', hotelId);
-      
-      if (error) throw error;
-      
-      return data || [];
-    } catch (error: any) {
-      console.error('Error fetching hotel amenities:', error);
-      toast({
-        title: "Failed to load amenities",
-        description: error.message,
-        variant: "destructive",
-      });
-      return [];
-    }
-  };
-
+  
   // Create a new hotel
-  const createHotel = async (hotelData: Omit<Hotel, 'id' | 'created_at' | 'updated_at'>, amenities: string[]) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to create a hotel.",
-        variant: "destructive",
-      });
-      return null;
-    }
-
+  const createHotel = async (
+    hotelData: Omit<Hotel, "id" | "created_at" | "updated_at">, 
+    amenitiesArray: string[] = []
+  ) => {
+    if (!user?.id) return null;
+    
     try {
       // Insert hotel
       const { data: newHotel, error: hotelError } = await supabase
         .from('hotels')
-        .insert([{
+        .insert({
           provider_id: user.id,
-          ...hotelData
-        }])
-        .select()
+          name: hotelData.name,
+          city: hotelData.city,
+          address: hotelData.address,
+          description: hotelData.description,
+          rating: hotelData.rating,
+          price_per_night: hotelData.price_per_night,
+          distance_to_haram: hotelData.distance_to_haram,
+          thumbnail: hotelData.thumbnail
+        })
+        .select('id')
         .single();
       
-      if (hotelError) throw hotelError;
+      if (hotelError) {
+        throw hotelError;
+      }
       
-      // Insert amenities
-      if (amenities.length > 0 && newHotel) {
-        const amenitiesData = amenities.map(name => ({
+      // Insert hotel amenities
+      if (amenitiesArray.length > 0) {
+        const amenitiesObjects = amenitiesArray.map(name => ({
           hotel_id: newHotel.id,
           name
         }));
         
         const { error: amenitiesError } = await supabase
           .from('hotel_amenities')
-          .insert(amenitiesData);
+          .insert(amenitiesObjects);
         
-        if (amenitiesError) throw amenitiesError;
+        if (amenitiesError) {
+          console.error('Error adding amenities:', amenitiesError);
+        }
       }
       
-      // Refresh the list
-      await fetchListings();
-      
       toast({
-        title: "Hotel created successfully",
+        title: "Hotel added successfully",
+        description: "Your new hotel has been added to your listings.",
       });
       
+      await fetchListings();
       return newHotel;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error creating hotel:', error);
       toast({
-        title: "Failed to create hotel",
-        description: error.message,
+        title: "Failed to add hotel",
+        description: "Please try again later.",
         variant: "destructive",
       });
       return null;
     }
   };
-
+  
   // Update an existing hotel
-  const updateHotel = async (hotelId: string, hotelData: Partial<Hotel>, amenities?: string[]) => {
-    if (!user) return false;
-
+  const updateHotel = async (
+    hotelId: string, 
+    updateData: Partial<Omit<Hotel, "id" | "created_at" | "updated_at">>,
+    newAmenities?: string[]
+  ) => {
     try {
-      // Update hotel
-      const { error: hotelError } = await supabase
+      // Update hotel data
+      const { error: updateError } = await supabase
         .from('hotels')
-        .update(hotelData)
-        .eq('id', hotelId)
-        .eq('provider_id', user.id);
+        .update(updateData)
+        .eq('id', hotelId);
       
-      if (hotelError) throw hotelError;
+      if (updateError) {
+        throw updateError;
+      }
       
-      // Update amenities if provided
-      if (amenities) {
-        // Delete existing amenities
+      // If new amenities are provided, update them
+      if (newAmenities) {
+        // First, delete all existing amenities
         const { error: deleteError } = await supabase
           .from('hotel_amenities')
           .delete()
           .eq('hotel_id', hotelId);
         
-        if (deleteError) throw deleteError;
+        if (deleteError) {
+          console.error('Error deleting amenities:', deleteError);
+        }
         
-        // Insert new amenities
-        if (amenities.length > 0) {
-          const amenitiesData = amenities.map(name => ({
+        // Then, insert new amenities
+        if (newAmenities.length > 0) {
+          const amenitiesObjects = newAmenities.map(name => ({
             hotel_id: hotelId,
             name
           }));
           
-          const { error: amenitiesError } = await supabase
+          const { error: insertError } = await supabase
             .from('hotel_amenities')
-            .insert(amenitiesData);
+            .insert(amenitiesObjects);
           
-          if (amenitiesError) throw amenitiesError;
+          if (insertError) {
+            console.error('Error adding new amenities:', insertError);
+          }
         }
       }
       
-      // Refresh the list
-      await fetchListings();
-      
       toast({
         title: "Hotel updated successfully",
+        description: "Your hotel information has been updated.",
       });
       
+      await fetchListings();
       return true;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error updating hotel:', error);
       toast({
         title: "Failed to update hotel",
-        description: error.message,
+        description: "Please try again later.",
         variant: "destructive",
       });
       return false;
     }
   };
-
+  
   // Delete a hotel
   const deleteHotel = async (hotelId: string) => {
-    if (!user) return false;
-
     try {
-      // Delete hotel (amenities will be deleted via cascade)
+      // Delete the hotel (amenities will be deleted by the foreign key cascade)
       const { error } = await supabase
         .from('hotels')
         .delete()
-        .eq('id', hotelId)
-        .eq('provider_id', user.id);
+        .eq('id', hotelId);
       
-      if (error) throw error;
-      
-      // Refresh the list
-      await fetchListings();
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Hotel deleted successfully",
+        description: "The hotel has been removed from your listings.",
       });
       
+      await fetchListings();
       return true;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error deleting hotel:', error);
       toast({
         title: "Failed to delete hotel",
-        description: error.message,
+        description: "Please try again later.",
         variant: "destructive",
       });
       return false;
     }
   };
-
+  
   // Create a new package
-  const createPackage = async (packageData: Omit<Package, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to create a package.",
-        variant: "destructive",
-      });
-      return null;
-    }
-
+  const createPackage = async (packageData: Omit<Package, "id" | "created_at" | "updated_at">) => {
+    if (!user?.id) return null;
+    
     try {
       const { data: newPackage, error } = await supabase
         .from('packages')
-        .insert([{
+        .insert({
           provider_id: user.id,
-          ...packageData
-        }])
-        .select()
+          name: packageData.name,
+          description: packageData.description,
+          price: packageData.price,
+          duration_days: packageData.duration_days,
+          start_date: packageData.start_date,
+          end_date: packageData.end_date,
+          city: packageData.city,
+          thumbnail: packageData.thumbnail,
+          includes_hotel: packageData.includes_hotel,
+          includes_flight: packageData.includes_flight,
+          includes_transport: packageData.includes_transport
+        })
+        .select('*')
         .single();
       
-      if (error) throw error;
-      
-      // Refresh the list
-      await fetchListings();
+      if (error) {
+        throw error;
+      }
       
       toast({
-        title: "Package created successfully",
+        title: "Package added successfully",
+        description: "Your new package has been added to your listings.",
       });
       
+      await fetchListings();
       return newPackage;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error creating package:', error);
       toast({
-        title: "Failed to create package",
-        description: error.message,
+        title: "Failed to add package",
+        description: "Please try again later.",
         variant: "destructive",
       });
       return null;
     }
   };
-
+  
   // Update an existing package
-  const updatePackage = async (packageId: string, packageData: Partial<Package>) => {
-    if (!user) return false;
-
+  const updatePackage = async (packageId: string, updateData: Partial<Omit<Package, "id" | "created_at" | "updated_at">>) => {
     try {
       const { error } = await supabase
         .from('packages')
-        .update(packageData)
-        .eq('id', packageId)
-        .eq('provider_id', user.id);
+        .update(updateData)
+        .eq('id', packageId);
       
-      if (error) throw error;
-      
-      // Refresh the list
-      await fetchListings();
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Package updated successfully",
+        description: "Your package information has been updated.",
       });
       
+      await fetchListings();
       return true;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error updating package:', error);
       toast({
         title: "Failed to update package",
-        description: error.message,
+        description: "Please try again later.",
         variant: "destructive",
       });
       return false;
     }
   };
-
+  
   // Delete a package
   const deletePackage = async (packageId: string) => {
-    if (!user) return false;
-
     try {
       const { error } = await supabase
         .from('packages')
         .delete()
-        .eq('id', packageId)
-        .eq('provider_id', user.id);
+        .eq('id', packageId);
       
-      if (error) throw error;
-      
-      // Refresh the list
-      await fetchListings();
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Package deleted successfully",
+        description: "The package has been removed from your listings.",
       });
       
+      await fetchListings();
       return true;
-    } catch (error: any) {
+      
+    } catch (error) {
       console.error('Error deleting package:', error);
       toast({
         title: "Failed to delete package",
-        description: error.message,
+        description: "Please try again later.",
         variant: "destructive",
       });
       return false;
     }
   };
-
-  // Initial fetch
+  
+  // Fetch listings on mount and when user changes
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchListings();
-    } else {
-      setHotels([]);
-      setPackages([]);
-      setIsLoading(false);
     }
-  }, [user]);
-
+  }, [user?.id]);
+  
   return {
     hotels,
     packages,
     isLoading,
     fetchListings,
-    fetchHotelAmenities,
     createHotel,
     updateHotel,
     deleteHotel,
     createPackage,
     updatePackage,
-    deletePackage,
+    deletePackage
   };
-};
+}

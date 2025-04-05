@@ -31,7 +31,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
   buttonText = "View Details",
   className 
 }) => {
-  const { t, isRTL, locale } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   
   // Format price to SAR consistently
   const formatPrice = (price: number): string => {
@@ -62,7 +62,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
           <div className="absolute top-2 left-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
               <MapPin className={cn("w-3 h-3", isRTL ? "mr-0 ml-1" : "mr-1")} />
-              {locale === 'ar' ? t(`location.${hotel.city.toLowerCase()}`) : hotel.city}
+              {language === 'ar' ? t(`location.${hotel.city.toLowerCase()}`) : hotel.city}
             </div>
           </div>
           

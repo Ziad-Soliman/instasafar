@@ -5,6 +5,8 @@ import { Calendar, Clock, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { format } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
 
 export interface PackageCardProps {
   package: {
@@ -34,13 +36,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
   buttonText = "View Package",
   className
 }) => {
-  const { t, isRTL, locale } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   
   // Format dates
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', options);
+    return new Date(dateString).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', options);
   };
 
   // Format price to SAR
@@ -71,7 +73,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
           <div className="absolute top-2 left-2">
             <div className="bg-white/90 dark:bg-slate-800/90 text-xs px-2 py-1 rounded font-medium flex items-center shadow-sm">
               <MapPin className="w-3 h-3 mr-1" />
-              {locale === 'ar' ? t(`location.${pkg.city.toLowerCase()}`) : pkg.city}
+              {language === 'ar' ? t(`location.${pkg.city.toLowerCase()}`) : pkg.city}
             </div>
           </div>
           

@@ -1,3 +1,4 @@
+
 // Import React and any necessary components or libraries needed for the Dashboard page
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,23 +19,31 @@ interface BookingData {
   status: string;
   payment_status: string;
   created_at: string;
-  check_in_date?: string;
-  check_out_date?: string;
+  check_in_date?: string | null;
+  check_out_date?: string | null;
   adults: number;
   children: number;
   hotel?: {
     name: string;
     city: string;
-  };
+  } | null;
   package?: {
     name: string;
     city: string;
-  };
+  } | null;
   user?: {
     id: string;
-    full_name?: string; // Make this optional to handle null cases
-    email?: string;
-  };
+    full_name?: string | null;
+    email?: string | null;
+  } | null;
+  user_id?: string;
+}
+
+interface ProviderStats {
+  total_bookings: number;
+  pending_bookings: number;
+  total_revenue: number;
+  active_listings: number;
 }
 
 interface StatCard {
@@ -92,7 +101,8 @@ const ProviderDashboard: React.FC = () => {
         throw bookingsError;
       }
 
-      setRecentBookings(bookingsData as BookingData[]);
+      // Cast bookingsData to unknown first, then to BookingData[]
+      setRecentBookings(bookingsData as unknown as BookingData[]);
 
       // Fetch dashboard stats
       const { data: statsData, error: statsError } = await supabase.rpc('get_provider_dashboard_stats', {

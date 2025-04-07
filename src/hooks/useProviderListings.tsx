@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +27,7 @@ export interface Package {
   duration_days: number;
   start_date: string;
   end_date: string;
-  city: string;
+  city: string; // Changed to string type to match the database
   thumbnail: string;
   includes_hotel: boolean;
   includes_flight: boolean;
@@ -119,7 +120,7 @@ export function useProviderListings() {
   
   // Create a new hotel
   const createHotel = async (
-    hotelData: Omit<Hotel, "id" | "created_at" | "updated_at">, 
+    hotelData: Omit<Hotel, "id" | "created_at" | "updated_at"> & { amenities?: string[] }, 
     amenitiesArray: string[] = []
   ) => {
     if (!user?.id) return null;

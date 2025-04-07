@@ -1,425 +1,273 @@
-
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { CalendarIcon, Hotel, Package, MapPin, Users, CreditCard, Clock, TrendingUp, BedDouble, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// Import React and any necessary components or libraries needed for the Dashboard page
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowRight, Hotel, Users, Building, Calendar, DollarSign, BookOpen, AreaChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import { motion } from "framer-motion";
 
-interface BookingStats {
-  total: number;
-  pending: number;
-  confirmed: number;
-  cancelled: number;
-  completed: number;
-}
-
-interface RecentBooking {
+// Define types for our booking data
+interface BookingData {
   id: string;
-  user_name: string;
-  booking_type: "hotel" | "package";
-  item_name: string;
-  check_in_date: string;
-  check_out_date: string;
+  booking_type: string;
   total_price: number;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: string;
+  payment_status: string;
   created_at: string;
+  check_in_date?: string;
+  check_out_date?: string;
+  adults: number;
+  children: number;
+  hotel?: {
+    name: string;
+    city: string;
+  };
+  package?: {
+    name: string;
+    city: string;
+  };
+  user?: {
+    id: string;
+    full_name?: string; // Make this optional to handle null cases
+    email?: string;
+  };
 }
 
-interface DashboardData {
-  totalHotels: number;
-  totalPackages: number;
-  bookingStats: BookingStats;
-  recentBookings: RecentBooking[];
-  monthlyBookings: { month: string; count: number }[];
-  monthlyRevenue: { month: string; amount: number }[];
+interface StatCard {
+  title: string;
+  value: string | number;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
 }
-
-const mockMonthlyBookings = [
-  { month: "Jan", count: 10 },
-  { month: "Feb", count: 15 },
-  { month: "Mar", count: 12 },
-  { month: "Apr", count: 8 },
-  { month: "May", count: 20 },
-  { month: "Jun", count: 25 },
-];
-
-const mockMonthlyRevenue = [
-  { month: "Jan", amount: 5000 },
-  { month: "Feb", amount: 7500 },
-  { month: "Mar", amount: 6000 },
-  { month: "Apr", amount: 4000 },
-  { month: "May", amount: 9000 },
-  { month: "Jun", amount: 12000 },
-];
 
 const ProviderDashboard: React.FC = () => {
-  const { t, locale, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const { user } = useSupabaseAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
-    totalHotels: 0,
-    totalPackages: 0,
-    bookingStats: { total: 0, pending: 0, confirmed: 0, cancelled: 0, completed: 0 },
-    recentBookings: [],
-    monthlyBookings: mockMonthlyBookings,
-    monthlyRevenue: mockMonthlyRevenue,
+  const { user } = useAuth();
+  const { t, language } = useLanguage();
+  const { toast } = useToast();
+  const [recentBookings, setRecentBookings] = useState<BookingData[]>([]);
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    pendingBookings: 0,
+    totalRevenue: 0,
+    activeListings: 0,
   });
+  const [loading, setLoading] = useState(true);
+  
+  // Function to format currency based on locale
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat(language === 'ar' ? 'ar-SA' : 'en-US', {
+      style: 'currency',
+      currency: 'SAR',
+    }).format(amount);
+  };
 
-  // Status badge component
-  const StatusBadge = ({ status }: { status: string }) => {
-    let variant: "outline" | "default" | "secondary" | "destructive" = "outline";
-    
-    switch (status) {
-      case "confirmed":
-        variant = "default";
-        break;
-      case "pending":
-        variant = "secondary";
-        break;
-      case "cancelled":
-        variant = "destructive";
-        break;
-      case "completed":
-        variant = "outline";
-        break;
+  // Fetch recent bookings and dashboard stats
+  const fetchData = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+
+    try {
+      // Fetch recent bookings
+      const { data: bookingsData, error: bookingsError } = await supabase
+        .from('bookings')
+        .select(`
+          id, booking_type, total_price, status, payment_status, created_at,
+          check_in_date, check_out_date, adults, children,
+          hotel (name, city),
+          package (name, city),
+          user_id,
+          user:user_id (id, full_name, email)
+        `)
+        .eq('provider_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (bookingsError) {
+        throw bookingsError;
+      }
+
+      setRecentBookings(bookingsData as BookingData[]);
+
+      // Fetch dashboard stats
+      const { data: statsData, error: statsError } = await supabase.rpc('get_provider_dashboard_stats', {
+        provider_id_arg: user.id
+      });
+
+      if (statsError) {
+        throw statsError;
+      }
+
+      setStats({
+        totalBookings: statsData?.total_bookings || 0,
+        pendingBookings: statsData?.pending_bookings || 0,
+        totalRevenue: statsData?.total_revenue || 0,
+        activeListings: statsData?.active_listings || 0,
+      });
+
+    } catch (error) {
+      console.error('Error fetching provider dashboard data:', error);
+      toast({
+        title: "Failed to fetch dashboard data",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [user?.id]);
+
+  // Create an array of stat cards to display
+  const statCards: StatCard[] = [
+    {
+      title: t("dashboard.totalBookings"),
+      value: stats.totalBookings,
+      description: t("dashboard.totalBookingsDesc"),
+      icon: <BookOpen className="h-5 w-5" />,
+      color: "text-blue-500",
+    },
+    {
+      title: t("dashboard.pendingBookings"),
+      value: stats.pendingBookings,
+      description: t("dashboard.pendingBookingsDesc"),
+      icon: <Calendar className="h-5 w-5" />,
+      color: "text-yellow-500",
+    },
+    {
+      title: t("dashboard.totalRevenue"),
+      value: formatCurrency(stats.totalRevenue),
+      description: t("dashboard.totalRevenueDesc"),
+      icon: <DollarSign className="h-5 w-5" />,
+      color: "text-green-500",
+    },
+    {
+      title: t("dashboard.activeListings"),
+      value: stats.activeListings,
+      description: t("dashboard.activeListingsDesc"),
+      icon: <Hotel className="h-5 w-5" />,
+      color: "text-purple-500",
+    },
+  ];
+
+  // Function to render the stat cards
+  const renderStatCards = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {statCards.map((card, index) => (
+        <Card key={index} className="shadow-md hover:shadow-lg transition-shadow duration-300">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+            {card.icon}
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{card.value}</div>
+            <p className="text-sm text-muted-foreground">
+              {card.description}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // Table for recent bookings
+  const renderRecentBookingsTable = () => {
+    if (recentBookings.length === 0) {
+      return (
+        <div className="text-center p-6 bg-muted/20 rounded-lg">
+          <p className="text-muted-foreground">No recent bookings found</p>
+        </div>
+      );
+    }
+
     return (
-      <Badge variant={variant}>
-        {t(`booking.status.${status}`)}
-      </Badge>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="px-4 py-3 text-left">Booking ID</th>
+              <th className="px-4 py-3 text-left">Customer</th>
+              <th className="px-4 py-3 text-left">Type</th>
+              <th className="px-4 py-3 text-left">Item</th>
+              <th className="px-4 py-3 text-right">Amount</th>
+              <th className="px-4 py-3 text-center">Status</th>
+              <th className="px-4 py-3 text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentBookings.map((booking) => (
+              <tr key={booking.id} className="border-b hover:bg-muted/50 transition-colors">
+                <td className="px-4 py-3 font-mono text-xs">{booking.id.substring(0, 8)}...</td>
+                <td className="px-4 py-3">{booking.user?.full_name || 'Anonymous'}</td>
+                <td className="px-4 py-3 capitalize">{booking.booking_type}</td>
+                <td className="px-4 py-3">
+                  {booking.booking_type === 'hotel' 
+                    ? booking.hotel?.name || 'Unknown Hotel'
+                    : booking.package?.name || 'Unknown Package'}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {formatCurrency(booking.total_price)}
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded-full text-xs inline-block text-center
+                    ${booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                      booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
+                      'bg-yellow-100 text-yellow-800'}`}>
+                    {booking.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {new Date(booking.created_at).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
 
-  // Format date based on language
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return format(date, "PPP", { locale: locale === 'ar' ? ar : enUS });
-    } catch (error) {
-      return dateStr;
-    }
-  };
-
-  // Fetch dashboard data
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
-      try {
-        // Fetch hotels count
-        const { count: hotelsCount, error: hotelsError } = await supabase
-          .from('hotels')
-          .select('*', { count: 'exact', head: true })
-          .eq('provider_id', user.id);
-        
-        if (hotelsError) throw hotelsError;
-        
-        // Fetch packages count
-        const { count: packagesCount, error: packagesError } = await supabase
-          .from('packages')
-          .select('*', { count: 'exact', head: true })
-          .eq('provider_id', user.id);
-        
-        if (packagesError) throw packagesError;
-        
-        // Fetch bookings
-        const { data: bookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select(`
-            id,
-            booking_type,
-            check_in_date,
-            check_out_date,
-            total_price,
-            status,
-            created_at,
-            profiles!bookings_user_id_fkey(full_name),
-            hotels!bookings_hotel_id_fkey(name),
-            packages!bookings_package_id_fkey(name)
-          `)
-          .or(`hotels.provider_id.eq.${user.id},packages.provider_id.eq.${user.id}`)
-          .order('created_at', { ascending: false });
-        
-        if (bookingsError) throw bookingsError;
-        
-        // Process bookings data
-        const processedBookings = bookings?.map(booking => ({
-          id: booking.id,
-          user_name: booking.profiles?.full_name || 'Unknown User',
-          booking_type: booking.booking_type as 'hotel' | 'package',
-          item_name: (booking.booking_type === 'hotel' ? booking.hotels?.name : booking.packages?.name) || 'Unknown',
-          check_in_date: booking.check_in_date,
-          check_out_date: booking.check_out_date,
-          total_price: booking.total_price,
-          status: booking.status as 'pending' | 'confirmed' | 'cancelled' | 'completed',
-          created_at: booking.created_at,
-        })) || [];
-        
-        // Calculate booking stats
-        const stats = {
-          total: processedBookings.length,
-          pending: processedBookings.filter(b => b.status === 'pending').length,
-          confirmed: processedBookings.filter(b => b.status === 'confirmed').length,
-          cancelled: processedBookings.filter(b => b.status === 'cancelled').length,
-          completed: processedBookings.filter(b => b.status === 'completed').length,
-        };
-        
-        setDashboardData({
-          totalHotels: hotelsCount || 0,
-          totalPackages: packagesCount || 0,
-          bookingStats: stats,
-          recentBookings: processedBookings.slice(0, 5),
-          monthlyBookings: mockMonthlyBookings, // TODO: Calculate from actual data
-          monthlyRevenue: mockMonthlyRevenue, // TODO: Calculate from actual data
-        });
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchDashboardData();
-  }, [user]);
-
   return (
-    <div className="container mx-auto py-8 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">{t("provider.dashboard.title")}</h1>
-            <p className="text-muted-foreground mt-1">{t("provider.dashboard.subtitle")}</p>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-            <Button onClick={() => navigate("/provider/listings")} className="flex items-center gap-2">
-              <Hotel className="h-4 w-4" />
-              {t("provider.dashboard.manageListings")}
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
+        <Button onClick={() => navigate("/provider/listings")}>
+          {t("dashboard.manageListings")} <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-48">
+          <p className="text-muted-foreground animate-pulse">Loading dashboard data...</p>
         </div>
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-6 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.totalListings")}</p>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <p className="text-2xl font-bold">{dashboardData.totalHotels + dashboardData.totalPackages}</p>
-                )}
-              </div>
-              <div className="bg-primary/10 p-3 rounded-full">
-                <BedDouble className="h-6 w-6 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.totalBookings")}</p>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <p className="text-2xl font-bold">{dashboardData.bookingStats.total}</p>
-                )}
-              </div>
-              <div className="bg-primary/10 p-3 rounded-full">
-                <CalendarIcon className="h-6 w-6 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.pendingBookings")}</p>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <p className="text-2xl font-bold">{dashboardData.bookingStats.pending}</p>
-                )}
-              </div>
-              <div className="bg-orange-100 p-3 rounded-full">
-                <Clock className="h-6 w-6 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">{t("provider.dashboard.activeBookings")}</p>
-                {isLoading ? (
-                  <Skeleton className="h-8 w-16" />
-                ) : (
-                  <p className="text-2xl font-bold">{dashboardData.bookingStats.confirmed}</p>
-                )}
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Users className="h-6 w-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
+      ) : (
+        <>
+          {renderStatCards()}
+
+          <Card className="shadow-md">
             <CardHeader>
-              <CardTitle>{t("provider.dashboard.bookingTrends")}</CardTitle>
-              <CardDescription>{t("provider.dashboard.bookingTrendsDesc")}</CardDescription>
+              <CardTitle>{t("dashboard.recentBookings")}</CardTitle>
+              <CardDescription>{t("dashboard.recentBookingsDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="w-full h-64 flex items-center justify-center">
-                  <Skeleton className="h-64 w-full" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={dashboardData.monthlyBookings}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value) => [value, t("provider.dashboard.bookings")]}
-                      labelFormatter={(label) => `${t("date.month."+label.toLowerCase())}`}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="count" name={t("provider.dashboard.bookings")} stroke="#6366f1" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
+              {renderRecentBookingsTable()}
             </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("provider.dashboard.revenue")}</CardTitle>
-              <CardDescription>{t("provider.dashboard.revenueDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="w-full h-64 flex items-center justify-center">
-                  <Skeleton className="h-64 w-full" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={dashboardData.monthlyRevenue}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value) => [`${value} ${t("currency.sar")}`, t("provider.dashboard.revenue")]}
-                      labelFormatter={(label) => `${t("date.month."+label.toLowerCase())}`}
-                    />
-                    <Legend />
-                    <Bar dataKey="amount" name={t("provider.dashboard.revenue")} fill="#10b981" />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Recent Bookings */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>{t("provider.dashboard.recentBookings")}</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => navigate("/provider/bookings")}>
-                {t("provider.dashboard.viewAll")}
-                <ArrowRight className="h-4 w-4 ml-2" />
+            <CardFooter className="justify-end">
+              <Button variant="link" onClick={() => navigate("/provider/bookings")}>
+                {t("dashboard.viewAll")}
               </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[250px]" />
-                      <Skeleton className="h-4 w-[200px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : dashboardData.recentBookings.length === 0 ? (
-              <div className="text-center py-6">
-                <p className="text-muted-foreground">{t("provider.dashboard.noBookings")}</p>
-              </div>
-            ) : (
-              <div className="divide-y">
-                {dashboardData.recentBookings.map((booking) => (
-                  <div key={booking.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{booking.user_name}</p>
-                        <StatusBadge status={booking.status} />
-                      </div>
-                      <div className="flex items-center text-sm text-muted-foreground mt-1">
-                        {booking.booking_type === 'hotel' ? (
-                          <Hotel className="h-4 w-4 mr-1" />
-                        ) : (
-                          <Package className="h-4 w-4 mr-1" />
-                        )}
-                        <span>{booking.item_name}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                      <div className="text-sm">
-                        <div className="flex items-center gap-1">
-                          <CalendarIcon className="h-3 w-3" />
-                          <span>{formatDate(booking.check_in_date)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-sm md:border-l md:border-r px-4">
-                        <span className="font-medium">{booking.total_price} {t("currency.sar")}</span>
-                      </div>
-                      
-                      <div className="text-xs text-muted-foreground">
-                        {t("booking.bookedOn")} {formatDate(booking.created_at)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="border-t pt-4 text-center text-muted-foreground text-sm">
-            {t("provider.dashboard.managedBy")}
-          </CardFooter>
-        </Card>
-      </motion.div>
+            </CardFooter>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

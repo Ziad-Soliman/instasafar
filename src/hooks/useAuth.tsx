@@ -79,7 +79,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, session) => {
         if (session?.user) {
           const userData: User = {
-            ...session.user,
+            id: session.user.id,
+            email: session.user.email || '',
+            user_metadata: session.user.user_metadata,
             name: session.user.user_metadata?.full_name,
             full_name: session.user.user_metadata?.full_name,
             avatar: session.user.user_metadata?.avatar_url,
@@ -99,7 +101,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         const userData: User = {
-          ...session.user,
+          id: session.user.id,
+          email: session.user.email || '',
+          user_metadata: session.user.user_metadata,
           name: session.user.user_metadata?.full_name,
           full_name: session.user.user_metadata?.full_name,
           avatar: session.user.user_metadata?.avatar_url,

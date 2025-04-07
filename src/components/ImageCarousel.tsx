@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -5,9 +6,18 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface ImageCarouselProps {
   images: string[];
   height?: number;
+  aspectRatio?: number; // Added this property
+  allowFullscreen?: boolean; // Added this property
+  caption?: string; // Added this property
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, height = 300 }) => {
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ 
+  images, 
+  height = 300,
+  aspectRatio, // Not used yet, but available for future enhancement
+  allowFullscreen = false, // Not used yet, but available for future enhancement
+  caption // Not used yet, but available for future enhancement
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const goToPrevious = () => {
@@ -57,13 +67,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, height = 300 }) =
     },
   };
 
+  // Fixed the onClick handler to pass the index, not the event
+  const handleDotClick = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
   return (
     <div className="relative w-full overflow-hidden rounded-lg" style={{ height: height }}>
       <AnimatePresence initial={false} custom={1}>
         <motion.img
           key={currentImageIndex}
           src={images[currentImageIndex] || "/placeholder.svg"}
-          alt={`Carousel Image ${currentImageIndex + 1}`}
+          alt={caption || `Carousel Image ${currentImageIndex + 1}`}
           className="absolute w-full h-full object-cover"
           variants={imageVariants}
           initial="hidden"
@@ -95,7 +110,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, height = 300 }) =
             className={`h-2 w-2 rounded-full ${
               index === currentImageIndex ? 'bg-primary' : 'bg-gray-500'
             }`}
-            onClick={() => setCurrentImageIndex(index)}
+            onClick={() => handleDotClick(index)}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

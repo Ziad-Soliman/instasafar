@@ -9,3 +9,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// No changes needed to the client.ts file, just using this to explain
+// The function get_provider_dashboard_stats needs to be created in the Supabase database
+// This function will efficiently calculate dashboard stats for providers in a single query

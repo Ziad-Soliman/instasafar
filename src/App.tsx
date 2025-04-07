@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -49,6 +48,7 @@ const ProviderDashboard = lazy(() => import("./pages/provider/DashboardPage"));
 const ProviderListings = lazy(() => import("./pages/provider/ListingsPage"));
 const ProviderBookings = lazy(() => import("./pages/provider/BookingsPage"));
 const ProviderProfile = lazy(() => import("./pages/provider/ProfilePage"));
+const BookingDetailPage = lazy(() => import("./pages/provider/BookingDetailPage"));
 
 // Import the new pages
 const FlightSearchPage = lazy(() => import("./pages/FlightSearchPage"));
@@ -137,6 +137,7 @@ const App = () => (
                         <Route path="/provider/dashboard" element={<ProviderDashboard />} />
                         <Route path="/provider/listings" element={<ProviderListings />} />
                         <Route path="/provider/bookings" element={<ProviderBookings />} />
+                        <Route path="/provider/bookings/:bookingId" element={<BookingDetailPage />} />
                         <Route path="/provider/profile" element={<ProviderProfile />} />
                       </Route>
 
@@ -189,6 +190,7 @@ const App = () => (
                           <Route path="dashboard" element={<ProviderDashboard />} />
                           <Route path="listings" element={<ProviderListings />} />
                           <Route path="bookings" element={<ProviderBookings />} />
+                          <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
                           <Route path="profile" element={<ProviderProfile />} />
                         </Route>
                       </Route>

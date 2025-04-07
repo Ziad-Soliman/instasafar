@@ -176,24 +176,27 @@ const ProviderDashboard: React.FC = () => {
         throw bookingsError;
       }
 
-      // Cast bookingsData to unknown first, then to BookingData[]
+      // Cast bookingsData to BookingData[] with type assertion
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
-      // Fetch dashboard stats
-      const { data: statsData, error: statsError } = await supabase.rpc('get_provider_dashboard_stats', {
-        provider_id_arg: user.id
-      });
+      // Fetch dashboard stats using the new database function
+      const { data: statsData, error: statsError } = await supabase.rpc(
+        'get_provider_dashboard_stats',
+        { provider_id_arg: user.id }
+      );
 
       if (statsError) {
         throw statsError;
       }
 
-      if (statsData) {
+      // Check if statsData exists and update state
+      if (statsData && statsData.length > 0) {
+        const providerStats = statsData[0];
         setStats({
-          totalBookings: statsData.total_bookings || 0,
-          pendingBookings: statsData.pending_bookings || 0,
-          totalRevenue: statsData.total_revenue || 0,
-          activeListings: statsData.active_listings || 0,
+          totalBookings: providerStats.total_bookings || 0,
+          pendingBookings: providerStats.pending_bookings || 0,
+          totalRevenue: providerStats.total_revenue || 0,
+          activeListings: providerStats.active_listings || 0,
         });
       }
 

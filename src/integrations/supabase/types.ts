@@ -447,7 +447,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_provider_dashboard_stats: {
+        Args: { provider_id_arg: string }
+        Returns: {
+          total_bookings: number
+          pending_bookings: number
+          total_revenue: number
+          active_listings: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

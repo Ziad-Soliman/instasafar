@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -158,8 +159,9 @@ const ProviderDashboard: React.FC = () => {
 
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
+      // This is where the error is occurring - we're explicitly typing the RPC call now
       const { data: statsData, error: statsError } = await supabase
-        .rpc('get_provider_dashboard_stats', {
+        .rpc<ProviderStats[]>('get_provider_dashboard_stats', {
           provider_id_arg: user.id
         });
 
@@ -168,7 +170,7 @@ const ProviderDashboard: React.FC = () => {
       }
 
       if (statsData && Array.isArray(statsData) && statsData.length > 0) {
-        const providerStats = statsData[0] as ProviderStats;
+        const providerStats = statsData[0];
         setStats({
           totalBookings: providerStats.total_bookings || 0,
           pendingBookings: providerStats.pending_bookings || 0,

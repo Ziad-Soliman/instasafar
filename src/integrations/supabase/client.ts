@@ -17,3 +17,10 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // const { data } = await supabase.rpc('get_provider_dashboard_stats', { provider_id_arg: user.id });
 // Stats can be accessed as: data[0].total_bookings, data[0].pending_bookings, etc.
 
+// Define the return type of the get_provider_dashboard_stats function for better type safety
+export interface ProviderStats {
+  total_bookings: number;
+  pending_bookings: number;
+  total_revenue: number;
+  active_listings: number;
+}

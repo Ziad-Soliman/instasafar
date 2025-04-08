@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Hotel, Users, Building, Calendar, DollarSign, BookOpen, AreaChart, Filter } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, ProviderStats } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -39,13 +39,6 @@ interface BookingData {
     email?: string | null;
   } | null;
   user_id?: string;
-}
-
-interface ProviderStatsData {
-  total_bookings: number;
-  pending_bookings: number;
-  total_revenue: number;
-  active_listings: number;
 }
 
 interface MonthlyData {
@@ -175,7 +168,7 @@ const ProviderDashboard: React.FC = () => {
       }
 
       if (statsData && Array.isArray(statsData) && statsData.length > 0) {
-        const providerStats = statsData[0] as ProviderStatsData;
+        const providerStats = statsData[0] as ProviderStats;
         setStats({
           totalBookings: providerStats.total_bookings || 0,
           pendingBookings: providerStats.pending_bookings || 0,

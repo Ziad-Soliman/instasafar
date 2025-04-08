@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Hotel, Users, Building, Calendar, DollarSign, BookOpen, AreaChart, Filter } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,6 +42,7 @@ interface BookingData {
   user_id?: string;
 }
 
+// Define the type for the provider stats returned by the database function
 interface ProviderStats {
   total_bookings: number;
   pending_bookings: number;
@@ -179,23 +180,21 @@ const ProviderDashboard: React.FC = () => {
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
       // Fetch dashboard stats using the database function
-      const { data: statsData, error: statsError } = await supabase.rpc<ProviderStats>(
-        'get_provider_dashboard_stats',
-        { provider_id_arg: user.id }
-      );
+      const { data: statsData, error: statsError } = await supabase.rpc('get_provider_dashboard_stats', {
+        provider_id_arg: user.id
+      });
 
       if (statsError) {
         throw statsError;
       }
 
       // Check if statsData exists and update state
-      if (statsData && Array.isArray(statsData) && statsData.length > 0) {
-        const providerStats = statsData[0];
+      if (statsData) {
         setStats({
-          totalBookings: providerStats.total_bookings || 0,
-          pendingBookings: providerStats.pending_bookings || 0,
-          totalRevenue: providerStats.total_revenue || 0,
-          activeListings: providerStats.active_listings || 0,
+          totalBookings: statsData.total_bookings || 0,
+          pendingBookings: statsData.pending_bookings || 0,
+          totalRevenue: statsData.total_revenue || 0,
+          activeListings: statsData.active_listings || 0,
         });
       }
 
@@ -402,7 +401,7 @@ const ProviderDashboard: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => [value, "Bookings"]} />
+                <Tooltip as={RechartsTooltip} formatter={(value) => [value, "Bookings"]} />
                 <Bar dataKey="bookings" fill="#3b82f6" name="Bookings" />
               </BarChart>
             </ResponsiveContainer>
@@ -425,7 +424,7 @@ const ProviderDashboard: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => [formatCurrency(value as number), "Revenue"]} />
+                <Tooltip as={RechartsTooltip} formatter={(value) => [formatCurrency(value as number), "Revenue"]} />
                 <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>

@@ -36,13 +36,13 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
-  // Navigation items
+  // Navigation items - Fixed to use proper translation keys without "nav." prefix
   const navItems = [
-    { name: t("nav.home"), path: "/", icon: Home },
-    { name: t("nav.search"), path: "/search", icon: Search },
-    { name: t("nav.packages"), path: "/packages", icon: Package },
-    { name: t("nav.flights"), path: "/flights", icon: Plane },
-    { name: t("nav.transport"), path: "/transport", icon: Bus },
+    { name: t("home"), path: "/", icon: Home },
+    { name: t("search"), path: "/search", icon: Search },
+    { name: t("packages"), path: "/packages", icon: Package },
+    { name: t("flights"), path: "/flights", icon: Plane },
+    { name: t("transport"), path: "/transport", icon: Bus },
   ];
   
   // Check if window has scrolled
@@ -144,21 +144,21 @@ const Header: React.FC = () => {
                     <DropdownMenuGroup>
                       <DropdownMenuItem onClick={() => navigate("/account/profile")}>
                         <User className="mr-2 h-4 w-4" />
-                        <span>{t("nav.profile")}</span>
+                        <span>{t("profile")}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/account/bookings")}>
                         <Calendar className="mr-2 h-4 w-4" />
-                        <span>{t("nav.bookings")}</span>
+                        <span>{t("bookings")}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => navigate("/account/wishlist")}>
                         <Heart className="mr-2 h-4 w-4" />
-                        <span>Wishlist</span>
+                        <span>{t("wishlist")}</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>{t("nav.logout")}</span>
+                      <span>{t("logout")}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -256,7 +256,7 @@ const Header: React.FC = () => {
                               }}
                             >
                               <User className="mr-2 h-4 w-4" />
-                              {t("nav.profile")}
+                              {t("profile")}
                             </Button>
                             <Button 
                               variant="outline" 
@@ -267,7 +267,7 @@ const Header: React.FC = () => {
                               }}
                             >
                               <Calendar className="mr-2 h-4 w-4" />
-                              {t("nav.bookings")}
+                              {t("bookings")}
                             </Button>
                             <Button 
                               variant="outline" 
@@ -278,7 +278,7 @@ const Header: React.FC = () => {
                               }}
                             >
                               <Heart className="mr-2 h-4 w-4" />
-                              Wishlist
+                              {t("wishlist")}
                             </Button>
                             <Button 
                               variant="default" 
@@ -289,7 +289,7 @@ const Header: React.FC = () => {
                               }}
                             >
                               <LogOut className="mr-2 h-4 w-4" />
-                              {t("nav.logout")}
+                              {t("logout")}
                             </Button>
                           </div>
                         </div>

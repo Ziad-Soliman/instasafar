@@ -5,16 +5,16 @@ type LanguageType = "en" | "ar";
 
 interface LanguageContextType {
   language: LanguageType;
-  locale: string; // Add locale property
+  locale: string;
   setLanguage: (language: LanguageType) => void;
   isRTL: boolean;
-  t: (key: string, defaultValue?: string) => string; // Update t function to accept a default value
+  t: (key: string, defaultValue?: string) => string;
 }
 
 // Create a context with default values
 const LanguageContext = createContext<LanguageContextType>({
   language: "en",
-  locale: "en-US", // Default locale
+  locale: "en-US",
   setLanguage: () => {},
   isRTL: false,
   t: (key, defaultValue) => defaultValue || key,
@@ -153,6 +153,17 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "package.duration": "Duration",
     "package.days": "days",
     
+    // Navigation items - FIXED removing the "nav." prefix
+    "home": "Home",
+    "search": "Search",
+    "packages": "Packages",
+    "flights": "Flights",
+    "transport": "Transport",
+    "profile": "Profile",
+    "bookings": "Bookings",
+    "wishlist": "Wishlist",
+    "logout": "Logout",
+    
     // New additions
     "wishlist.add": "Add to Wishlist",
     "wishlist.remove": "Remove from Wishlist",
@@ -166,6 +177,13 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "review.date": "Review Date",
     "review.helpful": "Was this review helpful?",
     "currency.sar": "SAR",
+    
+    // Language
+    "language.select": "Select language",
+    "language.changedToEnglish": "Language changed to English",
+    "language.changedToArabic": "Language changed to Arabic",
+    "language.pageWillRefresh": "The page will refresh with English content",
+    "language.pageWillRefreshAr": "The page will refresh with Arabic content",
   },
   ar: {
     // App general
@@ -294,6 +312,17 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "package.duration": "المدة",
     "package.days": "أيام",
     
+    // Navigation items - FIXED adding translations
+    "home": "الرئيسية",
+    "search": "البحث",
+    "packages": "الباقات",
+    "flights": "الرحلات الجوية",
+    "transport": "المواصلات",
+    "profile": "الملف الشخصي",
+    "bookings": "الحجوزات",
+    "wishlist": "المفضلة",
+    "logout": "تسجيل الخروج",
+    
     // New additions
     "wishlist.add": "أضف إلى المفضلة",
     "wishlist.remove": "إزالة من المفضلة",
@@ -307,6 +336,13 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "review.date": "تاريخ المراجعة",
     "review.helpful": "هل كانت هذه المراجعة مفيدة؟",
     "currency.sar": "ر.س",
+    
+    // Language
+    "language.select": "اختر اللغة",
+    "language.changedToEnglish": "تم تغيير اللغة إلى الإنجليزية",
+    "language.changedToArabic": "تم تغيير اللغة إلى العربية",
+    "language.pageWillRefresh": "ستتم إعادة تحميل الصفحة بالمحتوى الإنجليزي",
+    "language.pageWillRefreshAr": "ستتم إعادة تحميل الصفحة بالمحتوى العربي",
   },
 };
 

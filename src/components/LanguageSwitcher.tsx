@@ -32,12 +32,10 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
     // Show toast notification about language change with translation
     toast({
       title: t(
-        lang === "en" ? "language.changedToEnglish" : "language.changedToArabic", 
-        lang === "en" ? "Language changed to English" : "تم تغيير اللغة إلى العربية"
+        lang === "en" ? "language.changedToEnglish" : "language.changedToArabic"
       ),
       description: t(
-        lang === "en" ? "language.pageWillRefresh" : "language.pageWillRefreshAr",
-        lang === "en" ? "The page will refresh with English content" : "ستتم إعادة تحميل الصفحة بالمحتوى العربي"
+        lang === "en" ? "language.pageWillRefresh" : "language.pageWillRefreshAr"
       ),
     });
     
@@ -53,7 +51,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
         <Button 
           variant="ghost" 
           size="icon" 
-          aria-label={t("language.select", "Select language")} 
+          aria-label={t("language.select")} 
           className={className}
         >
           <Globe size={18} />

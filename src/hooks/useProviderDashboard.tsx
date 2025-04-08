@@ -3,7 +3,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase, ProviderStats } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ProviderStats {
+  total_bookings: number;
+  pending_bookings: number;
+  total_revenue: number;
+  active_listings: number;
+}
 
 interface BookingData {
   id: string;
@@ -152,12 +159,12 @@ export const useProviderDashboard = () => {
         throw bookingsError;
       }
 
-      // Cast as unknown first to work around type error
-      setRecentBookings(bookingsData as unknown as BookingData[]);
+      // Fix type casting for bookings data
+      setRecentBookings((bookingsData || []) as unknown as BookingData[]);
 
       // Second query: Get provider stats using properly typed RPC call
       const { data: statsData, error: statsError } = await supabase
-        .rpc<ProviderStats>('get_provider_dashboard_stats', {
+        .rpc('get_provider_dashboard_stats', {
           provider_id_arg: user.id
         });
 
@@ -165,9 +172,9 @@ export const useProviderDashboard = () => {
         throw statsError;
       }
 
-      if (statsData && statsData.length > 0) {
+      if (statsData && Array.isArray(statsData) && statsData.length > 0) {
         // Access the first element since the function returns an array with one item
-        const providerStats = statsData[0];
+        const providerStats = statsData[0] as ProviderStats;
         setStats({
           totalBookings: providerStats.total_bookings || 0,
           pendingBookings: providerStats.pending_bookings || 0,

@@ -25,6 +25,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultTab, tabs, title, descriptio
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       className="flex flex-col items-center justify-center w-full max-w-md mx-auto"
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-bold">{title}</h1>

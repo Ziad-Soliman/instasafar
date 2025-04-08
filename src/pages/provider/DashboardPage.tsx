@@ -14,6 +14,8 @@ import { supabase, ProviderStats } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { useRtlHelpers } from "@/utils/rtl-helpers";
 
 interface BookingData {
   id: string;
@@ -59,8 +61,9 @@ interface StatCard {
 const ProviderDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, isRTL } = useLanguage();
   const { toast } = useToast();
+  const { getDirectionalClasses } = useRtlHelpers();
   const [recentBookings, setRecentBookings] = useState<BookingData[]>([]);
   const [stats, setStats] = useState({
     totalBookings: 0,
@@ -102,8 +105,11 @@ const ProviderDashboard: React.FC = () => {
         },
         (payload) => {
           toast({
-            title: "New booking received",
-            description: `A new ${payload.new.booking_type} booking has been made`,
+            title: t("dashboard.newBooking", "New booking received"),
+            description: t(
+              "dashboard.newBookingDesc", 
+              `A new ${payload.new.booking_type} booking has been made`
+            ),
             variant: "default",
           });
           fetchData();
@@ -117,7 +123,10 @@ const ProviderDashboard: React.FC = () => {
   };
 
   const generateMonthlyData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = isRTL 
+      ? ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
     const currentMonth = new Date().getMonth();
     
     const data: MonthlyData[] = [];
@@ -159,7 +168,7 @@ const ProviderDashboard: React.FC = () => {
 
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
-      // This is where the error is occurring - we're explicitly typing the RPC call now
+      // Using explicit type parameter for rpc call to avoid TypeScript errors
       const { data: statsData, error: statsError } = await supabase
         .rpc<ProviderStats[]>('get_provider_dashboard_stats', {
           provider_id_arg: user.id
@@ -182,8 +191,8 @@ const ProviderDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error fetching provider dashboard data:', error);
       toast({
-        title: "Failed to fetch dashboard data",
-        description: "Please try again later.",
+        title: t("dashboard.fetchError", "Failed to fetch dashboard data"),
+        description: t("dashboard.tryAgain", "Please try again later."),
         variant: "destructive",
       });
     } finally {
@@ -208,30 +217,30 @@ const ProviderDashboard: React.FC = () => {
 
   const statCards: StatCard[] = [
     {
-      title: t("dashboard.totalBookings"),
+      title: t("dashboard.totalBookings", "Total Bookings"),
       value: stats.totalBookings,
-      description: t("dashboard.totalBookingsDesc"),
+      description: t("dashboard.totalBookingsDesc", "Total number of bookings received"),
       icon: <BookOpen className="h-5 w-5" />,
       color: "text-blue-500",
     },
     {
-      title: t("dashboard.pendingBookings"),
+      title: t("dashboard.pendingBookings", "Pending Bookings"),
       value: stats.pendingBookings,
-      description: t("dashboard.pendingBookingsDesc"),
+      description: t("dashboard.pendingBookingsDesc", "Bookings awaiting confirmation"),
       icon: <Calendar className="h-5 w-5" />,
       color: "text-yellow-500",
     },
     {
-      title: t("dashboard.totalRevenue"),
+      title: t("dashboard.totalRevenue", "Total Revenue"),
       value: formatCurrency(stats.totalRevenue),
-      description: t("dashboard.totalRevenueDesc"),
+      description: t("dashboard.totalRevenueDesc", "Total revenue from all bookings"),
       icon: <DollarSign className="h-5 w-5" />,
       color: "text-green-500",
     },
     {
-      title: t("dashboard.activeListings"),
+      title: t("dashboard.activeListings", "Active Listings"),
       value: stats.activeListings,
-      description: t("dashboard.activeListingsDesc"),
+      description: t("dashboard.activeListingsDesc", "Your active hotel and package listings"),
       icon: <Hotel className="h-5 w-5" />,
       color: "text-purple-500",
     },
@@ -284,7 +293,7 @@ const ProviderDashboard: React.FC = () => {
     if (filteredBookings.length === 0) {
       return (
         <div className="text-center p-6 bg-muted/20 rounded-lg">
-          <p className="text-muted-foreground">No recent bookings found</p>
+          <p className="text-muted-foreground">{t("dashboard.noBookings", "No recent bookings found")}</p>
         </div>
       );
     }
@@ -294,16 +303,16 @@ const ProviderDashboard: React.FC = () => {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b">
-              <th className="px-4 py-3 text-left">Booking ID</th>
-              <th className="px-4 py-3 text-left">Customer</th>
-              <th className="px-4 py-3 text-left">Type</th>
-              <th className="px-4 py-3 text-left">Item</th>
-              <th className="px-4 py-3 text-right">Amount</th>
-              <th className="px-4 py-3 text-center">Status</th>
-              <th className="px-4 py-3 text-left">Check-in</th>
-              <th className="px-4 py-3 text-left">Check-out</th>
-              <th className="px-4 py-3 text-right">Date</th>
-              <th className="px-4 py-3 text-center">Actions</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.bookingId", "Booking ID")}</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.customer", "Customer")}</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.type", "Type")}</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.item", "Item")}</th>
+              <th className={`px-4 py-3 ${isRTL ? 'text-start' : 'text-end'}`}>{t("dashboard.amount", "Amount")}</th>
+              <th className="px-4 py-3 text-center">{t("dashboard.status", "Status")}</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.checkIn", "Check-in")}</th>
+              <th className="px-4 py-3 text-start">{t("dashboard.checkOut", "Check-out")}</th>
+              <th className={`px-4 py-3 ${isRTL ? 'text-start' : 'text-end'}`}>{t("dashboard.date", "Date")}</th>
+              <th className="px-4 py-3 text-center">{t("dashboard.actions", "Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -316,20 +325,20 @@ const ProviderDashboard: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <td className="px-4 py-3 font-mono text-xs">{booking.id.substring(0, 8)}...</td>
-                <td className="px-4 py-3">{booking.user?.full_name || 'Anonymous'}</td>
-                <td className="px-4 py-3 capitalize">{booking.booking_type}</td>
+                <td className="px-4 py-3">{booking.user?.full_name || t("dashboard.anonymous", "Anonymous")}</td>
+                <td className="px-4 py-3 capitalize">{t(`booking.type.${booking.booking_type}`, booking.booking_type)}</td>
                 <td className="px-4 py-3">
                   {booking.booking_type === 'hotel' 
-                    ? booking.hotel?.name || 'Unknown Hotel'
-                    : booking.package?.name || 'Unknown Package'}
+                    ? booking.hotel?.name || t("dashboard.unknownHotel", "Unknown Hotel")
+                    : booking.package?.name || t("dashboard.unknownPackage", "Unknown Package")}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className={`px-4 py-3 ${isRTL ? 'text-start' : 'text-end'}`}>
                   {formatCurrency(booking.total_price)}
                 </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded-full text-xs inline-block text-center
                     ${getStatusColor(booking.status)}`}>
-                    {booking.status}
+                    {t(`booking.status.${booking.status}`, booking.status)}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -338,8 +347,8 @@ const ProviderDashboard: React.FC = () => {
                 <td className="px-4 py-3">
                   {formatDate(booking.check_out_date)}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  {new Date(booking.created_at).toLocaleDateString()}
+                <td className={`px-4 py-3 ${isRTL ? 'text-start' : 'text-end'}`}>
+                  {new Date(booking.created_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <Button 
@@ -347,7 +356,7 @@ const ProviderDashboard: React.FC = () => {
                     size="sm"
                     onClick={() => navigate(`/provider/bookings/${booking.id}`)}
                   >
-                    View
+                    {t("dashboard.view", "View")}
                   </Button>
                 </td>
               </motion.tr>
@@ -362,8 +371,8 @@ const ProviderDashboard: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Monthly Bookings</CardTitle>
-          <CardDescription>Number of bookings per month</CardDescription>
+          <CardTitle className="text-lg">{t("dashboard.monthlyBookings", "Monthly Bookings")}</CardTitle>
+          <CardDescription>{t("dashboard.monthlyBookingsDesc", "Number of bookings per month")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -375,8 +384,11 @@ const ProviderDashboard: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <RechartsTooltip formatter={(value) => [value, "Bookings"]} />
-                <Bar dataKey="bookings" fill="#3b82f6" name="Bookings" />
+                <RechartsTooltip 
+                  formatter={(value) => [value, t("dashboard.bookings", "Bookings")]} 
+                  labelFormatter={(label) => t(`months.${label.toLowerCase()}`, label)}
+                />
+                <Bar dataKey="bookings" fill="#3b82f6" name={t("dashboard.bookings", "Bookings")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -385,8 +397,8 @@ const ProviderDashboard: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Revenue Trend</CardTitle>
-          <CardDescription>Monthly revenue in SAR</CardDescription>
+          <CardTitle className="text-lg">{t("dashboard.revenueTrend", "Revenue Trend")}</CardTitle>
+          <CardDescription>{t("dashboard.revenueTrendDesc", "Monthly revenue in SAR")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -398,7 +410,10 @@ const ProviderDashboard: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <RechartsTooltip formatter={(value) => [formatCurrency(value as number), "Revenue"]} />
+                <RechartsTooltip 
+                  formatter={(value) => [formatCurrency(value as number), t("dashboard.revenue", "Revenue")]} 
+                  labelFormatter={(label) => t(`months.${label.toLowerCase()}`, label)}
+                />
                 <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
@@ -411,15 +426,16 @@ const ProviderDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
+        <h1 className="text-2xl font-bold">{t("dashboard.title", "Dashboard")}</h1>
         <Button onClick={() => navigate("/provider/listings")}>
-          {t("dashboard.manageListings")} <ArrowRight className="ml-2 h-4 w-4" />
+          {t("dashboard.manageListings", "Manage Listings")} 
+          <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
         </Button>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <p className="text-muted-foreground animate-pulse">Loading dashboard data...</p>
+          <p className="text-muted-foreground animate-pulse">{t("dashboard.loading", "Loading dashboard data...")}</p>
         </div>
       ) : (
         <>
@@ -430,8 +446,8 @@ const ProviderDashboard: React.FC = () => {
           <Card className="shadow-md">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>{t("dashboard.recentBookings")}</CardTitle>
-                <CardDescription>{t("dashboard.recentBookingsDesc")}</CardDescription>
+                <CardTitle>{t("dashboard.recentBookings", "Recent Bookings")}</CardTitle>
+                <CardDescription>{t("dashboard.recentBookingsDesc", "Your most recent booking activity")}</CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
@@ -440,13 +456,13 @@ const ProviderDashboard: React.FC = () => {
                   onValueChange={(value) => setBookingFilter(value as any)}
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
+                    <SelectValue placeholder={t("dashboard.filterByStatus", "Filter by status")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Bookings</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="all">{t("dashboard.allBookings", "All Bookings")}</SelectItem>
+                    <SelectItem value="pending">{t("booking.status.pending", "Pending")}</SelectItem>
+                    <SelectItem value="confirmed">{t("booking.status.confirmed", "Confirmed")}</SelectItem>
+                    <SelectItem value="cancelled">{t("booking.status.cancelled", "Cancelled")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -454,9 +470,9 @@ const ProviderDashboard: React.FC = () => {
             <CardContent>
               {renderRecentBookingsTable()}
             </CardContent>
-            <CardFooter className="justify-end">
+            <CardFooter className={`justify-${isRTL ? 'start' : 'end'}`}>
               <Button variant="link" onClick={() => navigate("/provider/bookings")}>
-                {t("dashboard.viewAll")}
+                {t("dashboard.viewAll", "View All Bookings")}
               </Button>
             </CardFooter>
           </Card>

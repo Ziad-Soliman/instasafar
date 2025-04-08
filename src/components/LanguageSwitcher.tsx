@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,26 +9,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 interface LanguageSwitcherProps {
   className?: string;
 }
 
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
-  const { language, setLanguage, isRTL } = useLanguage();
+  const { language, setLanguage, isRTL, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   const handleLanguageChange = (lang: "en" | "ar") => {
     setLanguage(lang);
     localStorage.setItem("instasafar_language", lang);
     
-    // Show toast notification about language change
+    // Show toast notification about language change with translation
     toast({
-      title: lang === "en" ? "Language changed to English" : "تم تغيير اللغة إلى العربية",
-      description: lang === "en" ? "The page will refresh with English content" : "ستتم إعادة تحميل الصفحة بالمحتوى العربي",
+      title: t(
+        lang === "en" ? "language.changedToEnglish" : "language.changedToArabic", 
+        lang === "en" ? "Language changed to English" : "تم تغيير اللغة إلى العربية"
+      ),
+      description: t(
+        lang === "en" ? "language.pageWillRefresh" : "language.pageWillRefreshAr",
+        lang === "en" ? "The page will refresh with English content" : "ستتم إعادة تحميل الصفحة بالمحتوى العربي"
+      ),
     });
     
     // Small delay to show the toast before reload
@@ -40,26 +48,37 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Select language" className={className}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          aria-label={t("language.select", "Select language")} 
+          className={className}
+        >
           <Globe size={18} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[120px]">
+      <DropdownMenuContent align={isRTL ? "start" : "end"} className="min-w-[120px] bg-popover">
         <DropdownMenuItem
-          className={`flex items-center cursor-pointer ${language === "en" ? "font-medium" : ""}`}
+          className={cn(
+            "flex items-center cursor-pointer gap-2", 
+            language === "en" ? "font-medium" : ""
+          )}
           onClick={() => handleLanguageChange("en")}
         >
-          <span className="mr-2">🇺🇸</span>
+          <span className={isRTL ? "ml-2" : "mr-2"}>🇺🇸</span>
           <span>English</span>
-          {language === "en" && <span className="ml-auto">✓</span>}
+          {language === "en" && <span className={isRTL ? "mr-auto" : "ml-auto"}>✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem
-          className={`flex items-center cursor-pointer ${language === "ar" ? "font-medium" : ""}`}
+          className={cn(
+            "flex items-center cursor-pointer gap-2", 
+            language === "ar" ? "font-medium" : ""
+          )}
           onClick={() => handleLanguageChange("ar")}
         >
-          <span className="mr-2">🇸🇦</span>
+          <span className={isRTL ? "ml-2" : "mr-2"}>🇸🇦</span>
           <span>العربية</span>
-          {language === "ar" && <span className="ml-auto">✓</span>}
+          {language === "ar" && <span className={isRTL ? "mr-auto" : "ml-auto"}>✓</span>}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

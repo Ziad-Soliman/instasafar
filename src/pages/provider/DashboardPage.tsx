@@ -1,4 +1,3 @@
-
 // Import React and any necessary components or libraries needed for the Dashboard page
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -179,8 +178,8 @@ const ProviderDashboard: React.FC = () => {
       // Cast bookingsData to BookingData[] with type assertion
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
-      // Fetch dashboard stats using the new database function
-      const { data: statsData, error: statsError } = await supabase.rpc(
+      // Fetch dashboard stats using the database function
+      const { data: statsData, error: statsError } = await supabase.rpc<ProviderStats>(
         'get_provider_dashboard_stats',
         { provider_id_arg: user.id }
       );
@@ -190,7 +189,7 @@ const ProviderDashboard: React.FC = () => {
       }
 
       // Check if statsData exists and update state
-      if (statsData && statsData.length > 0) {
+      if (statsData && Array.isArray(statsData) && statsData.length > 0) {
         const providerStats = statsData[0];
         setStats({
           totalBookings: providerStats.total_bookings || 0,

@@ -21,12 +21,12 @@ export interface ProviderStats {
 
 /**
  * The get_provider_dashboard_stats function efficiently calculates dashboard stats for providers
- * This function returns an array with a single object containing the provider statistics
+ * This function returns a single object containing the provider statistics
  * 
  * Usage example:
- * const { data, error } = await supabase.rpc<ProviderStats[]>('get_provider_dashboard_stats', { 
+ * const { data, error } = await supabase.rpc<ProviderStats>('get_provider_dashboard_stats', { 
  *   provider_id_arg: user.id 
  * });
  * 
- * Stats can be accessed as: data[0].total_bookings, data[0].pending_bookings, etc.
+ * Stats can be accessed as: data.total_bookings, data.pending_bookings, etc.
  */

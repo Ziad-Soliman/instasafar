@@ -1,5 +1,3 @@
-
-// Import React and any necessary components or libraries needed for the Dashboard page
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,8 +12,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Define types for our booking data
 interface BookingData {
   id: string;
   booking_type: string;
@@ -43,16 +41,13 @@ interface BookingData {
   user_id?: string;
 }
 
-// Define the type for the provider stats returned by the database function
-// This matches the return type from the Supabase function
-interface ProviderStats {
+interface ProviderStatsData {
   total_bookings: number;
   pending_bookings: number;
   total_revenue: number;
   active_listings: number;
 }
 
-// Monthly analytics data
 interface MonthlyData {
   name: string;
   bookings: number;
@@ -83,7 +78,6 @@ const ProviderDashboard: React.FC = () => {
   const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   
-  // Function to format currency based on locale
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(language === 'ar' ? 'ar-SA' : 'en-US', {
       style: 'currency',
@@ -91,7 +85,6 @@ const ProviderDashboard: React.FC = () => {
     }).format(amount);
   };
 
-  // Format date for display
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString(
@@ -100,7 +93,6 @@ const ProviderDashboard: React.FC = () => {
     );
   };
 
-  // Subscribe to real-time booking notifications
   const subscribeToBookings = () => {
     if (!user?.id) return;
     
@@ -115,13 +107,11 @@ const ProviderDashboard: React.FC = () => {
           filter: `provider_id=eq.${user.id}`,
         },
         (payload) => {
-          // Show notification for new booking
           toast({
             title: "New booking received",
             description: `A new ${payload.new.booking_type} booking has been made`,
             variant: "default",
           });
-          // Refresh data
           fetchData();
         }
       )
@@ -132,17 +122,14 @@ const ProviderDashboard: React.FC = () => {
     };
   };
 
-  // Generate mock monthly data
   const generateMonthlyData = () => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = new Date().getMonth();
     
-    // Create data for the last 6 months
     const data: MonthlyData[] = [];
     for (let i = 5; i >= 0; i--) {
       const monthIndex = (currentMonth - i + 12) % 12;
-      // Base the mock data somewhat on the actual total stats
-      const multiplier = (5 - i) / 5; // Higher values for more recent months
+      const multiplier = (5 - i) / 5;
       data.push({
         name: months[monthIndex],
         bookings: Math.round((stats.totalBookings / 6) * multiplier * (0.8 + Math.random() * 0.4)),
@@ -153,13 +140,11 @@ const ProviderDashboard: React.FC = () => {
     setMonthlyData(data);
   };
 
-  // Fetch recent bookings and dashboard stats
   const fetchData = async () => {
     if (!user?.id) return;
     setLoading(true);
 
     try {
-      // Fetch recent bookings
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -178,13 +163,10 @@ const ProviderDashboard: React.FC = () => {
         throw bookingsError;
       }
 
-      // Cast bookingsData to BookingData[] with type assertion
       setRecentBookings(bookingsData as unknown as BookingData[]);
 
-      // Fetch dashboard stats using the database function
-      // The function returns an array with a single object
       const { data: statsData, error: statsError } = await supabase
-        .rpc<ProviderStats>('get_provider_dashboard_stats', {
+        .rpc('get_provider_dashboard_stats', {
           provider_id_arg: user.id
         });
 
@@ -192,13 +174,13 @@ const ProviderDashboard: React.FC = () => {
         throw statsError;
       }
 
-      // Check if statsData exists and update state
-      if (statsData) {
+      if (statsData && Array.isArray(statsData) && statsData.length > 0) {
+        const providerStats = statsData[0] as ProviderStatsData;
         setStats({
-          totalBookings: statsData.total_bookings || 0,
-          pendingBookings: statsData.pending_bookings || 0,
-          totalRevenue: statsData.total_revenue || 0,
-          activeListings: statsData.active_listings || 0,
+          totalBookings: providerStats.total_bookings || 0,
+          pendingBookings: providerStats.pending_bookings || 0,
+          totalRevenue: providerStats.total_revenue || 0,
+          activeListings: providerStats.active_listings || 0,
         });
       }
 
@@ -223,14 +205,12 @@ const ProviderDashboard: React.FC = () => {
     };
   }, [user?.id]);
 
-  // Generate monthly data when stats are loaded
   useEffect(() => {
     if (!loading && stats.totalBookings > 0) {
       generateMonthlyData();
     }
   }, [stats, loading]);
 
-  // Create an array of stat cards to display
   const statCards: StatCard[] = [
     {
       title: t("dashboard.totalBookings"),
@@ -262,7 +242,6 @@ const ProviderDashboard: React.FC = () => {
     },
   ];
 
-  // Function to render the stat cards
   const renderStatCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {statCards.map((card, index) => (
@@ -291,12 +270,10 @@ const ProviderDashboard: React.FC = () => {
     </div>
   );
 
-  // Filter bookings based on selected filter
   const filteredBookings = recentBookings.filter(booking => 
     bookingFilter === 'all' || booking.status === bookingFilter
   );
 
-  // Function to get status color
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -308,7 +285,6 @@ const ProviderDashboard: React.FC = () => {
     }
   };
 
-  // Table for recent bookings
   const renderRecentBookingsTable = () => {
     if (filteredBookings.length === 0) {
       return (
@@ -387,7 +363,6 @@ const ProviderDashboard: React.FC = () => {
     );
   };
 
-  // Render charts for analytics
   const renderAnalyticsCharts = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <Card>

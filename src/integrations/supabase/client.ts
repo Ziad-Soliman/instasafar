@@ -12,8 +12,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // The get_provider_dashboard_stats function efficiently calculates dashboard stats for providers
-// This function returns an array with a single object containing the stats
+// This function returns an object with provider statistics
 // Usage example:
-// const { data } = await supabase.rpc<ProviderStats[]>('get_provider_dashboard_stats', { provider_id_arg: user.id });
-// Returns: [{ total_bookings, pending_bookings, total_revenue, active_listings }]
+// const { data } = await supabase.rpc<ProviderStats>('get_provider_dashboard_stats', { provider_id_arg: user.id });
+// Returns: { total_bookings, pending_bookings, total_revenue, active_listings }
 

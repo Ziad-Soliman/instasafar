@@ -184,7 +184,7 @@ const ProviderDashboard: React.FC = () => {
       // Fetch dashboard stats using the database function
       // The function returns an array with a single object
       const { data: statsData, error: statsError } = await supabase
-        .rpc<ProviderStats[]>('get_provider_dashboard_stats', {
+        .rpc<ProviderStats>('get_provider_dashboard_stats', {
           provider_id_arg: user.id
         });
 
@@ -193,14 +193,12 @@ const ProviderDashboard: React.FC = () => {
       }
 
       // Check if statsData exists and update state
-      // Since the RPC returns an array with a single object, we access the first element
-      if (statsData && statsData.length > 0) {
-        const providerStats = statsData[0];
+      if (statsData) {
         setStats({
-          totalBookings: providerStats.total_bookings || 0,
-          pendingBookings: providerStats.pending_bookings || 0,
-          totalRevenue: providerStats.total_revenue || 0,
-          activeListings: providerStats.active_listings || 0,
+          totalBookings: statsData.total_bookings || 0,
+          pendingBookings: statsData.pending_bookings || 0,
+          totalRevenue: statsData.total_revenue || 0,
+          activeListings: statsData.active_listings || 0,
         });
       }
 

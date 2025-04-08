@@ -67,9 +67,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
           )}
           onClick={() => handleLanguageChange("en")}
         >
-          <span className={getDirectionalClasses("mr-2", "mr-2", "ml-2")}>🇺🇸</span>
+          <span className={getDirectionalClasses("mr-2", "ml-2")}>🇺🇸</span>
           <span>English</span>
-          {language === "en" && <span className={getDirectionalClasses("ml-auto", "ml-auto", "mr-auto")}>✓</span>}
+          {language === "en" && <span className={getDirectionalClasses("ml-auto", "mr-auto")}>✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem
           className={cn(
@@ -78,9 +78,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className }) => {
           )}
           onClick={() => handleLanguageChange("ar")}
         >
-          <span className={getDirectionalClasses("mr-2", "mr-2", "ml-2")}>🇸🇦</span>
+          <span className={getDirectionalClasses("mr-2", "ml-2")}>🇸🇦</span>
           <span>العربية</span>
-          {language === "ar" && <span className={getDirectionalClasses("ml-auto", "ml-auto", "mr-auto")}>✓</span>}
+          {language === "ar" && <span className={getDirectionalClasses("ml-auto", "mr-auto")}>✓</span>}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

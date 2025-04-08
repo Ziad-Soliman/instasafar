@@ -133,6 +133,7 @@ export const useProviderDashboard = () => {
     setLoading(true);
 
     try {
+      // First query: Get recent bookings
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -151,9 +152,10 @@ export const useProviderDashboard = () => {
         throw bookingsError;
       }
 
-      setRecentBookings(bookingsData as BookingData[]);
+      // Cast as unknown first to work around type error
+      setRecentBookings(bookingsData as unknown as BookingData[]);
 
-      // Using explicit type parameter for rpc call
+      // Second query: Get provider stats using properly typed RPC call
       const { data: statsData, error: statsError } = await supabase
         .rpc<ProviderStats>('get_provider_dashboard_stats', {
           provider_id_arg: user.id
@@ -163,12 +165,14 @@ export const useProviderDashboard = () => {
         throw statsError;
       }
 
-      if (statsData) {
+      if (statsData && statsData.length > 0) {
+        // Access the first element since the function returns an array with one item
+        const providerStats = statsData[0];
         setStats({
-          totalBookings: statsData.total_bookings || 0,
-          pendingBookings: statsData.pending_bookings || 0,
-          totalRevenue: statsData.total_revenue || 0,
-          activeListings: statsData.active_listings || 0,
+          totalBookings: providerStats.total_bookings || 0,
+          pendingBookings: providerStats.pending_bookings || 0,
+          totalRevenue: providerStats.total_revenue || 0,
+          activeListings: providerStats.active_listings || 0,
         });
       }
 

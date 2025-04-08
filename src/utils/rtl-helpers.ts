@@ -33,6 +33,8 @@ export const useRtlHelpers = () => {
 
   /**
    * Conditionally apply classes based on the current RTL state
+   * @param ltrClasses Classes to use in LTR mode
+   * @param rtlClasses Classes to use in RTL mode
    */
   const getDirectionalClasses = (ltrClasses: string, rtlClasses: string): string => {
     return isRTL ? rtlClasses : ltrClasses;

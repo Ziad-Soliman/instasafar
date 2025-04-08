@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +29,9 @@ const BookingSuccessPage = lazy(() => import("./pages/BookingSuccessPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
 const ProviderRegisterPage = lazy(() => import("./pages/auth/ProviderRegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const UpdatePasswordPage = lazy(() => import("./pages/auth/UpdatePasswordPage"));
+const AuthCallbackPage = lazy(() => import("./pages/auth/AuthCallbackPage"));
 const ProfilePage = lazy(() => import("./pages/account/ProfilePage"));
 const BookingsPage = lazy(() => import("./pages/account/BookingsPage"));
 const WishlistPage = lazy(() => import("./pages/account/WishlistPage"));
@@ -104,8 +108,12 @@ const App = () => (
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
                     <Route path="/auth/register-provider" element={<ProviderRegisterPage />} />
-                    <Route path="/auth/reset-password" element={<LoginPage />} /> {/* Placeholder */}
+                    <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
                   </Route>
+                  
+                  {/* Auth callback route (for OAuth) */}
+                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
                   {/* Account Routes - Protected */}
                   <Route element={<MainLayout requireAuth />}>
@@ -157,8 +165,12 @@ const App = () => (
                       <Route path="login" element={<LoginPage />} />
                       <Route path="register" element={<RegisterPage />} />
                       <Route path="register-provider" element={<ProviderRegisterPage />} />
-                      <Route path="reset-password" element={<LoginPage />} /> {/* Placeholder */}
+                      <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                      <Route path="update-password" element={<UpdatePasswordPage />} />
                     </Route>
+                    
+                    {/* Auth callback route with language prefix */}
+                    <Route path="auth/callback" element={<AuthCallbackPage />} />
 
                     {/* Account Routes with language prefix - Protected */}
                     <Route path="account" element={<MainLayout requireAuth />}>

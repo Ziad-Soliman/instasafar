@@ -1,267 +1,397 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Building2, Mail, Lock, User, Phone, MapPin } from "lucide-react";
+
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Building2, Mail, Lock, User, Phone, MapPin, FileText } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRtlHelpers } from "@/utils/rtl-helpers";
+import AuthPage from "./AuthPage";
+
+// Define the form schema
+const providerSchema = z.object({
+  full_name: z.string().min(2, { message: "Please enter your full name" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  confirm_password: z.string(),
+  company_name: z.string().min(2, { message: "Please enter your company name" }),
+  company_address: z.string().optional(),
+  contact_phone: z.string().optional(),
+  description: z.string().optional(),
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Passwords don't match",
+  path: ["confirm_password"],
+});
+
+type ProviderFormValues = z.infer<typeof providerSchema>;
 
 const ProviderRegisterPage: React.FC = () => {
-  const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const { registerProvider, user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
   const { toast } = useToast();
-  const { registerProvider, loading } = useSupabaseAuth();
+  const { getDirectionalClasses } = useRtlHelpers();
   
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    companyName: "",
-    companyAddress: "",
-    contactPhone: ""
-  });
-  
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // If user is already logged in, redirect
+  useEffect(() => {
+    if (user) {
+      navigate("/");
     }
-  };
-  
-  const validate = () => {
-    const newErrors: {[key: string]: string} = {};
-    
-    if (!formData.fullName.trim()) newErrors.fullName = t("validation.required");
-    if (!formData.email.trim()) newErrors.email = t("validation.required");
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = t("validation.email");
-    
-    if (!formData.password) newErrors.password = t("validation.required");
-    else if (formData.password.length < 6) newErrors.password = t("validation.password.length");
-    
-    if (formData.password !== formData.confirmPassword) 
-      newErrors.confirmPassword = t("validation.password.match");
-    
-    if (!formData.companyName.trim()) newErrors.companyName = t("validation.required");
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validate()) return;
+  }, [user, navigate]);
+
+  const form = useForm<ProviderFormValues>({
+    resolver: zodResolver(providerSchema),
+    defaultValues: {
+      full_name: "",
+      email: "",
+      password: "",
+      confirm_password: "",
+      company_name: "",
+      company_address: "",
+      contact_phone: "",
+      description: "",
+    },
+  });
+
+  const onSubmit = async (data: ProviderFormValues) => {
+    setIsLoading(true);
+    setError(null);
     
     try {
-      const { success, error } = await registerProvider(
-        formData.email,
-        formData.password,
-        formData.fullName,
-        formData.companyName,
-        formData.companyAddress,
-        formData.contactPhone
+      const result = await registerProvider(
+        data.email,
+        data.password,
+        data.full_name,
+        data.company_name,
+        data.company_address,
+        data.contact_phone
       );
       
-      if (success) {
+      if (result.success) {
         toast({
-          title: t("auth.registerSuccess"),
-          description: t("auth.providerRegisterSuccess"),
+          title: t("auth.providerRegisterSuccess", "Registration successful"),
+          description: t(
+            "auth.providerRegisterSuccessDescription",
+            "Your provider account request has been submitted. We'll review your application and notify you soon."
+          ),
         });
-        navigate("/provider/dashboard");
-      } else if (error) {
-        toast({
-          title: t("auth.registerFailed"),
-          description: error.message,
-          variant: "destructive",
-        });
+        navigate("/auth/login");
+      } else if (result.error) {
+        setError(result.error.message);
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      toast({
-        title: t("auth.registerFailed"),
-        description: t("error.unexpected"),
-        variant: "destructive",
-      });
+      setError(t(
+        "auth.unexpectedError",
+        "An unexpected error occurred. Please try again."
+      ));
+      console.error("Provider registration error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="flex justify-center items-center min-h-[80vh] px-4"
-    >
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">{t("auth.registerAsProvider")}</CardTitle>
-          <CardDescription>
-            {t("auth.providerRegisterDescription")}
-          </CardDescription>
-        </CardHeader>
-        
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                {t("auth.personalInformation")}
-              </div>
-              
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="fullName">{t("auth.fullName")}</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className={`pl-10 ${errors.fullName ? 'border-destructive' : ''}`}
-                      placeholder={t("auth.fullNamePlaceholder")}
-                    />
-                  </div>
-                  {errors.fullName && <p className="text-xs text-destructive mt-1">{errors.fullName}</p>}
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="email">{t("auth.email")}</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
-                      placeholder={t("auth.emailPlaceholder")}
-                    />
-                  </div>
-                  {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="password">{t("auth.password")}</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className={`pl-10 ${errors.password ? 'border-destructive' : ''}`}
-                        placeholder={t("auth.passwordPlaceholder")}
-                      />
-                    </div>
-                    {errors.password && <p className="text-xs text-destructive mt-1">{errors.password}</p>}
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className={`pl-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
-                        placeholder={t("auth.confirmPasswordPlaceholder")}
-                      />
-                    </div>
-                    {errors.confirmPassword && <p className="text-xs text-destructive mt-1">{errors.confirmPassword}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="pt-2 space-y-2">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                {t("auth.companyInformation")}
-              </div>
-              
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="companyName">{t("auth.companyName")}</Label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="companyName"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      className={`pl-10 ${errors.companyName ? 'border-destructive' : ''}`}
-                      placeholder={t("auth.companyNamePlaceholder")}
-                    />
-                  </div>
-                  {errors.companyName && <p className="text-xs text-destructive mt-1">{errors.companyName}</p>}
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="companyAddress">{t("auth.companyAddress")}</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="companyAddress"
-                      name="companyAddress"
-                      value={formData.companyAddress}
-                      onChange={handleChange}
-                      className="pl-10"
-                      placeholder={t("auth.companyAddressPlaceholder")}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="contactPhone">{t("auth.contactPhone")}</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="contactPhone"
-                      name="contactPhone"
-                      value={formData.contactPhone}
-                      onChange={handleChange}
-                      className="pl-10"
-                      placeholder={t("auth.contactPhonePlaceholder")}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
+
+  const providerContent = (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <div className="text-sm font-medium text-muted-foreground mb-2">
+            {t("auth.personalInformation", "Personal Information")}
+          </div>
           
-          <CardFooter className="flex flex-col space-y-3">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={loading}
-            >
-              {loading ? t("auth.registering") : t("auth.register")}
-            </Button>
+          <FormField
+            control={form.control}
+            name="full_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.fullName", "Full Name")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <User className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Input
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      placeholder={t("auth.fullNamePlaceholder", "Your Full Name")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.email", "Email")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Mail className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Input
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      type="email"
+                      placeholder={t("auth.emailPlaceholder", "your.email@example.com")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("auth.password", "Password")}</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                        getDirectionalClasses("left-3", "right-3")
+                      }`} />
+                      <Input
+                        className={getDirectionalClasses("pl-10", "pr-10")}
+                        type={showPassword ? "text" : "password"}
+                        placeholder={t("auth.passwordPlaceholder", "••••••••")}
+                        disabled={isLoading}
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
+                          getDirectionalClasses("right-3", "left-3")
+                        }`}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
-            <div className="text-center text-sm">
-              {t("auth.alreadyAccount")} <Link to="/auth/login" className="text-primary hover:underline">{t("auth.login")}</Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
-    </motion.div>
+            <FormField
+              control={form.control}
+              name="confirm_password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("auth.confirmPassword", "Confirm Password")}</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                        getDirectionalClasses("left-3", "right-3")
+                      }`} />
+                      <Input
+                        className={getDirectionalClasses("pl-10", "pr-10")}
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder={t("auth.confirmPasswordPlaceholder", "••••••••")}
+                        disabled={isLoading}
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
+                          getDirectionalClasses("right-3", "left-3")
+                        }`}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="text-sm font-medium text-muted-foreground mb-2">
+            {t("auth.companyInformation", "Company Information")}
+          </div>
+          
+          <FormField
+            control={form.control}
+            name="company_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.companyName", "Company Name")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Building2 className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Input
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      placeholder={t("auth.companyNamePlaceholder", "Your Company or Organization Name")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="company_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.companyAddress", "Company Address")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <MapPin className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Input
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      placeholder={t("auth.companyAddressPlaceholder", "Business Address (Optional)")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="contact_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.contactPhone", "Contact Phone")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Phone className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Input
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      placeholder={t("auth.contactPhonePlaceholder", "Business Phone Number (Optional)")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("auth.serviceDescription", "Service Description")}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <FileText className={`absolute left-3 top-2.5 h-4 w-4 text-muted-foreground ${
+                      getDirectionalClasses("left-3", "right-3")
+                    }`} />
+                    <Textarea
+                      className={getDirectionalClasses("pl-10", "pr-10")}
+                      placeholder={t("auth.serviceDescriptionPlaceholder", "Brief description of your services (Optional)")}
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="text-xs text-muted-foreground">
+          {t(
+            "auth.termsAgreement",
+            "By registering, you agree to our"
+          )}{" "}
+          <Link to="/terms" className="text-primary hover:underline">
+            {t("auth.termsOfService", "Terms of Service")}
+          </Link>{" "}
+          {t("auth.and", "and")}{" "}
+          <Link to="/privacy" className="text-primary hover:underline">
+            {t("auth.privacyPolicy", "Privacy Policy")}
+          </Link>
+          .
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? 
+            t("auth.registering", "Submitting application...") : 
+            t("auth.registerAsProvider", "Submit Provider Application")}
+        </Button>
+        
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mt-4">
+            {t("auth.alreadyAccount", "Already have an account?")}{" "}
+            <Link to="/auth/login" className="text-primary hover:underline">
+              {t("auth.login", "Sign in")}
+            </Link>
+          </p>
+        </div>
+      </form>
+    </Form>
+  );
+
+  return (
+    <AuthPage
+      title={t("auth.registerAsProvider", "Register as a Provider")}
+      description={t(
+        "auth.providerRegisterDescription", 
+        "Submit your details to register as a service provider on InstaSafar"
+      )}
+      tabs={[
+        {
+          id: "provider",
+          label: t("auth.providerRegistration", "Provider Registration"),
+          content: providerContent,
+        },
+      ]}
+    />
   );
 };
 

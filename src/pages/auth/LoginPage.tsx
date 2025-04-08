@@ -1,139 +1,116 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"; // Use useAuth instead of useSupabaseAuth
-
-// Define the form schema
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(1, { message: "Please enter your password" }),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import EmailPasswordForm, { EmailPasswordFormValues } from "@/components/auth/EmailPasswordForm";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
+import AuthPage from "./AuthPage";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, user } = useAuth(); // Use useAuth hook directly
+  const { signIn, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  // If user is already logged in, redirect to home
+  // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
     if (user) {
-      navigate("/");
+      const userRole = user.role || 'user';
+      
+      if (userRole === 'admin') {
+        navigate("/admin/dashboard");
+      } else if (userRole === 'provider') {
+        navigate("/provider/dashboard");
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const handleLogin = async (data: EmailPasswordFormValues) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const result = await signIn(data.email, data.password);
       
-      if (result.success) {
-        navigate("/");
-      } else if (result.error) {
+      if (!result.success && result.error) {
         setError(result.error.message);
       }
     } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(t(
+        "auth.unexpectedError",
+        "An unexpected error occurred. Please try again."
+      ));
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Sign in to your account</h1>
-        <p className="text-muted-foreground mt-2">
-          Enter your email and password below to sign in
-        </p>
+  const loginContent = (
+    <>
+      <EmailPasswordForm
+        onSubmit={handleLogin}
+        submitButtonText={t("auth.signIn", "Sign In")}
+        isLoading={isLoading}
+        error={error}
+      />
+      
+      <div className="mt-4">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/auth/forgot-password"
+            className="text-sm text-primary hover:underline"
+          >
+            {t("auth.forgotPassword", "Forgot Password?")}
+          </Link>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            placeholder="m@example.com"
-            type="email"
-            autoComplete="email"
-            disabled={isLoading}
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              disabled={isLoading}
-              {...register("password")}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
-
-        {error && (
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {error}
-          </div>
-        )}
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Sign In"}
-        </Button>
-      </form>
-
+      
+      <SocialLoginButtons 
+        isLoading={isLoading}
+        onStartLoading={() => setIsLoading(true)} 
+      />
+      
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          {t("auth.noAccount", "Don't have an account?")}{" "}
           <Link
             to="/auth/register"
             className="text-primary font-medium hover:underline"
           >
-            Create Account
+            {t("auth.createAccount", "Create Account")}
+          </Link>
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          {t("auth.areYouProvider", "Are you a service provider?")}{" "}
+          <Link
+            to="/auth/register-provider"
+            className="text-primary font-medium hover:underline"
+          >
+            {t("auth.registerAsProvider", "Register here")}
           </Link>
         </p>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <AuthPage
+      title={t("auth.signInTitle", "Sign in to your account")}
+      description={t("auth.signInDescription", "Enter your email and password below to sign in")}
+      tabs={[
+        {
+          id: "login",
+          label: t("auth.login", "Login"),
+          content: loginContent,
+        },
+      ]}
+    />
   );
 };
 

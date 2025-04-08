@@ -37,6 +37,7 @@ export interface AuthContextType {
   loading: boolean;
   isLoading: boolean; // Alias for loading for compatibility
   isAdmin: boolean; // For AdminLayout
+  isProvider: boolean; // For ProviderLayout
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, fullName: string) => Promise<AuthResult>;
   register: (email: string, password: string, fullName: string) => Promise<AuthResult>; // Alias for signUp
@@ -51,6 +52,8 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   logout: () => Promise<void>; // Alias for signOut for compatibility
   updateProfile: (data: Partial<UserMetadata>) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (password: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -58,6 +61,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isLoading: true,
   isAdmin: false,
+  isProvider: false,
   signIn: async () => ({ success: false }),
   signUp: async () => ({ success: false }),
   register: async () => ({ success: false }),
@@ -65,6 +69,8 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   logout: async () => {},
   updateProfile: async () => false,
+  resetPassword: async () => ({ success: false }),
+  updatePassword: async () => ({ success: false }),
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -134,6 +140,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: { message: error.message } };
       }
 
+      // No need to navigate here - the onAuthStateChange will handle setting the user
+      // and the useEffect in each protected page will handle the redirection
       return { success: true };
     } catch (error) {
       return { 
@@ -249,8 +257,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string): Promise<AuthResult> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+
+      if (error) {
+        return { success: false, error: { message: error.message } };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: { message: 'An unexpected error occurred while sending the password reset email.' } 
+      };
+    }
+  };
+
+  const updatePassword = async (password: string): Promise<AuthResult> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: { message: error.message } };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: { message: 'An unexpected error occurred while updating your password.' } 
+      };
+    }
+  };
+
   // Check if user has admin role
   const isAdmin = user?.role === 'admin' || user?.user_metadata?.role === 'admin';
+  // Check if user has provider role
+  const isProvider = user?.role === 'provider' || user?.user_metadata?.role === 'provider';
 
   return (
     <AuthContext.Provider value={{ 
@@ -258,13 +306,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading, 
       isLoading: loading,
       isAdmin,
+      isProvider,
       signIn, 
       signUp,
       register: signUp, // Alias for compatibility
       registerProvider, 
       signOut,
       logout: signOut, // Alias for compatibility
-      updateProfile
+      updateProfile,
+      resetPassword,
+      updatePassword
     }}>
       {children}
     </AuthContext.Provider>

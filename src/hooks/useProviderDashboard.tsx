@@ -160,7 +160,7 @@ export const useProviderDashboard = () => {
       }
 
       // Fix type casting for bookings data
-      setRecentBookings((bookingsData || []) as unknown as BookingData[]);
+      setRecentBookings(bookingsData as unknown as BookingData[]);
 
       // Second query: Get provider stats using properly typed RPC call
       const { data: statsData, error: statsError } = await supabase

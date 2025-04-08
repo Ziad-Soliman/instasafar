@@ -7,6 +7,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import EmailPasswordForm, { EmailPasswordFormValues } from "@/components/auth/EmailPasswordForm";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import AuthPage from "./AuthPage";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +16,8 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
-
+  const { toast } = useToast();
+  
   // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
     if (user) {
@@ -46,6 +49,38 @@ const LoginPage: React.FC = () => {
         "An unexpected error occurred. Please try again."
       ));
       console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (userType: 'user' | 'provider' | 'admin') => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      let email: string;
+      let password = "password123";  // Same password for all demo accounts
+
+      if (userType === 'admin') {
+        email = "admin@instasafar.com";
+      } else if (userType === 'provider') {
+        email = "provider@instasafar.com";
+      } else {
+        email = "user@instasafar.com";
+      }
+
+      const result = await signIn(email, password);
+      
+      if (!result.success && result.error) {
+        setError(result.error.message);
+      }
+    } catch (error) {
+      setError(t(
+        "auth.unexpectedError",
+        "An unexpected error occurred. Please try again."
+      ));
+      console.error("Demo login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +129,36 @@ const LoginPage: React.FC = () => {
           >
             {t("auth.registerAsProvider", "Register here")}
           </Link>
+        </p>
+      </div>
+
+      <div className="mt-8 border-t pt-6">
+        <h3 className="text-center text-sm font-medium mb-4">{t("auth.quickLogin", "Quick Login for Demo")}</h3>
+        <div className="flex flex-col gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => handleDemoLogin('user')}
+            disabled={isLoading}
+          >
+            {t("auth.loginAsUser", "Login as User")}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => handleDemoLogin('provider')}
+            disabled={isLoading}
+          >
+            {t("auth.loginAsProvider", "Login as Provider")}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => handleDemoLogin('admin')}
+            disabled={isLoading}
+          >
+            {t("auth.loginAsAdmin", "Login as Admin")}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          {t("auth.demoNotice", "Demo accounts are for demonstration purposes only")}
         </p>
       </div>
     </>

@@ -14,7 +14,7 @@ import { useRtlHelpers } from "@/utils/rtl-helpers";
 
 const ProviderDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { isRTL } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { getDirectionalClasses } = useRtlHelpers();
   const {
     recentBookings,
@@ -30,16 +30,16 @@ const ProviderDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t("dashboard.title", "Dashboard")}</h1>
         <Button onClick={() => navigate("/provider/listings")}>
-          Manage Listings 
+          {t("dashboard.manageListings", "Manage Listings")}
           <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
         </Button>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <p className="text-muted-foreground animate-pulse">Loading dashboard data...</p>
+          <p className="text-muted-foreground animate-pulse">{t("dashboard.loadingData", "Loading dashboard data...")}</p>
         </div>
       ) : (
         <>

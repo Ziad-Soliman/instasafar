@@ -199,6 +199,10 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "bookings": "Bookings",
     "wishlist": "Wishlist",
     "logout": "Logout",
+    "dashboard": "Dashboard",
+    "listings": "Listings",
+    "analytics": "Analytics",
+    "settings": "Settings",
     
     // New additions
     "wishlist.add": "Add to Wishlist",
@@ -226,6 +230,9 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "dashboard.newBookingDesc": "A new booking has been made",
     "dashboard.fetchError": "Failed to fetch dashboard data",
     "dashboard.tryAgain": "Please try again later.",
+    "dashboard.title": "Dashboard",
+    "dashboard.manageListings": "Manage Listings",
+    "dashboard.loadingData": "Loading dashboard data...",
     
     // Why Choose Us section
     "whyChooseUs.title": "Why Choose Us",
@@ -422,6 +429,10 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "bookings": "الحجوزات",
     "wishlist": "المفضلة",
     "logout": "تسجيل الخروج",
+    "dashboard": "لوحة التحكم",
+    "listings": "القوائم",
+    "analytics": "التحليلات",
+    "settings": "الإعدادات",
     
     // New additions
     "wishlist.add": "أضف إلى المفضلة",
@@ -449,6 +460,9 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "dashboard.newBookingDesc": "تم إجراء حجز جديد",
     "dashboard.fetchError": "فشل في جلب بيانات لوحة التحكم",
     "dashboard.tryAgain": "يرجى المحاولة مرة أخرى لاحقًا.",
+    "dashboard.title": "لوحة التحكم",
+    "dashboard.manageListings": "إدارة القوائم",
+    "dashboard.loadingData": "جاري تحميل بيانات لوحة التحكم...",
     
     // Why Choose Us section
     "whyChooseUs.title": "لماذا تختارنا",

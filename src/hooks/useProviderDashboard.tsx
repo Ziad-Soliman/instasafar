@@ -154,13 +154,13 @@ export const useProviderDashboard = () => {
         .eq('provider_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
-
+      
       if (bookingsError) {
         throw bookingsError;
       }
-
+      
       // Fix type casting for bookings data
-      setRecentBookings(bookingsData as unknown as BookingData[]);
+      setRecentBookings(bookingsData as BookingData[]);
 
       // Second query: Get provider stats using properly typed RPC call
       const { data: statsData, error: statsError } = await supabase

@@ -17,6 +17,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [loginType, setLoginType] = useState<'user' | 'provider' | 'admin'>('user');
   
   // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
@@ -86,8 +87,28 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // Determine which form title to show based on login type
+  const getFormTitle = () => {
+    switch(loginType) {
+      case 'admin':
+        return t("auth.login.adminTitle", "Admin Sign In");
+      case 'provider':
+        return t("auth.login.providerTitle", "Provider Sign In");
+      default:
+        return t("auth.signInTitle", "Sign in to your account");
+    }
+  };
+
   const loginContent = (
     <>
+      <Tabs className="w-full mb-6" value={loginType} onValueChange={(value) => setLoginType(value as 'user' | 'provider' | 'admin')}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="user">{t("auth.login.userTab", "User")}</TabsTrigger>
+          <TabsTrigger value="provider">{t("auth.login.providerTab", "Provider")}</TabsTrigger>
+          <TabsTrigger value="admin">{t("auth.login.adminTab", "Admin")}</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <EmailPasswordForm
         onSubmit={handleLogin}
         submitButtonText={t("auth.signIn", "Sign In")}
@@ -166,7 +187,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <AuthPage
-      title={t("auth.signInTitle", "Sign in to your account")}
+      title={getFormTitle()}
       description={t("auth.signInDescription", "Enter your email and password below to sign in")}
       tabs={[
         {

@@ -57,12 +57,22 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, effect, asChild = false, loading = false, children, disabled, ...props }, ref) => {
+    // When using asChild, ensure we have valid children for Slot
+    if (asChild) {
+      // Check if children is valid for Slot component
+      const childrenArray = React.Children.toArray(children)
+      
+      // If no children or multiple children, fall back to regular button
+      if (childrenArray.length !== 1 || typeof childrenArray[0] === 'string') {
+        console.warn('Button with asChild prop requires exactly one React element child. Falling back to regular button.')
+        asChild = false
+      }
+    }
+    
     const Comp = asChild ? Slot : "button"
     
-    // When using asChild, we need to ensure we only pass a single child to Slot
-    if (asChild && loading) {
-      // When asChild is true and loading, we can't modify the child structure
-      // so we'll just pass the children as-is and let the parent handle loading state
+    // For Slot component, we can't add our own loading spinner
+    if (asChild) {
       return (
         <Comp
           className={cn(buttonVariants({ variant, size, effect, className }))}
@@ -75,6 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       )
     }
     
+    // For regular button, we can add loading spinner
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, effect, className }))}

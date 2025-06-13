@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -173,7 +174,7 @@ const HomePage: React.FC = () => {
               className="flex flex-col items-start space-y-8"
             >
               <motion.div variants={fadeInUp}>
-                <Badge className="py-2 px-4 text-sm font-medium mb-6 bg-saudi-green text-white">
+                <Badge className="py-2 px-4 text-sm font-medium mb-6" variant="saudi">
                   <Sparkles className="w-4 h-4 mr-1" />
                   Hajj & Umrah Specialists
                 </Badge>
@@ -370,7 +371,7 @@ const HomePage: React.FC = () => {
             <TabsContent value="hotel" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Destination</label>
+                  <Label className="text-sm font-medium mb-2 block">Destination</Label>
                   <Select defaultValue="makkah">
                     <SelectTrigger>
                       <SelectValue placeholder="Select location" />
@@ -384,7 +385,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Check-in Date</label>
+                  <Label className="text-sm font-medium mb-2 block">Check-in Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start text-left">
@@ -404,7 +405,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Duration</label>
+                  <Label className="text-sm font-medium mb-2 block">Duration</Label>
                   <Select defaultValue="7">
                     <SelectTrigger>
                       <SelectValue placeholder="Select duration" />
@@ -434,7 +435,7 @@ const HomePage: React.FC = () => {
             <TabsContent value="package" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Package Type</label>
+                  <Label className="text-sm font-medium mb-2 block">Package Type</Label>
                   <Select defaultValue="umrah">
                     <SelectTrigger>
                       <SelectValue placeholder="Select package" />
@@ -448,7 +449,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Start Date</label>
+                  <Label className="text-sm font-medium mb-2 block">Start Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start text-left">
@@ -468,7 +469,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Duration</label>
+                  <Label className="text-sm font-medium mb-2 block">Duration</Label>
                   <Select defaultValue="14">
                     <SelectTrigger>
                       <SelectValue placeholder="Select duration" />
@@ -497,12 +498,12 @@ const HomePage: React.FC = () => {
             <TabsContent value="flight" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">From</label>
+                  <Label className="text-sm font-medium mb-2 block">From</Label>
                   <Input placeholder="Departure City/Airport" />
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">To</label>
+                  <Label className="text-sm font-medium mb-2 block">To</Label>
                   <Select defaultValue="jeddah">
                     <SelectTrigger>
                       <SelectValue placeholder="Select destination" />
@@ -515,7 +516,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Departure Date</label>
+                  <Label className="text-sm font-medium mb-2 block">Departure Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start text-left">
@@ -549,7 +550,7 @@ const HomePage: React.FC = () => {
             <TabsContent value="transport" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">From</label>
+                  <Label className="text-sm font-medium mb-2 block">From</Label>
                   <Select defaultValue="jeddah">
                     <SelectTrigger>
                       <SelectValue placeholder="Select origin" />
@@ -563,7 +564,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">To</label>
+                  <Label className="text-sm font-medium mb-2 block">To</Label>
                   <Select defaultValue="makkah">
                     <SelectTrigger>
                       <SelectValue placeholder="Select destination" />
@@ -577,7 +578,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Date</label>
+                  <Label className="text-sm font-medium mb-2 block">Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start text-left">
@@ -620,8 +621,8 @@ const HomePage: React.FC = () => {
             variants={fadeInUp}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <Badge className="mb-4 bg-saudi-green">Why Choose InstaSafar</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Making Your Journey <span className="text-saudi-green-200">Spiritual & Comfortable</span></h2>
+            <Badge className="mb-4" variant="saudi">Why Choose InstaSafar</Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Making Your Journey <span className="text-saudi-green">Spiritual & Comfortable</span></h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
               We understand the profound significance of Hajj and Umrah in your spiritual life. Every aspect of our service is designed to enhance your sacred journey with comfort, convenience, and deep meaning.
             </p>
@@ -640,7 +641,7 @@ const HomePage: React.FC = () => {
                 variants={scaleIn}
                 className="group cursor-pointer"
               >
-                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 bg-white overflow-hidden relative">
+                <Card variant="interactive" className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 bg-white overflow-hidden relative">
                   <div className={`absolute inset-0 bg-gradient-to-br ${benefit.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
                   <CardHeader className="pb-4 relative z-10">
                     <div className={`bg-gradient-to-br ${benefit.gradient} rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
@@ -670,7 +671,7 @@ const HomePage: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               variants={fadeInUp}
             >
-              <Badge className="mb-3">Our Selection</Badge>
+              <Badge className="mb-3" variant="outline">Our Selection</Badge>
               <h2 className="text-3xl font-bold">Featured Hotels</h2>
               <p className="text-muted-foreground mt-2 max-w-2xl">
                 Discover our handpicked selection of hotels in Makkah and Madinah offering comfort, convenience, and spiritual serenity.
@@ -726,7 +727,7 @@ const HomePage: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               variants={fadeInUp}
             >
-              <Badge className="mb-3">Complete Solutions</Badge>
+              <Badge className="mb-3" variant="outline">Complete Solutions</Badge>
               <h2 className="text-3xl font-bold">Hajj & Umrah Packages</h2>
               <p className="text-muted-foreground mt-2 max-w-2xl">
                 All-inclusive packages featuring accommodation, transportation, and guided visits to holy sites.

@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Saudi Green Color Palette
+				// Enhanced Saudi Green Color Palette
 				'saudi-green': {
 					DEFAULT: 'hsl(140, 100%, 20%)', // #006C35
 					50: 'hsl(140, 100%, 96%)',
@@ -194,6 +194,13 @@ export default {
 			boxShadow: {
 				'saudi': '0 4px 14px 0 hsl(140, 100%, 20%, 0.15)',
 				'saudi-lg': '0 10px 25px -3px hsl(140, 100%, 20%, 0.2), 0 4px 6px -2px hsl(140, 100%, 20%, 0.05)',
+				'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.06)',
+				'elevated': '0 8px 24px 0 rgba(0, 0, 0, 0.12)',
+				'floating': '0 16px 48px 0 rgba(0, 0, 0, 0.18)',
+			},
+			backgroundPattern: {
+				'dots': 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+				'grid': 'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
 			}
 		}
 	},

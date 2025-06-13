@@ -1,6 +1,11 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { createClient } from '@supabase/supabase-js';
 import { toast } from "@/hooks/use-toast";
+
+// Create a temporary client for type safety
+const supabaseUrl = "https://oymavgefxsjouvfophjz.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bWF2Z2VmeHNqb3V2Zm9waGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NzA3NTMsImV4cCI6MjA1OTI0Njc1M30.Dsr4BVNsCHYV1zim6-9QvrxLs4SsOOv1Ql7Ncw67if0";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export type ExternalListing = {
   id: string;

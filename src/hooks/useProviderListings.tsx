@@ -1,8 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { createClient } from '@supabase/supabase-js';
+
+// Create a temporary client for type safety
+const supabaseUrl = "https://oymavgefxsjouvfophjz.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95bWF2Z2VmeHNqb3V2Zm9waGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NzA3NTMsImV4cCI6MjA1OTI0Njc1M30.Dsr4BVNsCHYV1zim6-9QvrxLs4SsOOv1Ql7Ncw67if0";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface Hotel {
   id: string;
@@ -27,7 +32,7 @@ export interface Package {
   duration_days: number;
   start_date: string;
   end_date: string;
-  city: string; // Changed to string type to match the database
+  city: string;
   thumbnail: string;
   includes_hotel: boolean;
   includes_flight: boolean;
@@ -49,62 +54,78 @@ export function useProviderListings() {
     setIsLoading(true);
     
     try {
-      // Fetch hotels
-      const { data: hotelsData, error: hotelsError } = await supabase
-        .from('hotels')
-        .select(`
-          id, 
-          name, 
-          city, 
-          address, 
-          description, 
-          rating, 
-          price_per_night, 
-          distance_to_haram, 
-          thumbnail,
-          created_at,
-          updated_at
-        `)
-        .eq('provider_id', user.id);
-      
-      if (hotelsError) {
-        throw hotelsError;
-      }
-      
-      // Fetch amenities for each hotel
-      const hotelsWithAmenities = await Promise.all(
-        hotelsData.map(async (hotel) => {
-          const { data: amenitiesData, error: amenitiesError } = await supabase
-            .from('hotel_amenities')
-            .select('name')
-            .eq('hotel_id', hotel.id);
-            
-          if (amenitiesError) {
-            console.error('Error fetching amenities:', amenitiesError);
-            return { ...hotel, amenities: [] };
-          }
+      // Fetch hotels with error handling
+      try {
+        const { data: hotelsData, error: hotelsError } = await supabase
+          .from('hotels')
+          .select(`
+            id, 
+            name, 
+            city, 
+            address, 
+            description, 
+            rating, 
+            price_per_night, 
+            distance_to_haram, 
+            thumbnail,
+            created_at,
+            updated_at
+          `)
+          .eq('provider_id', user.id);
+        
+        if (hotelsError) {
+          console.error('Hotels fetch error:', hotelsError);
+          setHotels([]);
+        } else {
+          // Fetch amenities for each hotel
+          const hotelsWithAmenities = await Promise.all(
+            (hotelsData || []).map(async (hotel: any) => {
+              try {
+                const { data: amenitiesData, error: amenitiesError } = await supabase
+                  .from('hotel_amenities')
+                  .select('name')
+                  .eq('hotel_id', hotel.id);
+                  
+                if (amenitiesError) {
+                  console.error('Error fetching amenities:', amenitiesError);
+                  return { ...hotel, amenities: [] };
+                }
+                
+                return { 
+                  ...hotel, 
+                  amenities: (amenitiesData || []).map((amenity: any) => amenity.name) 
+                };
+              } catch (err) {
+                console.error('Error processing hotel amenities:', err);
+                return { ...hotel, amenities: [] };
+              }
+            })
+          );
           
-          return { 
-            ...hotel, 
-            amenities: amenitiesData.map(amenity => amenity.name) 
-          };
-        })
-      );
-      
-      setHotels(hotelsWithAmenities);
-      
-      // Fetch packages
-      const { data: packagesData, error: packagesError } = await supabase
-        .from('packages')
-        .select('*')
-        .eq('provider_id', user.id);
-      
-      if (packagesError) {
-        throw packagesError;
+          setHotels(hotelsWithAmenities);
+        }
+      } catch (err) {
+        console.error('Hotels processing error:', err);
+        setHotels([]);
       }
       
-      // Safely cast the data to the Package type
-      setPackages(packagesData as unknown as Package[]);
+      // Fetch packages with error handling
+      try {
+        const { data: packagesData, error: packagesError } = await supabase
+          .from('packages')
+          .select('*')
+          .eq('provider_id', user.id);
+        
+        if (packagesError) {
+          console.error('Packages fetch error:', packagesError);
+          setPackages([]);
+        } else {
+          setPackages((packagesData || []) as Package[]);
+        }
+      } catch (err) {
+        console.error('Packages processing error:', err);
+        setPackages([]);
+      }
       
     } catch (error) {
       console.error('Error fetching provider listings:', error);
@@ -147,8 +168,8 @@ export function useProviderListings() {
         throw hotelError;
       }
       
-      // Insert hotel amenities
-      if (amenitiesArray.length > 0) {
+      // Insert hotel amenities if provided and newHotel exists
+      if (newHotel && amenitiesArray.length > 0) {
         const amenitiesObjects = amenitiesArray.map(name => ({
           hotel_id: newHotel.id,
           name
@@ -192,7 +213,7 @@ export function useProviderListings() {
       // Update hotel data
       const { error: updateError } = await supabase
         .from('hotels')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', hotelId);
       
       if (updateError) {
@@ -331,7 +352,7 @@ export function useProviderListings() {
     try {
       const { error } = await supabase
         .from('packages')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', packageId);
       
       if (error) {

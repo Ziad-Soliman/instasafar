@@ -105,10 +105,28 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    line-height: 1.6;
   }
 
   .font-arabic {
     font-family: 'Amiri', serif;
+  }
+
+  /* Enhanced Typography System */
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-semibold leading-snug;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl font-medium leading-relaxed;
   }
 
   /* RTL Support */
@@ -116,7 +134,7 @@
     text-align: right;
   }
 
-  /* Saudi Green Color Classes */
+  /* Enhanced Saudi Green Color Classes */
   .text-saudi-green {
     color: hsl(var(--saudi-green));
   }
@@ -129,100 +147,106 @@
     border-color: hsl(var(--saudi-green));
   }
 
-  /* Smooth scrolling for page transitions */
-  .page-transition-wrapper {
-    @apply animate-fade-in;
+  /* Enhanced Page Layout System */
+  .page-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
   }
 
-  /* Glass effect with Saudi green tint */
-  .glass-effect {
-    @apply backdrop-blur-md bg-white/80 dark:bg-black/30 border border-white/20 dark:border-white/10;
-    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(0,108,53,0.05) 100%);
+  .page-header {
+    @apply mb-8 md:mb-12;
   }
 
-  /* Enhanced hover effects */
-  .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-lg;
+  .page-title {
+    @apply text-3xl md:text-4xl font-bold text-foreground mb-2;
   }
 
-  .hover-scale {
-    @apply transition-transform duration-200 hover:scale-105;
+  .page-subtitle {
+    @apply text-lg text-muted-foreground;
   }
 
-  /* Custom scrollbar with Saudi green theme */
-  ::-webkit-scrollbar {
-    @apply w-2;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-muted rounded-full;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--saudi-green));
-    @apply rounded-full opacity-50 hover:opacity-80;
+  /* Enhanced Card System */
+  .card-enhanced {
+    @apply bg-card text-card-foreground rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden backdrop-blur-sm;
   }
 
-  /* Gradient backgrounds */
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--saudi-green)) 0%, hsl(var(--saudi-green-light)) 100%);
-  }
-
-  .gradient-secondary {
-    background: linear-gradient(135deg, hsl(var(--saudi-green-light)) 0%, hsl(var(--saudi-green-lighter)) 100%);
-  }
-}
-
-/* Enhanced utility classes */
-@layer components {
-  .container-custom {
-    @apply px-4 sm:px-6 md:px-8 mx-auto max-w-7xl;
-  }
-  
-  .card-custom {
-    @apply bg-card text-card-foreground rounded-lg border shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden;
+  .card-interactive {
+    @apply card-enhanced hover:border-saudi-green/20 hover:shadow-saudi transform hover:-translate-y-1 cursor-pointer;
   }
 
   .card-premium {
-    @apply card-custom border-2 border-saudi-green/20 shadow-lg hover:shadow-xl hover:border-saudi-green/40;
+    @apply card-enhanced border-2 border-saudi-green/20 shadow-saudi hover:shadow-saudi-lg hover:border-saudi-green/40;
   }
 
-  .input-custom {
-    @apply border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-saudi-green focus:border-saudi-green transition-all duration-200;
+  /* Enhanced Form System */
+  .form-group {
+    @apply space-y-2 mb-6;
   }
 
-  .btn-saudi {
-    @apply bg-saudi-green text-white hover:bg-saudi-green/90 focus:ring-2 focus:ring-saudi-green focus:ring-offset-2 transition-all duration-200;
+  .form-label {
+    @apply block text-sm font-medium text-foreground mb-2;
   }
 
-  .btn-saudi-outline {
-    @apply border-2 border-saudi-green text-saudi-green hover:bg-saudi-green hover:text-white transition-all duration-200;
+  .form-input {
+    @apply w-full px-4 py-3 border border-input bg-background rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-saudi-green focus:border-saudi-green transition-all duration-200;
   }
 
-  /* Hero section animation */
-  .hero-animation-wrapper {
-    @apply overflow-hidden relative;
+  .form-error {
+    @apply text-sm text-destructive mt-1;
   }
 
-  .hero-animation-item {
-    @apply transition-all duration-700;
+  /* Enhanced Button System */
+  .btn-base {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
-  /* Enhanced animations */
-  .bounce-gentle {
-    animation: bounce-gentle 2s ease-in-out infinite;
+  .btn-primary {
+    @apply btn-base bg-saudi-green text-white hover:bg-saudi-green/90 shadow-saudi hover:shadow-saudi-lg transform hover:-translate-y-0.5;
   }
 
-  @keyframes bounce-gentle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+  .btn-secondary {
+    @apply btn-base border-2 border-saudi-green text-saudi-green bg-transparent hover:bg-saudi-green hover:text-white;
   }
 
-  .fade-in-up {
-    animation: fade-in-up 0.6s ease-out forwards;
+  .btn-ghost {
+    @apply btn-base text-saudi-green hover:bg-saudi-green/10 hover:text-saudi-green-dark;
   }
 
-  @keyframes fade-in-up {
+  /* Enhanced Loading States */
+  .loading-container {
+    @apply flex items-center justify-center p-8;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-saudi-green;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+
+  /* Enhanced Grid System */
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .grid-responsive-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+
+  /* Enhanced Animations */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
     from {
       opacity: 0;
       transform: translateY(30px);
@@ -233,14 +257,10 @@
     }
   }
 
-  .scale-in {
-    animation: scale-in 0.4s ease-out forwards;
-  }
-
-  @keyframes scale-in {
+  @keyframes scaleIn {
     from {
       opacity: 0;
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
     to {
       opacity: 1;
@@ -248,18 +268,110 @@
     }
   }
 
-  /* Saudi-themed patterns */
-  .pattern-dots {
-    background-image: radial-gradient(circle, hsl(var(--saudi-green)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .pattern-grid {
-    background-image: 
-      linear-gradient(hsl(var(--saudi-green)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--saudi-green)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.05;
+  /* Enhanced Responsive Utilities */
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .heading-responsive {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .spacing-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  /* Enhanced Focus States */
+  .focus-visible {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-saudi-green focus-visible:ring-offset-2;
+  }
+
+  /* Enhanced Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--saudi-green));
+    @apply rounded-full opacity-60 hover:opacity-80 transition-opacity;
+  }
+
+  /* Enhanced Glass Effect */
+  .glass-effect {
+    @apply backdrop-blur-lg bg-white/90 dark:bg-black/40 border border-white/30 dark:border-white/10;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(0,108,53,0.05) 100%);
+  }
+
+  /* Enhanced Shadow System */
+  .shadow-soft {
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-elevated {
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  .shadow-floating {
+    box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.18);
+  }
+}
+
+/* Enhanced utility classes */
+@layer components {
+  .container-enhanced {
+    @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl;
+  }
+  
+  .section-spacing {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .content-spacing {
+    @apply space-y-6 md:space-y-8;
+  }
+
+  /* Enhanced Interactive Elements */
+  .interactive-element {
+    @apply transition-all duration-200 hover:scale-105 active:scale-95;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-[0_0_20px_hsl(140,100%,20%,0.3)];
+  }
+
+  /* Enhanced Status Indicators */
+  .status-success {
+    @apply bg-green-50 text-green-700 border-green-200;
+  }
+
+  .status-warning {
+    @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+  }
+
+  .status-error {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+
+  .status-info {
+    @apply bg-blue-50 text-blue-700 border-blue-200;
   }
 }

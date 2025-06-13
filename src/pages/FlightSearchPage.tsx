@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { ArrowRight, CalendarIcon, Clock, Plane, Search, Users } from "lucide-react";
+import { ArrowRight, CalendarIcon, Clock, Plane, Search, Users, Filter, MapPin, ArrowLeftRight } from "lucide-react";
+import FlightCard from "@/components/cards/FlightCard";
 
 // Mock data for flights
 interface Flight {
@@ -201,403 +201,422 @@ const FlightSearchPage: React.FC = () => {
   const airlines = [...new Set(flights.map(flight => flight.airline))];
   
   return (
-    <div className="container mx-auto py-8 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-3xl font-bold mb-6">Find Flights</h1>
-        
-        {/* Flight Search Form */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="mb-4">
-              <RadioGroup 
-                defaultValue={tripType} 
-                onValueChange={setTripType}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="one-way" id="one-way" />
-                  <Label htmlFor="one-way">One way</Label>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-saudi-green/5">
+      <div className="page-container">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="py-8 md:py-12"
+        >
+          {/* Enhanced Page Header */}
+          <div className="page-header text-center">
+            <h1 className="page-title mb-4">Find Your Perfect Flight</h1>
+            <p className="page-subtitle max-w-2xl mx-auto">
+              Discover the best flight deals and book your journey across Saudi Arabia and beyond
+            </p>
+          </div>
+          
+          {/* Enhanced Flight Search Form */}
+          <Card variant="elevated" className="mb-8 md:mb-12 bg-white/80 backdrop-blur-sm">
+            <CardContent className="p-6 md:p-8">
+              {/* Trip Type Selection */}
+              <div className="mb-6">
+                <Label className="text-base font-semibold mb-3 block">Trip Type</Label>
+                <RadioGroup 
+                  defaultValue={tripType} 
+                  onValueChange={setTripType}
+                  className="flex flex-wrap gap-6"
+                >
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="one-way" id="one-way" className="text-saudi-green" />
+                    <Label htmlFor="one-way" className="font-medium">One way</Label>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="round-trip" id="round-trip" className="text-saudi-green" />
+                    <Label htmlFor="round-trip" className="font-medium">Round trip</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              {/* Search Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="form-group">
+                  <Label htmlFor="from" className="form-label flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-saudi-green" />
+                    From
+                  </Label>
+                  <Select defaultValue={fromCity} onValueChange={setFromCity}>
+                    <SelectTrigger id="from" className="form-input">
+                      <SelectValue placeholder="Select departure city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Jeddah">Jeddah (JED)</SelectItem>
+                      <SelectItem value="Riyadh">Riyadh (RUH)</SelectItem>
+                      <SelectItem value="Makkah">Makkah</SelectItem>
+                      <SelectItem value="Madinah">Madinah</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="round-trip" id="round-trip" />
-                  <Label htmlFor="round-trip">Round trip</Label>
+                
+                <div className="form-group">
+                  <Label htmlFor="to" className="form-label flex items-center gap-2">
+                    <ArrowLeftRight className="w-4 h-4 text-saudi-green" />
+                    To
+                  </Label>
+                  <Select defaultValue={toCity} onValueChange={setToCity}>
+                    <SelectTrigger id="to" className="form-input">
+                      <SelectValue placeholder="Select destination city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Jeddah">Jeddah (JED)</SelectItem>
+                      <SelectItem value="Riyadh">Riyadh (RUH)</SelectItem>
+                      <SelectItem value="Makkah">Makkah</SelectItem>
+                      <SelectItem value="Madinah">Madinah</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </RadioGroup>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <div>
-                <Label htmlFor="from">From</Label>
-                <Select defaultValue={fromCity} onValueChange={setFromCity}>
-                  <SelectTrigger id="from">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Jeddah">Jeddah</SelectItem>
-                    <SelectItem value="Riyadh">Riyadh</SelectItem>
-                    <SelectItem value="Makkah">Makkah</SelectItem>
-                    <SelectItem value="Madinah">Madinah</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="to">To</Label>
-                <Select defaultValue={toCity} onValueChange={setToCity}>
-                  <SelectTrigger id="to">
-                    <SelectValue placeholder="Select city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Jeddah">Jeddah</SelectItem>
-                    <SelectItem value="Riyadh">Riyadh</SelectItem>
-                    <SelectItem value="Makkah">Makkah</SelectItem>
-                    <SelectItem value="Madinah">Madinah</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="departure-date">Departure Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !departureDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {departureDate ? format(departureDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={departureDate}
-                      onSelect={setDepartureDate}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              {tripType === "round-trip" && (
-                <div>
-                  <Label htmlFor="return-date">Return Date</Label>
+                
+                <div className="form-group">
+                  <Label htmlFor="departure-date" className="form-label flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4 text-saudi-green" />
+                    Departure Date
+                  </Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !returnDate && "text-muted-foreground"
+                          "form-input justify-start text-left font-normal h-12",
+                          !departureDate && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {returnDate ? format(returnDate, "PPP") : <span>Pick a date</span>}
+                        {departureDate ? format(departureDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-white shadow-elevated" align="start">
                       <Calendar
                         mode="single"
-                        selected={returnDate}
-                        onSelect={setReturnDate}
+                        selected={departureDate}
+                        onSelect={setDepartureDate}
                         initialFocus
-                        className="p-3 pointer-events-auto"
-                        disabled={date => !departureDate || date < departureDate}
+                        className="p-3"
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
-              )}
-              
-              {tripType === "one-way" && (
-                <div>
-                  <Label htmlFor="passengers">Passengers</Label>
-                  <Select defaultValue={passengers.toString()} onValueChange={(val) => setPassengers(parseInt(val))}>
-                    <SelectTrigger id="passengers">
-                      <SelectValue placeholder="Select passengers" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} {num === 1 ? 'passenger' : 'passengers'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-end">
-              <Button onClick={handleSearch} className="px-8">
-                <Search className="mr-2 h-4 w-4" /> Search Flights
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <Card className="lg:col-span-1">
-            <CardContent className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Filters</h2>
-              
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-base">Price Range</Label>
-                  <div className="pt-4">
-                    <Slider
-                      defaultValue={[0, 1000]}
-                      max={1000}
-                      step={50}
-                      onValueChange={(value) => setPriceRange(value)}
-                    />
-                    <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
-                    </div>
+                
+                {tripType === "round-trip" ? (
+                  <div className="form-group">
+                    <Label htmlFor="return-date" className="form-label flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4 text-saudi-green" />
+                      Return Date
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "form-input justify-start text-left font-normal h-12",
+                            !returnDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {returnDate ? format(returnDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-white shadow-elevated" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={returnDate}
+                          onSelect={setReturnDate}
+                          initialFocus
+                          disabled={date => !departureDate || date < departureDate}
+                          className="p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                </div>
-                
-                <div>
-                  <Label className="text-base">Airline</Label>
-                  <RadioGroup 
-                    defaultValue={selectedAirline} 
-                    onValueChange={setSelectedAirline}
-                    className="mt-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="all" id="all-airlines" />
-                      <Label htmlFor="all-airlines">All Airlines</Label>
-                    </div>
-                    {airlines.map(airline => (
-                      <div key={airline} className="flex items-center space-x-2">
-                        <RadioGroupItem value={airline} id={airline} />
-                        <Label htmlFor={airline}>{airline}</Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                
-                <div>
-                  <Label className="text-base">Stops</Label>
-                  <RadioGroup 
-                    defaultValue={maxStops.toString()}
-                    onValueChange={(value) => setMaxStops(parseInt(value))}
-                    className="mt-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="0" id="non-stop" />
-                      <Label htmlFor="non-stop">Non-stop only</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="1" id="max-1-stop" />
-                      <Label htmlFor="max-1-stop">Max 1 stop</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="2" id="max-2-stops" />
-                      <Label htmlFor="max-2-stops">Max 2 stops</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <Button className="w-full" onClick={handleSearch}>Apply Filters</Button>
+                ) : (
+                  <div className="form-group">
+                    <Label htmlFor="passengers" className="form-label flex items-center gap-2">
+                      <Users className="w-4 h-4 text-saudi-green" />
+                      Passengers
+                    </Label>
+                    <Select defaultValue={passengers.toString()} onValueChange={(val) => setPassengers(parseInt(val))}>
+                      <SelectTrigger id="passengers" className="form-input">
+                        <SelectValue placeholder="Select passengers" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} {num === 1 ? 'passenger' : 'passengers'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              
+              {/* Search Button */}
+              <div className="flex justify-center">
+                <Button 
+                  onClick={handleSearch} 
+                  variant="saudi"
+                  size="lg"
+                  className="px-12 py-3 text-base font-semibold"
+                  disabled={loading}
+                >
+                  <Search className="mr-2 h-5 w-5" /> 
+                  {loading ? 'Searching...' : 'Search Flights'}
+                </Button>
               </div>
             </CardContent>
           </Card>
           
-          {/* Flight Results */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="flights">
-              <TabsList className="mb-6">
-                <TabsTrigger value="flights">
-                  <Plane className="h-4 w-4 mr-2" />
-                  Flights
-                </TabsTrigger>
-                <TabsTrigger value="external">
-                  <Search className="h-4 w-4 mr-2" />
-                  External Providers
-                </TabsTrigger>
-              </TabsList>
-              
-              {/* Flights Tab */}
-              <TabsContent value="flights" className="mt-0">
-                {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <Card key={i}>
-                        <CardContent className="p-4">
-                          <div className="flex flex-col sm:flex-row justify-between">
-                            <div className="flex gap-4 mb-4 sm:mb-0">
-                              <Skeleton className="w-12 h-12 rounded-full" />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Enhanced Filters Sidebar */}
+            <div className="lg:col-span-1">
+              <Card variant="elevated" className="sticky top-8">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <Filter className="w-5 h-5 text-saudi-green" />
+                    Filters
+                  </h2>
+                  
+                  <div className="space-y-8">
+                    {/* Price Range Filter */}
+                    <div>
+                      <Label className="text-base font-medium mb-4 block">Price Range</Label>
+                      <div className="px-2">
+                        <Slider
+                          defaultValue={[0, 1000]}
+                          max={1000}
+                          step={50}
+                          onValueChange={(value) => setPriceRange(value)}
+                          className="mb-4"
+                        />
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>${priceRange[0]}</span>
+                          <span>${priceRange[1]}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Airline Filter */}
+                    <div>
+                      <Label className="text-base font-medium mb-4 block">Airline</Label>
+                      <RadioGroup 
+                        defaultValue={selectedAirline} 
+                        onValueChange={setSelectedAirline}
+                        className="space-y-3"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="all" id="all-airlines" />
+                          <Label htmlFor="all-airlines" className="font-medium">All Airlines</Label>
+                        </div>
+                        {airlines.map(airline => (
+                          <div key={airline} className="flex items-center space-x-3">
+                            <RadioGroupItem value={airline} id={airline} />
+                            <Label htmlFor={airline}>{airline}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                    
+                    <Separator />
+                    
+                    {/* Stops Filter */}
+                    <div>
+                      <Label className="text-base font-medium mb-4 block">Stops</Label>
+                      <RadioGroup 
+                        defaultValue={maxStops.toString()}
+                        onValueChange={(value) => setMaxStops(parseInt(value))}
+                        className="space-y-3"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="0" id="non-stop" />
+                          <Label htmlFor="non-stop">Non-stop only</Label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="1" id="max-1-stop" />
+                          <Label htmlFor="max-1-stop">Max 1 stop</Label>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <RadioGroupItem value="2" id="max-2-stops" />
+                          <Label htmlFor="max-2-stops">Max 2 stops</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    <Button 
+                      variant="saudi"
+                      className="w-full mt-6" 
+                      onClick={handleSearch}
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Enhanced Flight Results */}
+            <div className="lg:col-span-3">
+              <Tabs defaultValue="flights" className="w-full">
+                <TabsList className="mb-8 bg-white/80 backdrop-blur-sm">
+                  <TabsTrigger value="flights" className="flex items-center gap-2">
+                    <Plane className="h-4 w-4" />
+                    Flights ({filteredFlights.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="external" className="flex items-center gap-2">
+                    <Search className="h-4 w-4" />
+                    External Providers ({externalProviders.length})
+                  </TabsTrigger>
+                </TabsList>
+                
+                {/* Enhanced Flights Tab */}
+                <TabsContent value="flights" className="mt-0">
+                  {loading ? (
+                    <div className="space-y-6">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} variant="elevated">
+                          <CardContent className="p-6">
+                            <div className="flex flex-col lg:flex-row justify-between gap-6">
+                              <div className="flex gap-4">
+                                <Skeleton className="w-12 h-12 rounded-full" />
+                                <div className="space-y-2">
+                                  <Skeleton className="h-6 w-40" />
+                                  <Skeleton className="h-4 w-24" />
+                                </div>
+                              </div>
+                              <div className="flex-grow grid grid-cols-3 gap-4">
+                                <Skeleton className="h-16 w-full" />
+                                <Skeleton className="h-16 w-full" />
+                                <Skeleton className="h-16 w-full" />
+                              </div>
                               <div className="space-y-2">
-                                <Skeleton className="h-4 w-40" />
-                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-8 w-24" />
+                                <Skeleton className="h-10 w-32" />
                               </div>
                             </div>
-                            <div className="space-y-2">
-                              <Skeleton className="h-4 w-24" />
-                              <Skeleton className="h-6 w-32" />
-                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : filteredFlights.length === 0 ? (
+                    <Card variant="elevated">
+                      <CardContent className="p-12 text-center">
+                        <div className="max-w-md mx-auto">
+                          <div className="mb-4">
+                            <Plane className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                           </div>
-                          <Skeleton className="h-8 w-full mt-4" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <>
-                    {filteredFlights.length === 0 ? (
-                      <Card>
-                        <CardContent className="p-6 text-center">
-                          <p className="text-muted-foreground">No flights found matching your criteria.</p>
-                          <Button onClick={handleSearch} className="mt-4">Reset Filters</Button>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div className="space-y-4">
-                        {filteredFlights.map(flight => (
-                          <Card key={flight.id} className="relative overflow-hidden">
-                            {flight.is_internal && (
-                              <Badge className="absolute top-2 right-2 z-10 bg-primary" variant="secondary">
-                                Internal
-                              </Badge>
-                            )}
-                            <CardContent className="p-6">
-                              <div className="flex flex-col lg:flex-row justify-between gap-4">
-                                <div className="flex gap-4 items-center">
-                                  <div className="w-12 h-12 bg-muted rounded-full overflow-hidden flex-shrink-0">
-                                    <img 
-                                      src={flight.airline_logo} 
-                                      alt={flight.airline} 
-                                      className="w-full h-full object-cover" 
-                                    />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium">{flight.airline}</h3>
-                                    <div className="text-sm text-muted-foreground">
-                                      Flight #{flight.id.replace('flight-', '')}
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-center">
-                                  <div className="text-center">
-                                    <div className="font-semibold text-lg">{flight.departure_time}</div>
-                                    <div className="text-sm">{flight.departure_airport}</div>
-                                    <div className="text-xs text-muted-foreground">{flight.departure_city}</div>
-                                  </div>
-                                  
-                                  <div className="text-center flex flex-col items-center">
-                                    <div className="text-xs text-muted-foreground">{flight.duration}</div>
-                                    <div className="w-full flex items-center">
-                                      <div className="h-[1px] bg-border flex-grow"></div>
-                                      <Plane className="mx-2 h-3 w-3 text-muted-foreground" />
-                                      <div className="h-[1px] bg-border flex-grow"></div>
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {flight.stops === 0 ? 'Non-stop' : 
-                                       flight.stops === 1 ? '1 stop' : 
-                                       `${flight.stops} stops`}
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="text-center">
-                                    <div className="font-semibold text-lg">{flight.arrival_time}</div>
-                                    <div className="text-sm">{flight.arrival_airport}</div>
-                                    <div className="text-xs text-muted-foreground">{flight.arrival_city}</div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex flex-col items-end justify-between">
-                                  <div className="text-xl font-bold">${flight.price}</div>
-                                  <div className="text-xs text-muted-foreground mb-2">per person</div>
-                                  <Button onClick={() => handleViewDetails(flight)}>
-                                    {flight.is_internal ? 'Book Now' : 'View Details'}
-                                  </Button>
-                                </div>
+                          <h3 className="text-xl font-semibold mb-2">No flights found</h3>
+                          <p className="text-muted-foreground mb-6">
+                            We couldn't find any flights matching your criteria. Try adjusting your filters or search parameters.
+                          </p>
+                          <Button onClick={handleSearch} variant="saudi">
+                            Reset Filters
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <motion.div 
+                      className="space-y-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {filteredFlights.map((flight, index) => (
+                        <motion.div
+                          key={flight.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                        >
+                          <FlightCard
+                            flight={flight}
+                            departureDate={departureDate}
+                            passengers={passengers}
+                            onViewDetails={handleViewDetails}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </TabsContent>
+                
+                {/* Enhanced External Providers Tab */}
+                <TabsContent value="external" className="mt-0">
+                  {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} variant="elevated">
+                          <CardContent className="p-6">
+                            <Skeleton className="w-full h-16 mb-4" />
+                            <div className="space-y-2">
+                              <Skeleton className="h-6 w-40" />
+                              <Skeleton className="h-4 w-24" />
+                            </div>
+                            <Skeleton className="h-10 w-full mt-4" />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <motion.div 
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {externalProviders.map((provider, index) => (
+                        <motion.div
+                          key={provider.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                        >
+                          <Card variant="interactive" className="h-full">
+                            <CardContent className="p-6 text-center">
+                              <div className="h-16 mb-6 bg-muted/50 flex items-center justify-center rounded-lg">
+                                <img
+                                  src={provider.logo}
+                                  alt={provider.name}
+                                  className="h-10 max-w-full object-contain"
+                                />
                               </div>
                               
-                              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                                <div className="flex items-center text-xs text-muted-foreground">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  <span>Departure: {departureDate ? format(departureDate, 'dd MMM yyyy') : 'Not selected'}</span>
-                                </div>
-                                <div className="flex items-center text-xs text-muted-foreground">
-                                  <Users className="w-3 h-3 mr-1" />
-                                  <span>{passengers} {passengers === 1 ? 'passenger' : 'passengers'}</span>
-                                </div>
+                              <h3 className="font-semibold text-lg mb-2">{provider.name}</h3>
+                              <div className="text-muted-foreground mb-6 text-sm">
+                                {provider.price_indication}
                               </div>
+                              
+                              <Button 
+                                onClick={() => handleExternalProviderClick(provider.url)} 
+                                variant="saudi-outline"
+                                className="w-full"
+                              >
+                                Search on {provider.name}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Button>
                             </CardContent>
                           </Card>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </TabsContent>
-              
-              {/* External Providers Tab */}
-              <TabsContent value="external" className="mt-0">
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                      <Card key={i}>
-                        <CardContent className="p-6">
-                          <Skeleton className="w-full h-12 mb-4" />
-                          <div className="space-y-2">
-                            <Skeleton className="h-4 w-40" />
-                            <Skeleton className="h-4 w-24" />
-                          </div>
-                          <Skeleton className="h-8 w-full mt-4" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {externalProviders.map(provider => (
-                      <Card key={provider.id} className="relative overflow-hidden">
-                        <CardContent className="p-6">
-                          <div className="h-12 mb-4 bg-muted flex items-center justify-center rounded">
-                            <img
-                              src={provider.logo}
-                              alt={provider.name}
-                              className="h-8 max-w-full object-contain"
-                            />
-                          </div>
-                          
-                          <h3 className="font-semibold text-center">{provider.name}</h3>
-                          <div className="text-center text-sm mb-4">
-                            {provider.price_indication}
-                          </div>
-                          
-                          <Button 
-                            onClick={() => handleExternalProviderClick(provider.url)} 
-                            className="w-full"
-                            variant="outline"
-                          >
-                            Search on {provider.name}
-                            <ArrowRight className="ml-2 h-3 w-3" />
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

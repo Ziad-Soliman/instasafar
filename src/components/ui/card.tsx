@@ -1,20 +1,29 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
+  React.HTMLAttributes<HTMLDivElement> & {
+    variant?: "default" | "interactive" | "premium" | "elevated"
+  }
+>(({ className, variant = "default", ...props }, ref) => {
+  const variants = {
+    default: "rounded-xl border bg-card text-card-foreground shadow-soft",
+    interactive: "rounded-xl border bg-card text-card-foreground shadow-soft hover:shadow-elevated hover:border-saudi-green/20 transform hover:-translate-y-1 transition-all duration-300 cursor-pointer",
+    premium: "rounded-xl border-2 border-saudi-green/20 bg-card text-card-foreground shadow-saudi hover:shadow-saudi-lg hover:border-saudi-green/40 transition-all duration-300",
+    elevated: "rounded-xl border bg-card text-card-foreground shadow-elevated hover:shadow-floating transition-all duration-300"
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={cn(variants[variant], className)}
+      {...props}
+    />
+  )
+})
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<
@@ -23,7 +32,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-2 p-6 pb-4", className)}
     {...props}
   />
 ))
@@ -36,7 +45,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-xl md:text-2xl font-semibold leading-tight tracking-tight text-foreground",
       className
     )}
     {...props}
@@ -50,7 +59,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm md:text-base text-muted-foreground leading-relaxed", className)}
     {...props}
   />
 ))

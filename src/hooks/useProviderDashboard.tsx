@@ -140,7 +140,7 @@ export const useProviderDashboard = () => {
     setLoading(true);
 
     try {
-      // First query: Get recent bookings
+      // First query: Get recent bookings with proper type handling
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -159,8 +159,25 @@ export const useProviderDashboard = () => {
         throw bookingsError;
       }
       
-      // Fix type casting for bookings data
-      setRecentBookings(bookingsData as BookingData[]);
+      // Transform the data to match our interface
+      const transformedBookings: BookingData[] = (bookingsData || []).map(booking => ({
+        id: booking.id,
+        booking_type: booking.booking_type,
+        total_price: booking.total_price,
+        status: booking.status,
+        payment_status: booking.payment_status,
+        created_at: booking.created_at,
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date,
+        adults: booking.adults,
+        children: booking.children,
+        hotel: booking.hotel && typeof booking.hotel === 'object' && 'name' in booking.hotel ? booking.hotel : null,
+        package: booking.package && typeof booking.package === 'object' && 'name' in booking.package ? booking.package : null,
+        user: booking.user && typeof booking.user === 'object' && 'id' in booking.user ? booking.user : null,
+        user_id: booking.user_id,
+      }));
+      
+      setRecentBookings(transformedBookings);
 
       // Second query: Get provider stats using properly typed RPC call
       const { data: statsData, error: statsError } = await supabase

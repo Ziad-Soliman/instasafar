@@ -71,6 +71,11 @@ const translations: Record<LanguageType, Record<string, string>> = {
     // Auth pages
     "auth.login.title": "Sign in to your account",
     "auth.login.subtitle": "Enter your credentials to access your account",
+    "auth.login.userTab": "User",
+    "auth.login.providerTab": "Provider", 
+    "auth.login.adminTab": "Admin",
+    "auth.login.adminTitle": "Admin Sign In",
+    "auth.login.providerTitle": "Provider Sign In",
     "auth.register.title": "Create an account",
     "auth.register.subtitle": "Sign up to start booking your spiritual journey",
     "auth.email": "Email",
@@ -120,9 +125,8 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "auth.contactPhonePlaceholder": "Business Phone Number (Optional)",
     "auth.serviceDescription": "Service Description",
     "auth.serviceDescriptionPlaceholder": "Brief description of your services (Optional)",
-    "auth.registerAsProvider": "Register as a Provider",
-    "auth.providerRegisterDescription": "Submit your details to register as a service provider on InstaSafar",
     "auth.providerRegistration": "Provider Registration",
+    "auth.providerRegisterDescription": "Submit your details to register as a service provider on InstaSafar",
     
     // Account pages
     "account.profile.title": "Your Profile",
@@ -301,6 +305,11 @@ const translations: Record<LanguageType, Record<string, string>> = {
     // Auth pages
     "auth.login.title": "تسجيل الدخول إلى حسابك",
     "auth.login.subtitle": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى حسابك",
+    "auth.login.userTab": "مستخدم",
+    "auth.login.providerTab": "مزود خدمة",
+    "auth.login.adminTab": "مدير",
+    "auth.login.adminTitle": "تسجيل دخول المدير",
+    "auth.login.providerTitle": "تسجيل دخول مزود الخدمة",
     "auth.register.title": "إنشاء حساب",
     "auth.register.subtitle": "سجل للبدء في حجز رحلتك الروحية",
     "auth.email": "البريد الإلكتروني",
@@ -350,9 +359,8 @@ const translations: Record<LanguageType, Record<string, string>> = {
     "auth.contactPhonePlaceholder": "رقم هاتف العمل (اختياري)",
     "auth.serviceDescription": "وصف الخدمة",
     "auth.serviceDescriptionPlaceholder": "وصف موجز لخدماتك (اختياري)",
-    "auth.registerAsProvider": "التسجيل كمزود خدمة",
-    "auth.providerRegisterDescription": "قدم تفاصيلك للتسجيل كمزود خدمة في انستاسفر",
     "auth.providerRegistration": "تسجيل مزود الخدمة",
+    "auth.providerRegisterDescription": "قدم تفاصيلك للتسجيل كمزود خدمة في انستاسفر",
     
     // Account pages
     "account.profile.title": "ملفك الشخصي",

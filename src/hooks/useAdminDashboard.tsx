@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -71,7 +70,7 @@ export const useAdminDashboard = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our interface
+      // Transform the data to match our interface, handling potential null values
       const transformedData: Booking[] = (data || []).map(item => ({
         id: item.id,
         user_id: item.user_id,

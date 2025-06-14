@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Clock, MapPin, Hotel, Plane, Bus, Users, ChevronLeft, Check } from "lucide-react";
-import { format, differenceInDays, addDays } from "date-fns";
+import { format, differenceInDays, addDays, isValid, parseISO } from "date-fns";
 import { packageDetails } from "@/data/packages";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -172,6 +171,20 @@ const PackageDetailPage: React.FC = () => {
     return `${format(departureDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`;
   };
   
+  // Safe date formatting function
+  const formatSafeDate = (dateString: string, formatString: string = "MMM d, yyyy") => {
+    try {
+      const date = parseISO(dateString);
+      if (isValid(date)) {
+        return format(date, formatString);
+      }
+      return "Date available upon booking";
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Date available upon booking";
+    }
+  };
+  
   // Render loading state
   if (loading) {
     return (
@@ -251,7 +264,7 @@ const PackageDetailPage: React.FC = () => {
                 </div>
                 <div className="flex items-center">
                   <CalendarIcon className="h-4 w-4 mr-1" />
-                  <span>Available from {format(new Date(packageData.start_date), "MMM d, yyyy")}</span>
+                  <span>Available from {packageData.start_date ? formatSafeDate(packageData.start_date) : "Upon booking"}</span>
                 </div>
               </div>
             </div>
@@ -501,11 +514,35 @@ const PackageDetailPage: React.FC = () => {
                               mode="single"
                               selected={departureDate}
                               onSelect={(date) => date && setDepartureDate(date)}
-                              disabled={(date) => 
-                                date < new Date() || 
-                                (new Date(packageData.start_date) > new Date() && date < new Date(packageData.start_date)) ||
-                                (new Date(packageData.end_date) < new Date() && date > new Date())
-                              }
+                              disabled={(date) => {
+                                const today = new Date();
+                                if (date < today) return true;
+                                
+                                // Only apply date restrictions if we have valid start/end dates
+                                if (packageData.start_date) {
+                                  try {
+                                    const startDate = parseISO(packageData.start_date);
+                                    if (isValid(startDate) && startDate > today && date < startDate) {
+                                      return true;
+                                    }
+                                  } catch (error) {
+                                    console.error("Start date parsing error:", error);
+                                  }
+                                }
+                                
+                                if (packageData.end_date) {
+                                  try {
+                                    const endDate = parseISO(packageData.end_date);
+                                    if (isValid(endDate) && date > endDate) {
+                                      return true;
+                                    }
+                                  } catch (error) {
+                                    console.error("End date parsing error:", error);
+                                  }
+                                }
+                                
+                                return false;
+                              }}
                               className="p-3"
                             />
                             <div className="p-2 border-t">

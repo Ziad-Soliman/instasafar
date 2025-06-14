@@ -23,6 +23,22 @@ export interface ExternalListing {
   isPromoted?: boolean;
 }
 
+// Also export a database-compatible interface for admin pages
+export interface ExternalListingData {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  price_indication?: string;
+  rating_indication?: string;
+  city?: string;
+  provider_name: string;
+  redirect_url: string;
+  listing_type: 'hotel' | 'package' | 'flight' | 'activity';
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface ExternalListingCardProps {
   listing: ExternalListing;
   onSelect?: (listing: ExternalListing) => void;

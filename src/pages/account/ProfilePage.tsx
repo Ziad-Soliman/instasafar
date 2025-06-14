@@ -32,14 +32,14 @@ const ProfilePage: React.FC = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Setup form with default values from user profile
+  // Provide defaults from user/user_metadata, fallback to ""
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: user?.full_name || "",
+      fullName: user?.full_name || user?.user_metadata?.full_name || "",
       email: user?.email || "",
-      phone: user?.contact_phone || "", // use contact_phone for UserMetadata
-      preferredLanguage: "en",
+      phone: user?.user_metadata?.contact_phone || "",
+      preferredLanguage: user?.user_metadata?.preferred_language || "en",
     },
   });
   
@@ -47,22 +47,22 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     if (user) {
       form.reset({
-        fullName: user.full_name || "",
+        fullName: user.full_name || user.user_metadata?.full_name || "",
         email: user.email || "",
-        phone: user.contact_phone || "", // use contact_phone for UserMetadata
-        preferredLanguage: user.preferred_language || "en",
+        phone: user.user_metadata?.contact_phone || "",
+        preferredLanguage: user.user_metadata?.preferred_language || "en",
       });
     }
   }, [user, form]);
   
-  // Handle form submission -- now actually update the Supabase profile!
+  // Handle form submission
   async function onSubmit(values: ProfileFormValues) {
     setIsSubmitting(true);
     
     try {
       const success = await updateProfile({
         full_name: values.fullName,
-        contact_phone: values.phone, // FIXED: Use contact_phone instead of phone_number
+        contact_phone: values.phone,
         preferred_language: values.preferredLanguage,
       });
 
@@ -240,7 +240,7 @@ const ProfilePage: React.FC = () => {
                           <User className="w-4 h-4 mt-1 mr-3 text-muted-foreground" />
                           <div>
                             <div className="text-sm font-medium">Full Name</div>
-                            <div className="text-sm text-muted-foreground">{user?.full_name || "Not set"}</div>
+                            <div className="text-sm text-muted-foreground">{user?.full_name || user?.user_metadata?.full_name || "Not set"}</div>
                           </div>
                         </div>
                         
@@ -251,9 +251,13 @@ const ProfilePage: React.FC = () => {
                           <div>
                             <div className="text-sm font-medium">Language</div>
                             <div className="text-sm text-muted-foreground">
-                              {user?.preferred_language === "ar" ? "Arabic" : 
-                               user?.preferred_language === "fr" ? "French" :
-                               user?.preferred_language === "es" ? "Spanish" : "English"}
+                              {(user?.user_metadata?.preferred_language === "ar" || user?.preferred_language === "ar")
+                                ? "Arabic"
+                                : (user?.user_metadata?.preferred_language === "fr" || user?.preferred_language === "fr")
+                                ? "French"
+                                : (user?.user_metadata?.preferred_language === "es" || user?.preferred_language === "es")
+                                ? "Spanish"
+                                : "English"}
                             </div>
                           </div>
                         </div>
@@ -264,7 +268,7 @@ const ProfilePage: React.FC = () => {
                           <Phone className="w-4 h-4 mt-1 mr-3 text-muted-foreground" />
                           <div>
                             <div className="text-sm font-medium">Phone</div>
-                            <div className="text-sm text-muted-foreground">{user?.contact_phone || "Not set"}</div>
+                            <div className="text-sm text-muted-foreground">{user?.user_metadata?.contact_phone || "Not set"}</div>
                           </div>
                         </div>
                       </div>

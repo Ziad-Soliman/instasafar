@@ -7,53 +7,35 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { BreadcrumbEnhanced } from '@/components/ui/breadcrumb-enhanced';
+import BreadcrumbEnhanced from '@/components/ui/breadcrumb-enhanced';
 import PackageCard from '@/components/cards/PackageCard';
 import { Filter, Search, MapPin, Calendar, Users, DollarSign } from 'lucide-react';
-import { packages } from '@/data/packages';
 import { mockPackages } from '@/data/mockData';
 
 const PackagesPage = () => {
   const [searchParams] = useSearchParams();
   const packageType = searchParams.get('type') as 'hajj' | 'umrah' | 'custom' | null;
   
-  // Combine packages from both sources and ensure consistent format
+  // Use only mockPackages data since packages export doesn't exist
   const allPackages = useMemo(() => {
-    const combinedPackages = [
-      ...packages.map(pkg => ({
-        id: pkg.id,
-        title: pkg.title,
-        image: pkg.image,
-        duration: pkg.duration,
-        price: pkg.price,
-        location: pkg.location,
-        rating: pkg.rating,
-        review_count: pkg.review_count,
-        includes: pkg.includes || [],
-        type: pkg.type,
-        is_featured: pkg.is_featured
-      })),
-      ...mockPackages.map(pkg => ({
-        id: pkg.id,
-        title: pkg.title,
-        image: pkg.image,
-        duration: pkg.duration,
-        price: pkg.price,
-        location: pkg.location,
-        rating: pkg.rating,
-        review_count: pkg.review_count,
-        includes: pkg.includes || [],
-        type: pkg.type,
-        is_featured: pkg.is_featured
-      }))
-    ];
+    console.log('Available packages:', mockPackages);
     
-    // Remove duplicates based on ID
-    const uniquePackages = combinedPackages.filter((pkg, index, self) => 
-      index === self.findIndex((p) => p.id === pkg.id)
-    );
+    // Ensure consistent format
+    const formattedPackages = mockPackages.map(pkg => ({
+      id: pkg.id,
+      title: pkg.title,
+      image: pkg.image,
+      duration: pkg.duration,
+      price: pkg.price,
+      location: pkg.location,
+      rating: pkg.rating,
+      review_count: pkg.review_count,
+      includes: Array.isArray(pkg.includes) ? pkg.includes : [],
+      type: pkg.type,
+      is_featured: pkg.is_featured || false
+    }));
     
-    return uniquePackages;
+    return formattedPackages;
   }, []);
 
   // Filter state
@@ -94,7 +76,6 @@ const PackagesPage = () => {
   const regularPackages = filteredPackages.filter(pkg => !pkg.is_featured);
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
     { label: 'Packages', href: '/packages' },
     ...(packageType ? [{ label: packageType.charAt(0).toUpperCase() + packageType.slice(1), href: `/packages?type=${packageType}` }] : [])
   ];

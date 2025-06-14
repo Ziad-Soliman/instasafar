@@ -7,8 +7,9 @@ export type Direction = 'ltr' | 'rtl';
 interface LanguageContextType {
   language: Language;
   direction: Direction;
+  isRTL: boolean;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -163,10 +164,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguage] = useState<Language>('en');
 
   const direction: Direction = language === 'ar' ? 'rtl' : 'ltr';
+  const isRTL = language === 'ar';
 
-  // Simple translation function that takes only one argument
-  const t = (key: string): string => {
-    return translations[language][key] || key;
+  // Updated translation function that accepts optional fallback
+  const t = (key: string, fallback?: string): string => {
+    return translations[language][key] || fallback || key;
   };
 
   useEffect(() => {
@@ -175,7 +177,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [language, direction]);
 
   return (
-    <LanguageContext.Provider value={{ language, direction, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, direction, isRTL, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

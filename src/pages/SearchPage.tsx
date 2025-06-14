@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,19 +29,30 @@ const SearchPage: React.FC = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  // Fetch hotels from backend when search term changes
   useEffect(() => {
     const fetchHotels = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("hotels")
-        .select("*")
-        .order("created_at", { ascending: false });
+
+      // Build query, apply filters if searchTerm exists
+      let query = supabase.from("hotels").select("*").order("created_at", { ascending: false });
+
+      if (searchTerm.trim().length > 0) {
+        // Use ilike for case-insensitive filtering on name or city
+        query = query.or(
+          `name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`
+        );
+      }
+
+      const { data, error } = await query;
+
       if (error) {
         toast({
           title: "Error",
           description: "Failed to fetch hotels.",
           variant: "destructive",
         });
+        setHotels([]);
         setLoading(false);
         return;
       }
@@ -48,13 +60,7 @@ const SearchPage: React.FC = () => {
       setLoading(false);
     };
     fetchHotels();
-  }, [toast]);
-
-  const filteredHotels = hotels.filter(
-    (hotel) =>
-      hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hotel.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [searchTerm, toast]);
 
   return (
     <div className="container mx-auto py-8">
@@ -68,11 +74,11 @@ const SearchPage: React.FC = () => {
       </div>
       {loading ? (
         <div className="flex justify-center py-20">{t("search.loading")}</div>
-      ) : filteredHotels.length === 0 ? (
+      ) : hotels.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">{t("search.no_hotels")}</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredHotels.map((hotel) => (
+          {hotels.map((hotel) => (
             <Card key={hotel.id}>
               <CardContent className="p-4">
                 <Link to={`/hotel/${hotel.id}`}>
@@ -105,3 +111,4 @@ const SearchPage: React.FC = () => {
 };
 
 export default SearchPage;
+

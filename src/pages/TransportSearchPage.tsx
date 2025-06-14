@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,12 +16,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Bus, CalendarIcon, Car, MapPin, Search, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data for transport options
+// Types must match backend
 interface Transport {
   id: string;
-  provider: string;
-  provider_logo: string;
+  provider?: string;
+  provider_logo?: string;
   transport_type: "bus" | "car" | "shuttle";
   from_city: string;
   to_city: string;
@@ -30,11 +31,10 @@ interface Transport {
   duration: string;
   price: number;
   capacity: number;
-  is_internal: boolean;
-  features: string[];
+  is_internal?: boolean; // Supabase doesn't have this field unless you store it
+  features?: string[];
 }
 
-// Mock external transport provider
 interface ExternalTransportProvider {
   id: string;
   name: string;
@@ -47,87 +47,61 @@ const TransportSearchPage: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  
+  const { toast } = useToast();
+
   // State for search form
   const [fromCity, setFromCity] = useState("Makkah");
   const [toCity, setToCity] = useState("Madinah");
   const [travelDate, setTravelDate] = useState<Date | undefined>(new Date());
   const [passengers, setPassengers] = useState(1);
   const [transportType, setTransportType] = useState<string>("all");
-  
+
   // State for results
   const [loading, setLoading] = useState(false);
   const [transports, setTransports] = useState<Transport[]>([]);
   const [externalProviders, setExternalProviders] = useState<ExternalTransportProvider[]>([]);
-  
-  // Fetch transport options on search
-  const handleSearch = () => {
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch transport options from Supabase Edge Function
+  const handleSearch = useCallback(async () => {
     setLoading(true);
-    
-    // Mock API call - would be replaced with Supabase query
-    setTimeout(() => {
-      // Mock transport data
-      const mockTransports: Transport[] = [
-        {
-          id: "transport-1",
-          provider: "SAPTCO",
-          provider_logo: "/placeholder.svg",
-          transport_type: "bus",
-          from_city: "Makkah",
-          to_city: "Madinah",
-          departure_time: "08:00",
-          duration: "4h 30m",
-          price: 70,
-          capacity: 40,
-          is_internal: true,
-          features: ["Air Conditioned", "WiFi", "Refreshments", "Prayer Break"]
-        },
-        {
-          id: "transport-2",
-          provider: "Al Makkah Trans",
-          provider_logo: "/placeholder.svg",
-          transport_type: "shuttle",
-          from_city: "Makkah",
-          to_city: "Madinah",
-          departure_time: "09:30",
-          duration: "4h",
-          price: 85,
-          capacity: 16,
-          is_internal: true,
-          features: ["Air Conditioned", "WiFi", "Water", "Prayer Break"]
-        },
-        {
-          id: "transport-3",
-          provider: "Careem",
-          provider_logo: "/placeholder.svg",
-          transport_type: "car",
-          from_city: "Makkah",
-          to_city: "Madinah",
-          departure_time: "Flexible",
-          duration: "3h 45m",
-          price: 150,
-          capacity: 4,
-          is_internal: false,
-          features: ["Private", "Air Conditioned", "Water", "Flexible Timing"]
-        },
-        {
-          id: "transport-4",
-          provider: "Haramain Train",
-          provider_logo: "/placeholder.svg",
-          transport_type: "shuttle",
-          from_city: "Makkah",
-          to_city: "Madinah",
-          departure_time: "12:00",
-          duration: "2h 30m",
-          price: 90,
-          capacity: 100,
-          is_internal: true,
-          features: ["High Speed", "Air Conditioned", "Food Service", "Comfortable Seating"]
-        },
-      ];
-      
-      // Mock external providers
-      const mockExternalProviders: ExternalTransportProvider[] = [
+    setError(null);
+
+    try {
+      // Call the Supabase edge function for transport search
+      const queryParams: any = {};
+      if (transportType !== "all") queryParams.type = transportType;
+      // Backend can be updated to also handle from/to, date, etc. if desired
+      const { data, error } = await supabase.functions.invoke('transport', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        // send search params as query string
+        // Supabase functions can't GET with body, so we send as URL params. 
+        // The Vite dev proxy handles /functions, so it's available at /functions/transport
+        // But supabase.functions.invoke always maps name correctly, no need to include "/functions/"
+        // Query params handled internally, but for more complex backend, you'd refactor there too
+        // https://supabase.com/docs/guides/functions/client-invoke
+        searchParams: queryParams,
+      });
+
+      if (error) {
+        setTransports([]);
+        setError("Failed to fetch transport options");
+        toast({
+          title: "Error",
+          description: "Could not load transport options.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Defensive: fallback to empty if not right
+      const transportData: Transport[] = Array.isArray(data) ? data : [];
+      setTransports(transportData);
+
+      // External providers - still mocked for now
+      setExternalProviders([
         {
           id: "provider-1",
           name: "GetYourGuide",
@@ -148,41 +122,44 @@ const TransportSearchPage: React.FC = () => {
           logo: "/placeholder.svg",
           url: "https://viator.com",
           price_indication: "From $65"
-        },
-      ];
-      
-      setTransports(mockTransports);
-      setExternalProviders(mockExternalProviders);
+        }
+      ]);
+
       setLoading(false);
-    }, 1500);
-  };
-  
-  // Run search on component mount
+    } catch (err: any) {
+      setError("Unknown error fetching data");
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: err?.message || "An error occurred.",
+        variant: "destructive",
+      });
+    }
+  }, [toast, transportType]);
+
+  // Run search on mount and whenever search filters change
   useEffect(() => {
     handleSearch();
-  }, []);
-  
-  // Filter transports based on current filters
+  }, [handleSearch]);
+
+  // Filter transports based on filters in the frontend (could move all logic to backend for robust behavior)
   const filteredTransports = transports.filter(transport => {
     const matchesType = transportType === "all" || transport.transport_type === transportType;
-    const hasCapacity = transport.capacity >= passengers;
-    
+    const hasCapacity = typeof transport.capacity === "number" ? transport.capacity >= passengers : false;
     return matchesType && hasCapacity;
   });
-  
+
   // Handle view details/book now
   const handleViewDetails = (transport: Transport) => {
-    // For internal transports, navigate to details page
-    if (transport.is_internal) {
-      navigate(`/transport/${transport.id}`);
-    }
+    // Navigate for internal transports
+    navigate(`/transport/${transport.id}`);
   };
-  
+
   // Handle external provider click
   const handleExternalProviderClick = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
-  
+
   // Get icon based on transport type
   const getTransportIcon = (type: string) => {
     switch (type) {
@@ -194,7 +171,7 @@ const TransportSearchPage: React.FC = () => {
         return <Bus className="h-4 w-4" />;
     }
   };
-  
+
   return (
     <div className="container mx-auto py-8 px-4">
       <motion.div
@@ -356,93 +333,96 @@ const TransportSearchPage: React.FC = () => {
                       </Card>
                     ))}
                   </div>
+                ) : error ? (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">{error}</p>
+                      <Button onClick={handleSearch} className="mt-4">Retry</Button>
+                    </CardContent>
+                  </Card>
+                ) : filteredTransports.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">No transport options found matching your criteria.</p>
+                      <Button onClick={handleSearch} className="mt-4">Reset Filters</Button>
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <>
-                    {filteredTransports.length === 0 ? (
-                      <Card>
-                        <CardContent className="p-6 text-center">
-                          <p className="text-muted-foreground">No transport options found matching your criteria.</p>
-                          <Button onClick={handleSearch} className="mt-4">Reset Filters</Button>
+                  <div className="space-y-4">
+                    {filteredTransports.map(transport => (
+                      <Card key={transport.id} className="relative overflow-hidden">
+                        {transport.is_internal && (
+                          <Badge className="absolute top-2 right-2 z-10 bg-primary" variant="secondary">
+                            Internal
+                          </Badge>
+                        )}
+                        <CardContent className="p-6">
+                          <div className="flex flex-col lg:flex-row justify-between gap-4">
+                            <div className="flex gap-4 items-center">
+                              <div className="w-12 h-12 bg-muted rounded-full overflow-hidden flex-shrink-0">
+                                {/* Use provider_logo if available */}
+                                {transport.provider_logo ? (
+                                  <img
+                                    src={transport.provider_logo}
+                                    alt={transport.provider || ""}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground">No Logo</div>
+                                )}
+                              </div>
+                              <div>
+                                <h3 className="font-medium">{transport.provider}</h3>
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  {getTransportIcon(transport.transport_type)}
+                                  <span className="ml-1 capitalize">{transport.transport_type}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-center">
+                              <div className="text-center">
+                                <div className="font-semibold">{transport.from_city}</div>
+                                <div className="text-sm text-muted-foreground">From</div>
+                                <div className="text-xs">{transport.departure_time}</div>
+                              </div>
+                              <div className="text-center flex flex-col items-center">
+                                <div className="text-xs text-muted-foreground">{transport.duration}</div>
+                                <div className="w-full flex items-center">
+                                  <div className="h-[1px] bg-border flex-grow"></div>
+                                  {getTransportIcon(transport.transport_type)}
+                                  <div className="h-[1px] bg-border flex-grow"></div>
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-semibold">{transport.to_city}</div>
+                                <div className="text-sm text-muted-foreground">To</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end justify-between">
+                              <div className="text-xl font-bold">${transport.price}</div>
+                              <div className="text-xs text-muted-foreground mb-2">per person</div>
+                              <Button onClick={() => handleViewDetails(transport)}>
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="mt-4 pt-4 border-t">
+                            <div className="flex flex-wrap gap-2">
+                              {(transport.features || []).map((feature, index) => (
+                                <Badge key={index} variant="outline">
+                                  {feature}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="mt-2 text-xs text-muted-foreground flex items-center">
+                              <Users className="w-3 h-3 mr-1" />
+                              <span>Capacity: {transport.capacity} passengers</span>
+                            </div>
+                          </div>
                         </CardContent>
                       </Card>
-                    ) : (
-                      <div className="space-y-4">
-                        {filteredTransports.map(transport => (
-                          <Card key={transport.id} className="relative overflow-hidden">
-                            {transport.is_internal && (
-                              <Badge className="absolute top-2 right-2 z-10 bg-primary" variant="secondary">
-                                Internal
-                              </Badge>
-                            )}
-                            <CardContent className="p-6">
-                              <div className="flex flex-col lg:flex-row justify-between gap-4">
-                                <div className="flex gap-4 items-center">
-                                  <div className="w-12 h-12 bg-muted rounded-full overflow-hidden flex-shrink-0">
-                                    <img 
-                                      src={transport.provider_logo} 
-                                      alt={transport.provider} 
-                                      className="w-full h-full object-cover" 
-                                    />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium">{transport.provider}</h3>
-                                    <div className="flex items-center text-sm text-muted-foreground">
-                                      {getTransportIcon(transport.transport_type)}
-                                      <span className="ml-1 capitalize">{transport.transport_type}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-center">
-                                  <div className="text-center">
-                                    <div className="font-semibold">{transport.from_city}</div>
-                                    <div className="text-sm text-muted-foreground">From</div>
-                                    <div className="text-xs">{transport.departure_time}</div>
-                                  </div>
-                                  
-                                  <div className="text-center flex flex-col items-center">
-                                    <div className="text-xs text-muted-foreground">{transport.duration}</div>
-                                    <div className="w-full flex items-center">
-                                      <div className="h-[1px] bg-border flex-grow"></div>
-                                      {getTransportIcon(transport.transport_type)}
-                                      <div className="h-[1px] bg-border flex-grow"></div>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="text-center">
-                                    <div className="font-semibold">{transport.to_city}</div>
-                                    <div className="text-sm text-muted-foreground">To</div>
-                                  </div>
-                                </div>
-                                
-                                <div className="flex flex-col items-end justify-between">
-                                  <div className="text-xl font-bold">${transport.price}</div>
-                                  <div className="text-xs text-muted-foreground mb-2">per person</div>
-                                  <Button onClick={() => handleViewDetails(transport)}>
-                                    {transport.is_internal ? 'Book Now' : 'View Details'}
-                                  </Button>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-4 pt-4 border-t">
-                                <div className="flex flex-wrap gap-2">
-                                  {transport.features.map((feature, index) => (
-                                    <Badge key={index} variant="outline">
-                                      {feature}
-                                    </Badge>
-                                  ))}
-                                </div>
-                                <div className="mt-2 text-xs text-muted-foreground flex items-center">
-                                  <Users className="w-3 h-3 mr-1" />
-                                  <span>Capacity: {transport.capacity} passengers</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                    ))}
+                  </div>
                 )}
               </TabsContent>
               

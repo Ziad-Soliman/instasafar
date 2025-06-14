@@ -36,6 +36,7 @@ export interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isProvider: boolean;
+  userRole: 'user' | 'provider' | 'admin' | null;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, fullName: string) => Promise<AuthResult>;
   register: (email: string, password: string, fullName: string) => Promise<AuthResult>;
@@ -61,6 +62,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   isAdmin: false,
   isProvider: false,
+  userRole: null,
   signIn: async () => ({ success: false }),
   signUp: async () => ({ success: false }),
   register: async () => ({ success: false }),
@@ -76,13 +78,29 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<'user' | 'provider' | 'admin' | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('get_user_role', { _user_id: userId });
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return null;
+      }
+      return data;
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (session?.user) {
+          const role = await fetchUserRole(session.user.id);
           const userData: User = {
             id: session.user.id,
             email: session.user.email || '',
@@ -92,18 +110,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             avatar: session.user.user_metadata?.avatar_url,
             phone_number: session.user.user_metadata?.phone_number,
             preferred_language: session.user.user_metadata?.preferred_language || 'en',
-            role: session.user.user_metadata?.role || 'user'
+            role: role || session.user.user_metadata?.role || 'user'
           };
           setUser(userData);
+          setUserRole(role || session.user.user_metadata?.role || 'user');
         } else {
           setUser(null);
+          setUserRole(null);
         }
         setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
+        const role = await fetchUserRole(session.user.id);
         const userData: User = {
           id: session.user.id,
           email: session.user.email || '',
@@ -113,11 +134,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: session.user.user_metadata?.avatar_url,
           phone_number: session.user.user_metadata?.phone_number,
           preferred_language: session.user.user_metadata?.preferred_language || 'en',
-          role: session.user.user_metadata?.role || 'user'
+          role: role || session.user.user_metadata?.role || 'user'
         };
         setUser(userData);
+        setUserRole(role || session.user.user_metadata?.role || 'user');
       } else {
         setUser(null);
+        setUserRole(null);
       }
       setLoading(false);
     });
@@ -131,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Create admin account
       try {
-        await supabase.auth.signUp({
+        const { data: adminData } = await supabase.auth.signUp({
           email: 'admin@instasafar.com',
           password: 'password123',
           options: {
@@ -141,13 +164,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         });
+        
+        if (adminData.user) {
+          await supabase.from('user_roles').insert({
+            user_id: adminData.user.id,
+            role: 'admin'
+          });
+        }
       } catch (error) {
         // Account might already exist
       }
 
       // Create provider account
       try {
-        await supabase.auth.signUp({
+        const { data: providerData } = await supabase.auth.signUp({
           email: 'provider@instasafar.com',
           password: 'password123',
           options: {
@@ -158,13 +188,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         });
+        
+        if (providerData.user) {
+          await supabase.from('user_roles').insert({
+            user_id: providerData.user.id,
+            role: 'provider'
+          });
+        }
       } catch (error) {
         // Account might already exist
       }
 
       // Create regular user account
       try {
-        await supabase.auth.signUp({
+        const { data: userData } = await supabase.auth.signUp({
           email: 'user@instasafar.com',
           password: 'password123',
           options: {
@@ -174,6 +211,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         });
+        
+        if (userData.user) {
+          await supabase.from('user_roles').insert({
+            user_id: userData.user.id,
+            role: 'user'
+          });
+        }
       } catch (error) {
         // Account might already exist
       }
@@ -219,6 +263,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: { message: error.message } };
       }
 
+      // Add user role to user_roles table
+      if (data.user) {
+        await supabase.from('user_roles').insert({
+          user_id: data.user.id,
+          role: 'user'
+        });
+      }
+
       return { success: true };
     } catch (error) {
       return { 
@@ -253,6 +305,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         return { success: false, error: { message: error.message } };
+      }
+
+      // Add provider role to user_roles table
+      if (data.user) {
+        await supabase.from('user_roles').insert({
+          user_id: data.user.id,
+          role: 'provider'
+        });
       }
 
       return { success: true };
@@ -346,8 +406,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isAdmin = user?.role === 'admin' || user?.user_metadata?.role === 'admin';
-  const isProvider = user?.role === 'provider' || user?.user_metadata?.role === 'provider';
+  const isAdmin = userRole === 'admin';
+  const isProvider = userRole === 'provider';
 
   return (
     <AuthContext.Provider value={{ 
@@ -356,6 +416,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading: loading,
       isAdmin,
       isProvider,
+      userRole,
       signIn, 
       signUp,
       register: signUp,

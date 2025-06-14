@@ -16,7 +16,7 @@ interface Hotel {
   city: string;
   address: string;
   price_per_night: number;
-  rating: number;
+  rating: number | null;
   thumbnail?: string | null;
   description?: string | null;
   distance_to_haram?: string | null;
@@ -34,11 +34,13 @@ const SearchPage: React.FC = () => {
     const fetchHotels = async () => {
       setLoading(true);
 
-      // Build query, apply filters if searchTerm exists
-      let query = supabase.from("hotels").select("*").order("created_at", { ascending: false });
+      let query = supabase
+        .from("hotels")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (searchTerm.trim().length > 0) {
-        // Use ilike for case-insensitive filtering on name or city
+        // Case-insensitive search by name or city
         query = query.or(
           `name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`
         );
@@ -63,7 +65,6 @@ const SearchPage: React.FC = () => {
   }, [searchTerm, toast]);
 
   const handleBookNow = (hotel: Hotel) => {
-    // You can replace this with navigation to a booking confirmation page or drawer/modal
     toast({
       title: "Booking",
       description: `Booking initiated for ${hotel.name}`,
@@ -83,42 +84,50 @@ const SearchPage: React.FC = () => {
       {loading ? (
         <div className="flex justify-center py-20">{t("search.loading")}</div>
       ) : hotels.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">{t("search.no_hotels")}</div>
+        <div className="text-center py-20 text-muted-foreground">
+          {t("search.no_hotels")}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {hotels.map((hotel) => (
             <Card key={hotel.id}>
               <CardContent className="p-4">
-                <Link to={`/hotel/${hotel.id}`}>
+                <Link to={`/hotel/${hotel.id}`} className="block group">
                   <img
                     src={hotel.thumbnail || "/placeholder.svg"}
                     alt={hotel.name}
                     className="w-full h-44 object-cover rounded-lg mb-3"
                   />
-                  <h3 className="text-lg font-bold">{hotel.name}</h3>
+                  <h3 className="text-lg font-bold group-hover:text-saudi-green transition-colors">{hotel.name}</h3>
                   <div className="flex items-center text-muted-foreground text-sm">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{hotel.address}, {hotel.city}</span>
+                    <span>
+                      {hotel.address}, {hotel.city}
+                    </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <Badge variant="outline">{hotel.distance_to_haram || "N/A"} {t("distance.to")} {t("distance.haram")}</Badge>
+                    <Badge variant="outline">
+                      {hotel.distance_to_haram || "N/A"} {t("distance.to")} {t("distance.haram")}
+                    </Badge>
                     <span className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                       {(hotel.rating ?? 0).toFixed(1)}
                     </span>
                   </div>
-                  <div className="mt-2 font-semibold">${hotel.price_per_night} / {t("price.night")}</div>
-                  <Button 
-                    className="mt-3 w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleBookNow(hotel);
-                    }}
-                  >
-                    {t("search.book_now") || "Book Now"}
-                  </Button>
+                  <div className="mt-2 font-semibold">
+                    ${hotel.price_per_night} / {t("price.night")}
+                  </div>
                 </Link>
+                <Button
+                  className="mt-3 w-full"
+                  onClick={e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleBookNow(hotel);
+                  }}
+                >
+                  {t("search.book_now") || "Book Now"}
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -129,4 +138,3 @@ const SearchPage: React.FC = () => {
 };
 
 export default SearchPage;
-

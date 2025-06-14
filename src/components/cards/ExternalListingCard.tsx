@@ -23,9 +23,10 @@ export interface ExternalListing {
   isPromoted?: boolean;
 }
 
-// Also export a database-compatible interface for admin pages
+// Database-compatible interface for admin pages and data fetching
 export interface ExternalListingData {
   id: string;
+  listing_type: 'hotel' | 'package' | 'flight' | 'activity';
   name: string;
   description?: string;
   image_url?: string;
@@ -34,7 +35,6 @@ export interface ExternalListingData {
   city?: string;
   provider_name: string;
   redirect_url: string;
-  listing_type: 'hotel' | 'package' | 'flight' | 'activity';
   created_at?: string;
   updated_at?: string;
 }

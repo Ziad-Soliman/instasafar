@@ -12,13 +12,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, Search, Edit, Trash, ExternalLink, MapPin } from "lucide-react";
-import { ExternalListing } from "@/components/cards/ExternalListingCard";
+import { ExternalListingData } from "@/components/cards/ExternalListingCard";
 import { useToast } from "@/hooks/use-toast";
 
 // Form validation schema
 const externalListingSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  listing_type: z.enum(["hotel", "flight", "transport"], { 
+  listing_type: z.enum(["hotel", "flight", "activity"], { 
     required_error: "Please select a listing type.",
   }),
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
@@ -40,7 +40,7 @@ const AdminExternalListings: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // This would typically fetch external listing data from your API
-  const externalListings: ExternalListing[] = [
+  const externalListings: ExternalListingData[] = [
     {
       id: "1",
       listing_type: "hotel",
@@ -79,7 +79,7 @@ const AdminExternalListings: React.FC = () => {
     },
     {
       id: "4",
-      listing_type: "transport",
+      listing_type: "activity",
       name: "Makkah-Madinah Transport",
       description: "Comfortable transportation between holy cities",
       city: "Other",
@@ -205,7 +205,7 @@ const AdminExternalListings: React.FC = () => {
                             <SelectContent>
                               <SelectItem value="hotel">Hotel</SelectItem>
                               <SelectItem value="flight">Flight</SelectItem>
-                              <SelectItem value="transport">Transport</SelectItem>
+                              <SelectItem value="activity">Activity</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

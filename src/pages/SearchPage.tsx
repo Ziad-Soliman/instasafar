@@ -14,7 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import SearchBar from "@/components/SearchBar";
 import HotelCard from "@/components/cards/HotelCard";
 import PackageCard from "@/components/cards/PackageCard";
-import ExternalListingCard from "@/components/cards/ExternalListingCard";
+import ExternalListingCard, { type ExternalListing } from "@/components/cards/ExternalListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Types
@@ -29,33 +29,42 @@ interface Hotel {
   distance_to_haram: string;
   amenities: string[];
   thumbnail: string;
+  image: string;
+  location: string;
+  review_count: number;
   is_internal: boolean;
+  is_featured?: boolean;
 }
 
 interface Package {
   id: string;
   name: string;
+  title: string;
   description: string;
   price: number;
   duration_days: number;
+  duration: string;
   start_date: string;
   end_date: string;
   thumbnail: string;
+  image: string;
   includes_hotel: boolean;
   includes_flight: boolean;
   includes_transport: boolean;
+  includes: string[];
   city: "Makkah" | "Madinah" | "Both";
+  location: string;
+  rating: number;
+  review_count: number;
+  type: 'hajj' | 'umrah' | 'custom';
   is_internal: boolean;
+  is_featured?: boolean;
 }
-
-// Import the ExternalListing type from ExternalListingCard to ensure consistency
-import type { ExternalListing } from "@/components/cards/ExternalListingCard";
 
 type ListingType = Hotel | Package | ExternalListing;
 
 // Mock data retrieval function - would be replaced with Supabase queries
 const fetchListings = () => {
-  // This is just mock data - would be replaced with actual Supabase queries
   return new Promise<{ hotels: Hotel[], packages: Package[], externalListings: ExternalListing[] }>((resolve) => {
     setTimeout(() => {
       resolve({
@@ -71,7 +80,11 @@ const fetchListings = () => {
             distance_to_haram: "500m",
             amenities: ["Free WiFi", "Breakfast", "Prayer Room", "Shuttle"],
             thumbnail: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            is_internal: true
+            image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            location: "Makkah",
+            review_count: 245,
+            is_internal: true,
+            is_featured: true
           },
           {
             id: "hotel-2",
@@ -84,81 +97,71 @@ const fetchListings = () => {
             distance_to_haram: "800m",
             amenities: ["Free WiFi", "Restaurant", "Prayer Room"],
             thumbnail: "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            is_internal: true
-          },
-          {
-            id: "hotel-3",
-            name: "Al Shohada Hotel",
-            city: "Makkah",
-            address: "Al Shohada District, Makkah",
-            description: "Comfortable stay with great views",
-            rating: 4.2,
-            price_per_night: 560,
-            distance_to_haram: "1.2km",
-            amenities: ["Free WiFi", "Breakfast", "Laundry"],
-            thumbnail: "https://images.unsplash.com/photo-1519449556851-5720b33024e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            is_internal: false
+            image: "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            location: "Madinah",
+            review_count: 189,
+            is_internal: true,
+            is_featured: false
           }
         ],
         packages: [
           {
             id: "package-1",
             name: "Complete Umrah Package",
+            title: "Complete Umrah Package",
             description: "7-day Umrah package including hotel, flights, and guided tours",
             price: 4500,
             duration_days: 7,
+            duration: "7 days",
             start_date: "2023-11-15",
             end_date: "2023-11-22",
             thumbnail: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            image: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             includes_hotel: true,
             includes_flight: true,
             includes_transport: true,
+            includes: ["Hotel", "Flights", "Transport", "Guide"],
             city: "Both",
-            is_internal: true
-          },
-          {
-            id: "package-2",
-            name: "Economy Hajj Package",
-            description: "10-day Hajj package with all essentials covered",
-            price: 9500,
-            duration_days: 10,
-            start_date: "2024-06-10",
-            end_date: "2024-06-20",
-            thumbnail: "https://images.unsplash.com/photo-1604331465963-e4b8812eba2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            includes_hotel: true,
-            includes_flight: true,
-            includes_transport: true,
-            city: "Both",
-            is_internal: true
+            location: "Makkah & Madinah",
+            rating: 4.8,
+            review_count: 156,
+            type: 'umrah',
+            is_internal: true,
+            is_featured: true
           }
         ],
         externalListings: [
           {
             id: "ext-1",
-            listing_type: "hotel",
-            name: "Makkah Hilton Hotel",
+            title: "Makkah Hilton Hotel",
             description: "5-star hotel with excellent amenities near Haram",
-            city: "Makkah",
-            provider_name: "Booking.com",
-            redirect_url: "https://booking.com/example",
-            image_url: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            price_indication: "من 750 ﷼",
-            rating_indication: "4.7 (1,245 reviews)"
+            image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            price: 750,
+            currency: "SAR",
+            rating: 4.7,
+            reviewCount: 1245,
+            location: "Makkah",
+            provider: "Booking.com",
+            type: "hotel",
+            url: "https://booking.com/example"
           },
           {
             id: "ext-2",
-            listing_type: "flight",
-            name: "رحلات إلى مكة",
+            title: "رحلات إلى مكة",
             description: "رحلات مباشرة من المدن الرئيسية إلى جدة",
-            city: "Jeddah",
-            provider_name: "Skyscanner",
-            redirect_url: "https://skyscanner.com/example",
-            image_url: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            price_indication: "من 2250 ﷼"
+            image: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            price: 2250,
+            currency: "SAR",
+            rating: 4.5,
+            reviewCount: 89,
+            location: "Jeddah",
+            provider: "Skyscanner",
+            type: "flight",
+            url: "https://skyscanner.com/example"
           }
         ]
       });
-    }, 1000); // Simulate API delay
+    }, 1000);
   });
 };
 
@@ -230,7 +233,7 @@ const SearchPage: React.FC = () => {
   // Apply filters to external listings (simplified)
   const filteredExternalListings = externalListings.filter(listing => {
     const cityMatches = selectedCity === "all" || 
-                        listing.city.toLowerCase().includes(selectedCity);
+                        listing.location.toLowerCase().includes(selectedCity);
     return cityMatches;
   });
 

@@ -8,10 +8,44 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Hotel, Package, Bus, Loader } from "lucide-react";
 import HotelCard from "@/components/cards/HotelCard";
 import PackageCard from "@/components/cards/PackageCard";
-import ExternalListingCard from "@/components/cards/ExternalListingCard";
-import { mockHotels, mockPackages, mockExternalListings } from "@/data/mockData";
+import ExternalListingCard, { type ExternalListing } from "@/components/cards/ExternalListingCard";
+import { mockHotels, mockPackages } from "@/data/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+
+// Convert external listings to proper format
+const mockExternalListingsFormatted: ExternalListing[] = [
+  {
+    id: "external-1",
+    title: "Premium Flight Deals to Jeddah",
+    description: "Direct flights from major cities to Jeddah",
+    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop",
+    price: 450,
+    currency: "USD",
+    rating: 4.5,
+    reviewCount: 1234,
+    location: "Jeddah",
+    provider: "Booking.com",
+    type: "flight",
+    url: "https://booking.com",
+    features: ["Direct Flight", "Baggage Included", "Flexible Dates"]
+  },
+  {
+    id: "external-2",
+    title: "Makkah to Madinah Transport",
+    description: "Comfortable transportation between holy cities",
+    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop",
+    price: 45,
+    currency: "USD",
+    rating: 4.3,
+    reviewCount: 567,
+    location: "Both Cities",
+    provider: "Saudi Transport Co",
+    type: "activity",
+    url: "https://sauditransport.com",
+    features: ["AC Bus", "WiFi", "Comfortable Seats"]
+  }
+];
 
 const WishlistPage: React.FC = () => {
   const { items, isLoading } = useWishlist();
@@ -33,8 +67,7 @@ const WishlistPage: React.FC = () => {
     
   const savedTransport = items
     .filter(item => item.itemType === "transport")
-    .map(item => mockExternalListings.find(listing => 
-      listing.id === item.id && listing.listing_type === "flight"))
+    .map(item => mockExternalListingsFormatted.find(listing => listing.id === item.id))
     .filter(Boolean);
   
   if (isLoading) {

@@ -62,6 +62,14 @@ const SearchPage: React.FC = () => {
     fetchHotels();
   }, [searchTerm, toast]);
 
+  const handleBookNow = (hotel: Hotel) => {
+    // You can replace this with navigation to a booking confirmation page or drawer/modal
+    toast({
+      title: "Booking",
+      description: `Booking initiated for ${hotel.name}`,
+    });
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6 flex items-center gap-2">
@@ -100,6 +108,16 @@ const SearchPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="mt-2 font-semibold">${hotel.price_per_night} / {t("price.night")}</div>
+                  <Button 
+                    className="mt-3 w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleBookNow(hotel);
+                    }}
+                  >
+                    {t("search.book_now") || "Book Now"}
+                  </Button>
                 </Link>
               </CardContent>
             </Card>

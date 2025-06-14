@@ -39,7 +39,7 @@ const ProfilePage: React.FC = () => {
       fullName: user?.full_name || user?.user_metadata?.full_name || "",
       email: user?.email || "",
       phone: user?.user_metadata?.contact_phone || "",
-      preferredLanguage: user?.user_metadata?.preferred_language || "en",
+      preferredLanguage: "en", // Fallback for form, but don't sync to Supabase Auth
     },
   });
   
@@ -50,7 +50,7 @@ const ProfilePage: React.FC = () => {
         fullName: user.full_name || user.user_metadata?.full_name || "",
         email: user.email || "",
         phone: user.user_metadata?.contact_phone || "",
-        preferredLanguage: user.user_metadata?.preferred_language || "en",
+        preferredLanguage: "en", // Fallback here as well
       });
     }
   }, [user, form]);
@@ -60,10 +60,11 @@ const ProfilePage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // Only send fields allowed by UserMetadata
       const success = await updateProfile({
         full_name: values.fullName,
         contact_phone: values.phone,
-        preferred_language: values.preferredLanguage,
+        // preferred_language is not a key in user_metadata and will error otherwise
       });
 
       if (success) {
@@ -205,7 +206,7 @@ const ProfilePage: React.FC = () => {
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              This will be the default language for communications and notifications.
+                              This is only used locally for communications/notifications in the app interface.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -251,11 +252,12 @@ const ProfilePage: React.FC = () => {
                           <div>
                             <div className="text-sm font-medium">Language</div>
                             <div className="text-sm text-muted-foreground">
-                              {(user?.user_metadata?.preferred_language === "ar" || user?.preferred_language === "ar")
+                              {/* Just use the selected language in the form */}
+                              {form.getValues("preferredLanguage") === "ar"
                                 ? "Arabic"
-                                : (user?.user_metadata?.preferred_language === "fr" || user?.preferred_language === "fr")
+                                : form.getValues("preferredLanguage") === "fr"
                                 ? "French"
-                                : (user?.user_metadata?.preferred_language === "es" || user?.preferred_language === "es")
+                                : form.getValues("preferredLanguage") === "es"
                                 ? "Spanish"
                                 : "English"}
                             </div>

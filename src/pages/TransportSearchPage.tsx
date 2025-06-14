@@ -68,20 +68,16 @@ const TransportSearchPage: React.FC = () => {
     setError(null);
 
     try {
+      // Build query string for filters
+      const queryParams = [];
+      if (transportType !== "all") queryParams.push(`type=${encodeURIComponent(transportType)}`);
+      // You could expand here for fromCity, toCity, or travelDate if backend supports
+      const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
       // Call the Supabase edge function for transport search
-      const queryParams: any = {};
-      if (transportType !== "all") queryParams.type = transportType;
-      // Backend can be updated to also handle from/to, date, etc. if desired
-      const { data, error } = await supabase.functions.invoke('transport', {
+      const { data, error } = await supabase.functions.invoke(`transport${queryString}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        // send search params as query string
-        // Supabase functions can't GET with body, so we send as URL params. 
-        // The Vite dev proxy handles /functions, so it's available at /functions/transport
-        // But supabase.functions.invoke always maps name correctly, no need to include "/functions/"
-        // Query params handled internally, but for more complex backend, you'd refactor there too
-        // https://supabase.com/docs/guides/functions/client-invoke
-        searchParams: queryParams,
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (error) {

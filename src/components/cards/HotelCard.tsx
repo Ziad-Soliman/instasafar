@@ -23,6 +23,11 @@ interface HotelCardProps {
 }
 
 const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
+  console.log('HotelCard props:', hotel);
+  
+  // Ensure amenities is always an array
+  const amenities = Array.isArray(hotel.amenities) ? hotel.amenities : [];
+  
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
       case 'wifi':
@@ -39,7 +44,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
   };
 
   return (
-    <Card variant="interactive" className={`group overflow-hidden ${className}`}>
+    <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {hotel.is_featured && (
         <Badge className="absolute top-4 left-4 z-10 bg-saudi-green text-white" variant="saudi">
           Featured
@@ -81,7 +86,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
           
           {/* Amenities */}
           <div className="flex items-center gap-3">
-            {hotel.amenities.slice(0, 4).map((amenity, index) => (
+            {amenities.slice(0, 4).map((amenity, index) => (
               <div key={index} className="flex items-center gap-1 text-muted-foreground">
                 {getAmenityIcon(amenity)}
                 <span className="text-xs">{amenity}</span>

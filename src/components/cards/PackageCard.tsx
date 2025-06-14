@@ -24,6 +24,11 @@ interface PackageCardProps {
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) => {
+  console.log('PackageCard props:', pkg);
+  
+  // Ensure includes is always an array
+  const includes = Array.isArray(pkg.includes) ? pkg.includes : [];
+  
   const getPackageTypeColor = (type: string) => {
     switch (type) {
       case 'hajj':
@@ -38,7 +43,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
   };
 
   return (
-    <Card variant="interactive" className={`group overflow-hidden ${className}`}>
+    <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {pkg.is_featured && (
         <Badge className="absolute top-4 left-4 z-10 bg-saudi-green text-white" variant="saudi">
           Featured
@@ -89,14 +94,14 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
           <div>
             <h4 className="text-sm font-medium mb-2">Package Includes:</h4>
             <div className="flex flex-wrap gap-1">
-              {pkg.includes.slice(0, 3).map((item, index) => (
+              {includes.slice(0, 3).map((item, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
                   {item}
                 </Badge>
               ))}
-              {pkg.includes.length > 3 && (
+              {includes.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{pkg.includes.length - 3} more
+                  +{includes.length - 3} more
                 </Badge>
               )}
             </div>

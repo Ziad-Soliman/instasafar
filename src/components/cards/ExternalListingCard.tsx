@@ -22,12 +22,17 @@ interface ExternalListingCardProps {
 }
 
 const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, className }) => {
+  console.log('ExternalListingCard props:', listing);
+  
+  // Ensure features is always an array
+  const features = Array.isArray(listing.features) ? listing.features : [];
+  
   const handleExternalClick = () => {
     window.open(listing.url, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <Card variant="interactive" className={`group overflow-hidden ${className}`}>
+    <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       <Badge className="absolute top-4 right-4 z-10 bg-blue-500 text-white">
         External
       </Badge>
@@ -72,7 +77,7 @@ const ExternalListingCard: React.FC<ExternalListingCardProps> = ({ listing, clas
           
           {/* Features */}
           <div className="flex flex-wrap gap-1">
-            {listing.features.slice(0, 3).map((feature, index) => (
+            {features.slice(0, 3).map((feature, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {feature}
               </Badge>

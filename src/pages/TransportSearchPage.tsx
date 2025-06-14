@@ -62,19 +62,22 @@ const TransportSearchPage: React.FC = () => {
   const [externalProviders, setExternalProviders] = useState<ExternalTransportProvider[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch transport options from Supabase Edge Function
+  // Fetch transport options from Supabase Edge Function (server-side filtering)
   const handleSearch = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build query string for filters
-      const queryParams = [];
-      if (transportType !== "all") queryParams.push(`type=${encodeURIComponent(transportType)}`);
-      // You could expand here for fromCity, toCity, or travelDate if backend supports
+      // Build query string for all filters
+      const queryParams: string[] = [];
+      if (fromCity) queryParams.push(`from=${encodeURIComponent(fromCity)}`);
+      if (toCity) queryParams.push(`to=${encodeURIComponent(toCity)}`);
+      if (travelDate) queryParams.push(`date=${encodeURIComponent(travelDate.toISOString().split("T")[0])}`);
+      if (transportType && transportType !== "all") queryParams.push(`type=${encodeURIComponent(transportType)}`);
+      if (passengers) queryParams.push(`passengers=${passengers}`);
       const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 
-      // Call the Supabase edge function for transport search
+      // Call the Supabase edge function for transport search (fetching from backend with filters)
       const { data, error } = await supabase.functions.invoke(`transport${queryString}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
@@ -92,11 +95,11 @@ const TransportSearchPage: React.FC = () => {
         return;
       }
 
-      // Defensive: fallback to empty if not right
+      // All filtering is server-side now
       const transportData: Transport[] = Array.isArray(data) ? data : [];
       setTransports(transportData);
 
-      // External providers - still mocked for now
+      // External providers - still mocked for now (not affected)
       setExternalProviders([
         {
           id: "provider-1",
@@ -131,19 +134,18 @@ const TransportSearchPage: React.FC = () => {
         variant: "destructive",
       });
     }
-  }, [toast, transportType]);
+  }, [toast, fromCity, toCity, travelDate, transportType, passengers]);
 
-  // Run search on mount and whenever search filters change
+  // Run search on mount and whenever ANY filter changes
   useEffect(() => {
     handleSearch();
   }, [handleSearch]);
 
-  // Filter transports based on filters in the frontend (could move all logic to backend for robust behavior)
-  const filteredTransports = transports.filter(transport => {
-    const matchesType = transportType === "all" || transport.transport_type === transportType;
-    const hasCapacity = typeof transport.capacity === "number" ? transport.capacity >= passengers : false;
-    return matchesType && hasCapacity;
-  });
+  // Remove all local client-side filtering; show all transports received from backend
+  // Old:
+  // const filteredTransports = transports.filter(...);
+  // New:
+  const filteredTransports = transports; // display as-received (server-side filtered)
 
   // Handle view details/book now
   const handleViewDetails = (transport: Transport) => {

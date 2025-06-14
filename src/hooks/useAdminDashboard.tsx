@@ -25,9 +25,9 @@ interface Booking {
   status: string;
   payment_status: string;
   created_at: string;
-  hotels?: { name: string };
-  packages?: { name: string };
-  profiles?: { full_name: string };
+  hotels?: { name: string } | null;
+  packages?: { name: string } | null;
+  profiles?: { full_name: string } | null;
 }
 
 export const useAdminDashboard = () => {
@@ -70,7 +70,27 @@ export const useAdminDashboard = () => {
         .limit(10);
 
       if (error) throw error;
-      setRecentBookings(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData: Booking[] = (data || []).map(item => ({
+        id: item.id,
+        user_id: item.user_id,
+        hotel_id: item.hotel_id,
+        package_id: item.package_id,
+        check_in_date: item.check_in_date,
+        check_out_date: item.check_out_date,
+        adults: item.adults,
+        children: item.children,
+        total_price: item.total_price,
+        status: item.status,
+        payment_status: item.payment_status,
+        created_at: item.created_at,
+        hotels: item.hotels,
+        packages: item.packages,
+        profiles: item.profiles
+      }));
+      
+      setRecentBookings(transformedData);
     } catch (error) {
       console.error('Error fetching recent bookings:', error);
       toast({

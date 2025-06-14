@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -25,22 +24,23 @@ import { format, addDays, differenceInDays } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageCarousel from "@/components/ImageCarousel";
-import { hotelDetails } from "@/data/hotels";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 // Define interfaces
 interface Hotel {
   id: string;
   name: string;
-  city: "Makkah" | "Madinah";
+  city: string;
   address: string;
-  description: string;
+  description: string | null;
   detailed_description?: string;
-  rating: number;
+  rating: number | null;
   price_per_night: number;
   discount_price?: number;
-  distance_to_haram: string;
-  amenities: string[];
-  thumbnail: string;
+  distance_to_haram: string | null;
+  amenities?: string[];
+  thumbnail: string | null;
   images?: string[];
   map_coordinates?: {
     lat: number;
@@ -59,83 +59,6 @@ interface Room {
   images: string[];
 }
 
-// Mock fetch hotel data function
-const fetchHotel = (hotelId: string): Promise<Hotel> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // First check if the hotel exists in our detailed data
-      if (hotelDetails[hotelId]) {
-        resolve({
-          ...hotelDetails[hotelId],
-          is_internal: true
-        });
-        return;
-      }
-
-      // Fallback to generic data if not found
-      resolve({
-        id: hotelId,
-        name: "Grand Makkah Hotel",
-        city: "Makkah",
-        address: "King Fahd Road, Makkah",
-        description: "Luxury hotel with excellent amenities near Haram",
-        detailed_description: "Experience luxury and comfort at the Grand Makkah Hotel, located just a short walk from the Haram. Our hotel offers spacious rooms, excellent service, and a range of amenities to make your stay comfortable and spiritually fulfilling. The hotel features a dedicated prayer area, restaurant serving international cuisine, and friendly staff to assist with your needs throughout your stay.",
-        rating: 4.7,
-        price_per_night: 240,
-        distance_to_haram: "500m",
-        amenities: ["Free WiFi", "Breakfast Included", "Prayer Room", "Shuttle Service", "Room Service", "Air Conditioning", "Concierge", "24/7 Front Desk"],
-        thumbnail: "/placeholder.svg",
-        images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
-        is_internal: true
-      });
-    }, 1000);
-  });
-};
-
-// Mock fetch rooms data function
-const fetchRooms = (hotelId: string): Promise<Room[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // First check if the hotel exists in our detailed data
-      if (hotelDetails[hotelId] && hotelDetails[hotelId].rooms) {
-        resolve(hotelDetails[hotelId].rooms);
-        return;
-      }
-      
-      // Fallback to generic data if not found
-      resolve([
-        {
-          id: "room-1",
-          room_type: "Standard Room",
-          price_per_night: 240,
-          capacity: 2,
-          description: "Comfortable standard room with two single beds",
-          amenities: ["Free WiFi", "Air Conditioning", "TV", "Private Bathroom"],
-          images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
-        },
-        {
-          id: "room-2",
-          room_type: "Deluxe Room",
-          price_per_night: 320,
-          capacity: 3,
-          description: "Spacious deluxe room with Haram view, king bed and additional single bed",
-          amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Haram View"],
-          images: ["https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
-        },
-        {
-          id: "room-3",
-          room_type: "Family Suite",
-          price_per_night: 480,
-          capacity: 5,
-          description: "Large family suite with two bedrooms and a living area",
-          amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Living Room", "Two Bathrooms"],
-          images: ["https://images.unsplash.com/photo-1630660664869-c9d3cc676880?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1970&q=80"]
-        }
-      ]);
-    }, 1500);
-  });
-};
-
 const HotelDetailPage: React.FC = () => {
   const { hotelId } = useParams<{ hotelId: string }>();
   const navigate = useNavigate();
@@ -145,6 +68,7 @@ const HotelDetailPage: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const { toast } = useToast();
   
   const [checkIn, setCheckIn] = useState<Date>(new Date());
   const [checkOut, setCheckOut] = useState<Date>(addDays(new Date(), 3));
@@ -153,27 +77,74 @@ const HotelDetailPage: React.FC = () => {
   
   // Fetch hotel and rooms data
   useEffect(() => {
-    const getHotelData = async () => {
+    const fetchHotel = async () => {
       if (!hotelId) return;
       
       try {
         setLoading(true);
-        const [hotelData, roomsData] = await Promise.all([
-          fetchHotel(hotelId),
-          fetchRooms(hotelId)
-        ]);
+        const { data, error } = await supabase
+          .from("hotels")
+          .select("*")
+          .eq("id", hotelId)
+          .maybeSingle();
         
-        setHotel(hotelData);
-        setRooms(roomsData);
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Could not fetch hotel.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        
+        // Transform the data to match our interface
+        if (data) {
+          const hotelData: Hotel = {
+            ...data,
+            is_internal: true,
+            amenities: ["Free WiFi", "Breakfast Included", "Prayer Room", "Shuttle Service", "Room Service", "Air Conditioning", "Concierge", "24/7 Front Desk"],
+            images: data.thumbnail ? [data.thumbnail] : ["/placeholder.svg"]
+          };
+          setHotel(hotelData);
+          
+          // Mock rooms data for now
+          const roomsData: Room[] = [
+            {
+              id: "room-1",
+              room_type: "Standard Room",
+              price_per_night: data.price_per_night,
+              capacity: 2,
+              description: "Comfortable standard room with two single beds",
+              amenities: ["Free WiFi", "Air Conditioning", "TV", "Private Bathroom"],
+              images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
+            },
+            {
+              id: "room-2",
+              room_type: "Deluxe Room",
+              price_per_night: Math.round(data.price_per_night * 1.3),
+              capacity: 3,
+              description: "Spacious deluxe room with Haram view, king bed and additional single bed",
+              amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Haram View"],
+              images: ["https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
+            }
+          ];
+          setRooms(roomsData);
+        }
       } catch (error) {
         console.error("Error fetching hotel data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load hotel details.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
     
-    getHotelData();
-  }, [hotelId]);
+    fetchHotel();
+  }, [hotelId, toast]);
   
   // Calculate number of nights
   const nights = differenceInDays(checkOut, checkIn);
@@ -300,7 +271,7 @@ const HotelDetailPage: React.FC = () => {
             {/* Main Image Carousel */}
             <div className="rounded-lg overflow-hidden">
               <ImageCarousel 
-                images={hotel.images || [hotel.thumbnail]}
+                images={hotel.images || [hotel.thumbnail || "/placeholder.svg"]}
                 aspectRatio={16/9}
                 allowFullscreen={true}
                 caption={`${hotel.name} - ${hotel.city}`}
@@ -315,11 +286,11 @@ const HotelDetailPage: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center">
                       <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 mr-1" />
-                      <span className="font-medium">{hotel.rating.toFixed(1)}</span>
+                      <span className="font-medium">{(hotel.rating || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 text-blue-500 mr-1" />
-                      <span>{hotel.distance_to_haram} {t("distance.from")} {t("distance.haram")}</span>
+                      <span>{hotel.distance_to_haram || "N/A"} {t("distance.from")} {t("distance.haram")}</span>
                     </div>
                   </div>
                   
@@ -333,7 +304,7 @@ const HotelDetailPage: React.FC = () => {
                   <div>
                     <h2 className="text-xl font-semibold mb-3">Amenities</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-2 gap-x-4">
-                      {hotel.amenities.map((amenity, index) => (
+                      {hotel.amenities?.map((amenity, index) => (
                         <div key={index} className="flex items-center">
                           <Wifi className="h-4 w-4 text-primary mr-2" />
                           <span className="text-sm">{amenity}</span>

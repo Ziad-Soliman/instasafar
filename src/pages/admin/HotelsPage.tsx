@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -12,13 +11,13 @@ interface Hotel {
   id: string;
   name: string;
   city: string;
-  distance_to_haram: string;
-  rating: number;
+  distance_to_haram: string | null;
+  rating: number | null;
   price_per_night: number;
   provider_id?: string;
   address: string;
-  description?: string;
-  thumbnail?: string;
+  description?: string | null;
+  thumbnail?: string | null;
 }
 
 const AdminHotels: React.FC = () => {
@@ -28,22 +27,19 @@ const AdminHotels: React.FC = () => {
   const { toast } = useToast();
 
   const fetchHotels = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('hotels')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       setHotels(data || []);
     } catch (error) {
-      console.error('Error fetching hotels:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch hotels. Please try again.",
+        description: "Failed to fetch hotels.",
         variant: "destructive",
       });
     } finally {
@@ -62,21 +58,18 @@ const AdminHotels: React.FC = () => {
         .delete()
         .eq('id', hotelId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Hotel deleted successfully.",
       });
-      
-      fetchHotels(); // Refresh the list
+
+      fetchHotels();
     } catch (error) {
-      console.error('Error deleting hotel:', error);
       toast({
         title: "Error",
-        description: "Failed to delete hotel. Please try again.",
+        description: "Failed to delete hotel.",
         variant: "destructive",
       });
     }
@@ -163,7 +156,7 @@ const AdminHotels: React.FC = () => {
                       <td className="py-3 px-4">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 fill-yellow-500 text-yellow-500 mr-1" />
-                          <span>{Number(hotel.rating).toFixed(1)}</span>
+                          <span>{Number(hotel.rating ?? 0).toFixed(1)}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4">${Number(hotel.price_per_night).toFixed(0)}</td>

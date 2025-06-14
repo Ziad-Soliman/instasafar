@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -149,7 +148,7 @@ const fetchListings = () => {
             id: "ext-2",
             title: "رحلات إلى مكة",
             description: "رحلات مباشرة من المدن الرئيسية إلى جدة",
-            image: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+            image: "https://images.unsplash.com/photo-1569154941061-e231b4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
             price: 2250,
             currency: "SAR",
             rating: 4.5,
@@ -382,11 +381,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <HotelCard 
-                              hotel={hotel} 
-                              onButtonClick={() => handleViewDetails(hotel)}
-                              buttonText={hotel.is_internal ? t("listing.bookNow") : t("listing.viewDetails")}
-                            />
+                            <HotelCard hotel={hotel} />
                           </div>
                         ))}
                         
@@ -398,11 +393,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <PackageCard 
-                              package={pkg}
-                              onButtonClick={() => handleViewDetails(pkg)}
-                              buttonText={pkg.is_internal ? t("listing.bookNow") : t("listing.viewDetails")}
-                            />
+                            <PackageCard package={pkg} />
                           </div>
                         ))}
                         
@@ -449,11 +440,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <HotelCard 
-                              hotel={hotel} 
-                              onButtonClick={() => handleViewDetails(hotel)}
-                              buttonText={hotel.is_internal ? t("listing.bookNow") : t("listing.viewDetails")}
-                            />
+                            <HotelCard hotel={hotel} />
                           </div>
                         ))}
                       </div>
@@ -490,11 +477,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <PackageCard 
-                              package={pkg}
-                              onButtonClick={() => handleViewDetails(pkg)}
-                              buttonText={pkg.is_internal ? t("listing.bookNow") : t("listing.viewDetails")}
-                            />
+                            <PackageCard package={pkg} />
                           </div>
                         ))}
                       </div>

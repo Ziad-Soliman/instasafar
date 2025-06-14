@@ -63,7 +63,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClient Provider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
           <WishlistProvider>

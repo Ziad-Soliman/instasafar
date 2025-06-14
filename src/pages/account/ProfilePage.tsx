@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,28 +55,29 @@ const ProfilePage: React.FC = () => {
     }
   }, [user, form]);
   
-  // Handle form submission
+  // Handle form submission -- now actually update the Supabase profile!
   async function onSubmit(values: ProfileFormValues) {
     setIsSubmitting(true);
     
     try {
-      // In a real implementation, we would update the user profile in Supabase here
-      
-      // Mock API call - would be replaced with Supabase update
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real implementation:
-      // await updateProfile({
-      //   full_name: values.fullName,
-      //   phone_number: values.phone,
-      //   preferred_language: values.preferredLanguage,
-      // });
-      
-      // Show success toast
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
+      const success = await updateProfile({
+        full_name: values.fullName,
+        phone_number: values.phone,
+        preferred_language: values.preferredLanguage,
       });
+
+      if (success) {
+        toast({
+          title: "Profile updated",
+          description: "Your profile information has been updated successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({

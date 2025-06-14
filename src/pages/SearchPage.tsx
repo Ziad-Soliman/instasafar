@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -81,6 +80,14 @@ const SearchPage: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<"makkah" | "madinah" | "all">("all");
   const [selectedRating, setSelectedRating] = useState<"5" | "4" | "3" | "any">("any");
   const [currentTab, setCurrentTab] = useState("all");
+
+  // Helper function to ensure HotelCard props always get a hotel with required amenities array
+  function getHotelCardProps(hotel: Hotel) {
+    return {
+      ...hotel,
+      amenities: Array.isArray(hotel.amenities) ? hotel.amenities : [],
+    };
+  }
 
   // Fetch data from Supabase
   const fetchListings = async () => {
@@ -402,7 +409,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <HotelCard hotel={hotel} />
+                            <HotelCard hotel={getHotelCardProps(hotel)} />
                           </div>
                         ))}
                         
@@ -461,7 +468,7 @@ const SearchPage: React.FC = () => {
                                 {t("listing.internal")}
                               </Badge>
                             )}
-                            <HotelCard hotel={hotel} />
+                            <HotelCard hotel={getHotelCardProps(hotel)} />
                           </div>
                         ))}
                       </div>

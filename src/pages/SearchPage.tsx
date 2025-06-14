@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -15,19 +16,22 @@ import HotelCard from "@/components/cards/HotelCard";
 import PackageCard from "@/components/cards/PackageCard";
 import ExternalListingCard, { type ExternalListing } from "@/components/cards/ExternalListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-// Types
+// Types for database entities
 interface Hotel {
   id: string;
   name: string;
-  city: "Makkah" | "Madinah";
+  city: string;
   address: string;
-  description: string;
-  rating: number;
+  description: string | null;
+  rating: number | null;
   price_per_night: number;
-  distance_to_haram: string;
-  amenities: string[];
-  thumbnail: string;
+  distance_to_haram: string | null;
+  thumbnail: string | null;
+  provider_id: string | null;
+  amenities?: string[];
   image: string;
   location: string;
   review_count: number;
@@ -39,19 +43,19 @@ interface Package {
   id: string;
   name: string;
   title: string;
-  description: string;
+  description: string | null;
   price: number;
   duration_days: number;
   duration: string;
-  start_date: string;
-  end_date: string;
-  thumbnail: string;
+  start_date: string | null;
+  end_date: string | null;
+  thumbnail: string | null;
   image: string;
-  includes_hotel: boolean;
-  includes_flight: boolean;
-  includes_transport: boolean;
+  includes_hotel: boolean | null;
+  includes_flight: boolean | null;
+  includes_transport: boolean | null;
   includes: string[];
-  city: "Makkah" | "Madinah" | "Both";
+  city: string | null;
   location: string;
   rating: number;
   review_count: number;
@@ -62,112 +66,11 @@ interface Package {
 
 type ListingType = Hotel | Package | ExternalListing;
 
-// Mock data retrieval function - would be replaced with Supabase queries
-const fetchListings = () => {
-  return new Promise<{ hotels: Hotel[], packages: Package[], externalListings: ExternalListing[] }>((resolve) => {
-    setTimeout(() => {
-      resolve({
-        hotels: [
-          {
-            id: "hotel-1",
-            name: "Grand Makkah Hotel",
-            city: "Makkah",
-            address: "King Fahd Road, Makkah",
-            description: "Luxury hotel with excellent amenities near Haram",
-            rating: 4.7,
-            price_per_night: 750,
-            distance_to_haram: "500m",
-            amenities: ["Free WiFi", "Breakfast", "Prayer Room", "Shuttle"],
-            thumbnail: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            location: "Makkah",
-            review_count: 245,
-            is_internal: true,
-            is_featured: true
-          },
-          {
-            id: "hotel-2",
-            name: "Madinah Plaza Hotel",
-            city: "Madinah",
-            address: "Central Area, Madinah",
-            description: "Modern hotel with top-notch facilities",
-            rating: 4.5,
-            price_per_night: 680,
-            distance_to_haram: "800m",
-            amenities: ["Free WiFi", "Restaurant", "Prayer Room"],
-            thumbnail: "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            image: "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            location: "Madinah",
-            review_count: 189,
-            is_internal: true,
-            is_featured: false
-          }
-        ],
-        packages: [
-          {
-            id: "package-1",
-            name: "Complete Umrah Package",
-            title: "Complete Umrah Package",
-            description: "7-day Umrah package including hotel, flights, and guided tours",
-            price: 4500,
-            duration_days: 7,
-            duration: "7 days",
-            start_date: "2023-11-15",
-            end_date: "2023-11-22",
-            thumbnail: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            image: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            includes_hotel: true,
-            includes_flight: true,
-            includes_transport: true,
-            includes: ["Hotel", "Flights", "Transport", "Guide"],
-            city: "Both",
-            location: "Makkah & Madinah",
-            rating: 4.8,
-            review_count: 156,
-            type: 'umrah',
-            is_internal: true,
-            is_featured: true
-          }
-        ],
-        externalListings: [
-          {
-            id: "ext-1",
-            title: "Makkah Hilton Hotel",
-            description: "5-star hotel with excellent amenities near Haram",
-            image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            price: 750,
-            currency: "SAR",
-            rating: 4.7,
-            reviewCount: 1245,
-            location: "Makkah",
-            provider: "Booking.com",
-            type: "hotel",
-            url: "https://booking.com/example"
-          },
-          {
-            id: "ext-2",
-            title: "رحلات إلى مكة",
-            description: "رحلات مباشرة من المدن الرئيسية إلى جدة",
-            image: "https://images.unsplash.com/photo-1569154941061-e231b4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-            price: 2250,
-            currency: "SAR",
-            rating: 4.5,
-            reviewCount: 89,
-            location: "Jeddah",
-            provider: "Skyscanner",
-            type: "flight",
-            url: "https://skyscanner.com/example"
-          }
-        ]
-      });
-    }, 1000);
-  });
-};
-
 const SearchPage: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
   const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -179,35 +82,153 @@ const SearchPage: React.FC = () => {
   const [selectedRating, setSelectedRating] = useState<"5" | "4" | "3" | "any">("any");
   const [currentTab, setCurrentTab] = useState("all");
 
+  // Fetch data from Supabase
+  const fetchListings = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch hotels
+      const { data: hotelsData, error: hotelsError } = await supabase
+        .from('hotels')
+        .select(`
+          *,
+          hotel_amenities(name)
+        `);
+
+      if (hotelsError) {
+        console.error('Error fetching hotels:', hotelsError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch hotels data",
+          variant: "destructive",
+        });
+      }
+
+      // Fetch packages  
+      const { data: packagesData, error: packagesError } = await supabase
+        .from('packages')
+        .select('*');
+
+      if (packagesError) {
+        console.error('Error fetching packages:', packagesError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch packages data",
+          variant: "destructive",
+        });
+      }
+
+      // Fetch external listings
+      const { data: externalData, error: externalError } = await supabase
+        .from('external_listings')
+        .select('*');
+
+      if (externalError) {
+        console.error('Error fetching external listings:', externalError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch external listings data",
+          variant: "destructive",
+        });
+      }
+
+      // Transform hotels data
+      const transformedHotels: Hotel[] = (hotelsData || []).map(hotel => ({
+        id: hotel.id,
+        name: hotel.name,
+        city: hotel.city,
+        address: hotel.address,
+        description: hotel.description,
+        rating: hotel.rating || 0,
+        price_per_night: hotel.price_per_night,
+        distance_to_haram: hotel.distance_to_haram,
+        thumbnail: hotel.thumbnail,
+        provider_id: hotel.provider_id,
+        amenities: hotel.hotel_amenities?.map((a: any) => a.name) || [],
+        image: hotel.thumbnail || '',
+        location: hotel.city,
+        review_count: 0, // TODO: Calculate from reviews table
+        is_internal: true,
+        is_featured: false
+      }));
+
+      // Transform packages data
+      const transformedPackages: Package[] = (packagesData || []).map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        title: pkg.name,
+        description: pkg.description,
+        price: pkg.price,
+        duration_days: pkg.duration_days,
+        duration: `${pkg.duration_days} days`,
+        start_date: pkg.start_date,
+        end_date: pkg.end_date,
+        thumbnail: pkg.thumbnail,
+        image: pkg.thumbnail || '',
+        includes_hotel: pkg.includes_hotel || false,
+        includes_flight: pkg.includes_flight || false,
+        includes_transport: pkg.includes_transport || false,
+        includes: [
+          ...(pkg.includes_hotel ? ['Hotel'] : []),
+          ...(pkg.includes_flight ? ['Flight'] : []),
+          ...(pkg.includes_transport ? ['Transport'] : [])
+        ],
+        city: pkg.city,
+        location: pkg.city || 'Multiple Cities',
+        rating: 4.5, // TODO: Calculate from reviews
+        review_count: 0, // TODO: Calculate from reviews table
+        type: 'umrah' as const, // TODO: Add type field to packages table
+        is_internal: true,
+        is_featured: false
+      }));
+
+      // Transform external listings data
+      const transformedExternals: ExternalListing[] = (externalData || []).map(listing => ({
+        id: listing.id,
+        title: listing.name,
+        description: listing.description || '',
+        image: listing.image_url || '',
+        price: 0, // External listings don't have structured pricing
+        currency: "SAR",
+        rating: 0, // External listings don't have structured ratings
+        reviewCount: 0,
+        location: listing.city || '',
+        provider: listing.provider_name,
+        type: listing.listing_type as 'hotel' | 'flight' | 'package',
+        url: listing.redirect_url
+      }));
+
+      setHotels(transformedHotels);
+      setPackages(transformedPackages);
+      setExternalListings(transformedExternals);
+
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch listings data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Helper function to filter hotels based on filters
   const filterHotels = (hotel: Hotel) => {
     const matchesPrice = hotel.price_per_night >= priceRange[0] && hotel.price_per_night <= priceRange[1];
     const matchesCity = selectedCity === "all" || hotel.city.toLowerCase() === selectedCity;
     const matchesRating = selectedRating === "any" || 
-                          (selectedRating === "5" && hotel.rating >= 5) ||
-                          (selectedRating === "4" && hotel.rating >= 4) ||
-                          (selectedRating === "3" && hotel.rating >= 3);
+                          (selectedRating === "5" && (hotel.rating || 0) >= 5) ||
+                          (selectedRating === "4" && (hotel.rating || 0) >= 4) ||
+                          (selectedRating === "3" && (hotel.rating || 0) >= 3);
     
     return matchesPrice && matchesCity && matchesRating;
   };
 
   // Fetch listings on component mount
   useEffect(() => {
-    const getListings = async () => {
-      try {
-        setLoading(true);
-        const { hotels, packages, externalListings } = await fetchListings();
-        setHotels(hotels);
-        setPackages(packages);
-        setExternalListings(externalListings);
-      } catch (error) {
-        console.error("Error fetching listings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getListings();
+    fetchListings();
     
     // Parse query params if any
     const params = new URLSearchParams(location.search);
@@ -224,7 +245,7 @@ const SearchPage: React.FC = () => {
   const filteredPackages = packages.filter(pkg => {
     const matchesPrice = pkg.price >= priceRange[0] && pkg.price <= priceRange[1];
     const matchesCity = selectedCity === "all" || 
-                        pkg.city.toLowerCase() === selectedCity || 
+                        (pkg.city && pkg.city.toLowerCase() === selectedCity) || 
                         pkg.city === "Both";
     return matchesPrice && matchesCity;
   });

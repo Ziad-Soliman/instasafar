@@ -17,7 +17,7 @@ interface BreadcrumbEnhancedProps {
   separator?: React.ReactNode;
 }
 
-const BreadcrumbEnhanced: React.FC<BreadcrumbEnhancedProps> = ({ 
+export const BreadcrumbEnhanced: React.FC<BreadcrumbEnhancedProps> = ({ 
   items, 
   className,
   showHome = true,

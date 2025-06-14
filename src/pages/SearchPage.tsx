@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +8,8 @@ import { Star, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import HotelBookingModal from "@/components/hotel/HotelBookingModal";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Hotel {
   id: string;
@@ -28,6 +29,9 @@ const SearchPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch hotels from backend when search term changes
   useEffect(() => {
@@ -65,10 +69,8 @@ const SearchPage: React.FC = () => {
   }, [searchTerm, toast]);
 
   const handleBookNow = (hotel: Hotel) => {
-    toast({
-      title: "Booking",
-      description: `Booking initiated for ${hotel.name}`,
-    });
+    setSelectedHotel(hotel);
+    setModalOpen(true);
   };
 
   return (
@@ -81,6 +83,29 @@ const SearchPage: React.FC = () => {
           className="max-w-xl"
         />
       </div>
+      <HotelBookingModal
+        open={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) setSelectedHotel(null);
+        }}
+        hotel={
+          selectedHotel
+            ? {
+                id: selectedHotel.id,
+                name: selectedHotel.name,
+                price_per_night: selectedHotel.price_per_night,
+                thumbnail: selectedHotel.thumbnail,
+              }
+            : {
+                id: "",
+                name: "",
+                price_per_night: 0,
+                thumbnail: "",
+              }
+        }
+        userId={user?.id}
+      />
       {loading ? (
         <div className="flex justify-center py-20">{t("search.loading")}</div>
       ) : hotels.length === 0 ? (

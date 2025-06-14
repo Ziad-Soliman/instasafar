@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,14 +11,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, user } = useAuth();
+  const { signIn, user, createDemoAccounts } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
   const { toast } = useToast();
   const [loginType, setLoginType] = useState<'user' | 'provider' | 'admin'>('user');
   
-  // If user is already logged in, redirect to appropriate dashboard
+  useEffect(() => {
+    // Create demo accounts on component mount
+    createDemoAccounts();
+  }, [createDemoAccounts]);
+
   useEffect(() => {
     if (user) {
       const userRole = user.role || 'user';
@@ -61,7 +64,7 @@ const LoginPage: React.FC = () => {
 
     try {
       let email: string;
-      let password = "password123";  // Same password for all demo accounts
+      let password = "password123";
 
       if (userType === 'admin') {
         email = "admin@instasafar.com";
@@ -87,7 +90,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Determine which form title to show based on login type
   const getFormTitle = () => {
     switch(loginType) {
       case 'admin':

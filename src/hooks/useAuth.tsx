@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +15,6 @@ export interface User {
   id: string;
   email: string;
   user_metadata: UserMetadata;
-  // Add the properties being used in components
   name?: string;
   avatar?: string;
   full_name?: string;
@@ -35,12 +33,12 @@ interface AuthResult {
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  isLoading: boolean; // Alias for loading for compatibility
-  isAdmin: boolean; // For AdminLayout
-  isProvider: boolean; // For ProviderLayout
+  isLoading: boolean;
+  isAdmin: boolean;
+  isProvider: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, fullName: string) => Promise<AuthResult>;
-  register: (email: string, password: string, fullName: string) => Promise<AuthResult>; // Alias for signUp
+  register: (email: string, password: string, fullName: string) => Promise<AuthResult>;
   registerProvider: (
     email: string, 
     password: string, 
@@ -50,10 +48,11 @@ export interface AuthContextType {
     contactPhone?: string
   ) => Promise<AuthResult>;
   signOut: () => Promise<void>;
-  logout: () => Promise<void>; // Alias for signOut for compatibility
+  logout: () => Promise<void>;
   updateProfile: (data: Partial<UserMetadata>) => Promise<boolean>;
   resetPassword: (email: string) => Promise<AuthResult>;
   updatePassword: (password: string) => Promise<AuthResult>;
+  createDemoAccounts: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -71,6 +70,7 @@ const AuthContext = createContext<AuthContextType>({
   updateProfile: async () => false,
   resetPassword: async () => ({ success: false }),
   updatePassword: async () => ({ success: false }),
+  createDemoAccounts: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -80,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
@@ -103,7 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         const userData: User = {
@@ -129,6 +127,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  const createDemoAccounts = async (): Promise<void> => {
+    try {
+      // Create admin account
+      try {
+        await supabase.auth.signUp({
+          email: 'admin@instasafar.com',
+          password: 'password123',
+          options: {
+            data: {
+              full_name: 'Admin User',
+              role: 'admin'
+            }
+          }
+        });
+      } catch (error) {
+        // Account might already exist
+      }
+
+      // Create provider account
+      try {
+        await supabase.auth.signUp({
+          email: 'provider@instasafar.com',
+          password: 'password123',
+          options: {
+            data: {
+              full_name: 'Provider User',
+              role: 'provider',
+              company_name: 'Example Provider'
+            }
+          }
+        });
+      } catch (error) {
+        // Account might already exist
+      }
+
+      // Create regular user account
+      try {
+        await supabase.auth.signUp({
+          email: 'user@instasafar.com',
+          password: 'password123',
+          options: {
+            data: {
+              full_name: 'Regular User',
+              role: 'user'
+            }
+          }
+        });
+      } catch (error) {
+        // Account might already exist
+      }
+    } catch (error) {
+      console.error('Error creating demo accounts:', error);
+    }
+  };
+
   const signIn = async (email: string, password: string): Promise<AuthResult> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -140,8 +193,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: { message: error.message } };
       }
 
-      // No need to navigate here - the onAuthStateChange will handle setting the user
-      // and the useEffect in each protected page will handle the redirection
       return { success: true };
     } catch (error) {
       return { 
@@ -295,9 +346,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Check if user has admin role
   const isAdmin = user?.role === 'admin' || user?.user_metadata?.role === 'admin';
-  // Check if user has provider role
   const isProvider = user?.role === 'provider' || user?.user_metadata?.role === 'provider';
 
   return (
@@ -309,13 +358,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isProvider,
       signIn, 
       signUp,
-      register: signUp, // Alias for compatibility
+      register: signUp,
       registerProvider, 
       signOut,
-      logout: signOut, // Alias for compatibility
+      logout: signOut,
       updateProfile,
       resetPassword,
-      updatePassword
+      updatePassword,
+      createDemoAccounts
     }}>
       {children}
     </AuthContext.Provider>

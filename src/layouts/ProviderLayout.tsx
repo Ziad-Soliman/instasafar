@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -54,8 +53,8 @@ const ProviderLayout: React.FC = () => {
     );
   }
 
-  // Redirect if not a provider
-  if (!loading && (!user || user.role !== "admin")) {
+  // Allow both provider and admin access to provider routes
+  if (!loading && (!user || (user.role !== "provider" && user.role !== "admin"))) {
     // For demonstration, we're allowing admin access
     // In a real app, this would check for a specific "provider" role
     return <Navigate to="/auth/login" state={{ from: location }} replace />;

@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
     defaultValues: {
       fullName: user?.full_name || "",
       email: user?.email || "",
-      phone: user?.phone_number || "",
+      phone: user?.contact_phone || "", // use contact_phone for UserMetadata
       preferredLanguage: "en",
     },
   });
@@ -49,7 +49,7 @@ const ProfilePage: React.FC = () => {
       form.reset({
         fullName: user.full_name || "",
         email: user.email || "",
-        phone: user.phone_number || "",
+        phone: user.contact_phone || "", // use contact_phone for UserMetadata
         preferredLanguage: user.preferred_language || "en",
       });
     }
@@ -62,7 +62,7 @@ const ProfilePage: React.FC = () => {
     try {
       const success = await updateProfile({
         full_name: values.fullName,
-        phone_number: values.phone,
+        contact_phone: values.phone, // FIXED: Use contact_phone instead of phone_number
         preferred_language: values.preferredLanguage,
       });
 
@@ -264,7 +264,7 @@ const ProfilePage: React.FC = () => {
                           <Phone className="w-4 h-4 mt-1 mr-3 text-muted-foreground" />
                           <div>
                             <div className="text-sm font-medium">Phone</div>
-                            <div className="text-sm text-muted-foreground">{user?.phone_number || "Not set"}</div>
+                            <div className="text-sm text-muted-foreground">{user?.contact_phone || "Not set"}</div>
                           </div>
                         </div>
                       </div>

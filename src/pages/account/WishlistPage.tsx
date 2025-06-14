@@ -9,7 +9,7 @@ import { Heart, Hotel, Package, Bus, Loader } from "lucide-react";
 import HotelCard from "@/components/cards/HotelCard";
 import PackageCard from "@/components/cards/PackageCard";
 import ExternalListingCard from "@/components/cards/ExternalListingCard";
-import { featuredHotels, featuredPackages, externalListings } from "@/data/mockData";
+import { mockHotels, mockPackages, mockExternalListings } from "@/data/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 
@@ -23,17 +23,17 @@ const WishlistPage: React.FC = () => {
   // In a real implementation, you would fetch the actual data from the API
   const savedHotels = items
     .filter(item => item.itemType === "hotel")
-    .map(item => featuredHotels.find(hotel => hotel.id === item.id))
+    .map(item => mockHotels.find(hotel => hotel.id === item.id))
     .filter(Boolean);
     
   const savedPackages = items
     .filter(item => item.itemType === "package")
-    .map(item => featuredPackages.find(pkg => pkg.id === item.id))
+    .map(item => mockPackages.find(pkg => pkg.id === item.id))
     .filter(Boolean);
     
   const savedTransport = items
     .filter(item => item.itemType === "transport")
-    .map(item => externalListings.find(listing => 
+    .map(item => mockExternalListings.find(listing => 
       listing.id === item.id && listing.listing_type === "flight"))
     .filter(Boolean);
   

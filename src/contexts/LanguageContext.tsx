@@ -1,177 +1,189 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Language = 'en' | 'ar';
+export type Language = 'en' | 'ar';
+export type Direction = 'ltr' | 'rtl';
 
 interface LanguageContextType {
   language: Language;
+  direction: Direction;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
-  isRTL: boolean;
 }
 
-const translations = {
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+// Simple translations object
+const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
     'nav.home': 'Home',
+    'nav.search': 'Search',
     'nav.packages': 'Packages',
-    'nav.hotels': 'Hotels',
     'nav.flights': 'Flights',
     'nav.transport': 'Transport',
-    'nav.about': 'About',
-    'nav.contact': 'Contact',
+    'nav.hotels': 'Hotels',
+    'nav.profile': 'Profile',
+    'nav.bookings': 'Bookings',
+    'nav.wishlist': 'Wishlist',
+    'nav.login': 'Login',
+    'nav.register': 'Register',
     
     // Common
     'common.search': 'Search',
-    'common.book_now': 'Book Now',
-    'common.view_details': 'View Details',
+    'common.book': 'Book',
+    'common.view': 'View',
+    'common.details': 'Details',
     'common.loading': 'Loading...',
     'common.error': 'Error',
     'common.success': 'Success',
-    
-    // Homepage
-    'hero.title': 'Discover Saudi Arabia',
-    'hero.subtitle': 'Your gateway to unforgettable experiences',
-    'features.title': 'Why Choose Us',
-    'packages.title': 'Featured Packages',
-    'hotels.title': 'Top Hotels',
-    
-    // Packages
-    'packages.hajj': 'Hajj',
-    'packages.umrah': 'Umrah',
-    'packages.custom': 'Custom',
-    'packages.duration': 'Duration',
-    'packages.price': 'Price',
-    'packages.includes': 'Package Includes',
-    
-    // Hotels
-    'hotels.rating': 'Rating',
-    'hotels.price_per_night': 'per night',
-    'hotels.amenities': 'Amenities',
-    'hotels.distance': 'Distance to Haram',
-    
-    // Flights
-    'flights.departure': 'Departure',
-    'flights.arrival': 'Arrival',
-    'flights.duration': 'Duration',
-    'flights.stops': 'Stops',
-    'flights.nonstop': 'Non-stop',
-    
-    // Booking
-    'booking.guests': 'Guests',
-    'booking.checkin': 'Check-in',
-    'booking.checkout': 'Check-out',
-    'booking.total': 'Total',
-    'booking.confirm': 'Confirm Booking',
-    
-    // Auth
-    'auth.login': 'Login',
-    'auth.register': 'Register',
-    'auth.email': 'Email',
-    'auth.password': 'Password',
-    'auth.forgot_password': 'Forgot Password?',
-    
-    // Dashboard
-    'dashboard.welcome': 'Welcome',
-    'dashboard.bookings': 'Bookings',
-    'dashboard.revenue': 'Revenue',
-    'dashboard.listings': 'Listings',
-    'dashboard.analytics': 'Analytics'
+    'common.cancel': 'Cancel',
+    'common.confirm': 'Confirm',
+    'common.save': 'Save',
+    'common.edit': 'Edit',
+    'common.delete': 'Delete',
+    'common.add': 'Add',
+    'common.update': 'Update',
+    'common.close': 'Close',
+    'common.back': 'Back',
+    'common.next': 'Next',
+    'common.previous': 'Previous',
+    'common.submit': 'Submit',
+    'common.reset': 'Reset',
+    'common.filter': 'Filter',
+    'common.sort': 'Sort',
+    'common.clear': 'Clear',
+    'common.apply': 'Apply',
+    'common.remove': 'Remove',
+    'common.select': 'Select',
+    'common.choose': 'Choose',
+    'common.upload': 'Upload',
+    'common.download': 'Download',
+    'common.share': 'Share',
+    'common.copy': 'Copy',
+    'common.paste': 'Paste',
+    'common.cut': 'Cut',
+    'common.undo': 'Undo',
+    'common.redo': 'Redo',
+    'common.refresh': 'Refresh',
+    'common.reload': 'Reload',
+    'common.print': 'Print',
+    'common.export': 'Export',
+    'common.import': 'Import',
+    'common.help': 'Help',
+    'common.about': 'About',
+    'common.contact': 'Contact',
+    'common.support': 'Support',
+    'common.feedback': 'Feedback',
+    'common.settings': 'Settings',
+    'common.preferences': 'Preferences',
+    'common.privacy': 'Privacy',
+    'common.terms': 'Terms',
+    'common.conditions': 'Conditions',
+    'common.policy': 'Policy',
+    'common.agreement': 'Agreement',
+    'common.license': 'License',
+    'common.copyright': 'Copyright',
+    'common.all_rights_reserved': 'All rights reserved',
   },
   ar: {
     // Navigation
     'nav.home': 'الرئيسية',
+    'nav.search': 'البحث',
     'nav.packages': 'الباقات',
-    'nav.hotels': 'الفنادق',
-    'nav.flights': 'الطيران',
+    'nav.flights': 'الرحلات',
     'nav.transport': 'النقل',
-    'nav.about': 'حولنا',
-    'nav.contact': 'اتصل بنا',
+    'nav.hotels': 'الفنادق',
+    'nav.profile': 'الملف الشخصي',
+    'nav.bookings': 'الحجوزات',
+    'nav.wishlist': 'المفضلة',
+    'nav.login': 'تسجيل الدخول',
+    'nav.register': 'التسجيل',
     
     // Common
-    'common.search': 'بحث',
-    'common.book_now': 'احجز الآن',
-    'common.view_details': 'عرض التفاصيل',
+    'common.search': 'البحث',
+    'common.book': 'حجز',
+    'common.view': 'عرض',
+    'common.details': 'التفاصيل',
     'common.loading': 'جاري التحميل...',
     'common.error': 'خطأ',
     'common.success': 'نجح',
-    
-    // Homepage
-    'hero.title': 'اكتشف المملكة العربية السعودية',
-    'hero.subtitle': 'بوابتك لتجارب لا تُنسى',
-    'features.title': 'لماذا تختارنا',
-    'packages.title': 'الباقات المميزة',
-    'hotels.title': 'أفضل الفنادق',
-    
-    // Packages
-    'packages.hajj': 'الحج',
-    'packages.umrah': 'العمرة',
-    'packages.custom': 'مخصص',
-    'packages.duration': 'المدة',
-    'packages.price': 'السعر',
-    'packages.includes': 'تشمل الباقة',
-    
-    // Hotels
-    'hotels.rating': 'التقييم',
-    'hotels.price_per_night': 'لليلة الواحدة',
-    'hotels.amenities': 'المرافق',
-    'hotels.distance': 'المسافة إلى الحرم',
-    
-    // Flights
-    'flights.departure': 'المغادرة',
-    'flights.arrival': 'الوصول',
-    'flights.duration': 'المدة',
-    'flights.stops': 'التوقفات',
-    'flights.nonstop': 'مباشر',
-    
-    // Booking
-    'booking.guests': 'الضيوف',
-    'booking.checkin': 'تسجيل الوصول',
-    'booking.checkout': 'تسجيل المغادرة',
-    'booking.total': 'الإجمالي',
-    'booking.confirm': 'تأكيد الحجز',
-    
-    // Auth
-    'auth.login': 'تسجيل الدخول',
-    'auth.register': 'إنشاء حساب',
-    'auth.email': 'البريد الإلكتروني',
-    'auth.password': 'كلمة المرور',
-    'auth.forgot_password': 'نسيت كلمة المرور؟',
-    
-    // Dashboard
-    'dashboard.welcome': 'مرحباً',
-    'dashboard.bookings': 'الحجوزات',
-    'dashboard.revenue': 'الإيرادات',
-    'dashboard.listings': 'القوائم',
-    'dashboard.analytics': 'التحليلات'
+    'common.cancel': 'إلغاء',
+    'common.confirm': 'تأكيد',
+    'common.save': 'حفظ',
+    'common.edit': 'تعديل',
+    'common.delete': 'حذف',
+    'common.add': 'إضافة',
+    'common.update': 'تحديث',
+    'common.close': 'إغلاق',
+    'common.back': 'رجوع',
+    'common.next': 'التالي',
+    'common.previous': 'السابق',
+    'common.submit': 'إرسال',
+    'common.reset': 'إعادة تعيين',
+    'common.filter': 'تصفية',
+    'common.sort': 'ترتيب',
+    'common.clear': 'مسح',
+    'common.apply': 'تطبيق',
+    'common.remove': 'إزالة',
+    'common.select': 'اختيار',
+    'common.choose': 'اختر',
+    'common.upload': 'رفع',
+    'common.download': 'تحميل',
+    'common.share': 'مشاركة',
+    'common.copy': 'نسخ',
+    'common.paste': 'لصق',
+    'common.cut': 'قص',
+    'common.undo': 'تراجع',
+    'common.redo': 'إعادة',
+    'common.refresh': 'تحديث',
+    'common.reload': 'إعادة تحميل',
+    'common.print': 'طباعة',
+    'common.export': 'تصدير',
+    'common.import': 'استيراد',
+    'common.help': 'مساعدة',
+    'common.about': 'حول',
+    'common.contact': 'اتصال',
+    'common.support': 'دعم',
+    'common.feedback': 'تعليقات',
+    'common.settings': 'إعدادات',
+    'common.preferences': 'تفضيلات',
+    'common.privacy': 'خصوصية',
+    'common.terms': 'شروط',
+    'common.conditions': 'أحكام',
+    'common.policy': 'سياسة',
+    'common.agreement': 'اتفاقية',
+    'common.license': 'رخصة',
+    'common.copyright': 'حقوق الطبع والنشر',
+    'common.all_rights_reserved': 'جميع الحقوق محفوظة',
   }
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');
 
+  const direction: Direction = language === 'ar' ? 'rtl' : 'ltr';
+
+  // Simple translation function that takes only one argument
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    return translations[language][key] || key;
   };
 
-  const isRTL = language === 'ar';
+  useEffect(() => {
+    document.dir = direction;
+    document.documentElement.lang = language;
+  }, [language, direction]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
+    <LanguageContext.Provider value={{ language, direction, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-export const useLanguage = (): LanguageContextType => {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;

@@ -44,6 +44,20 @@ export interface PackageData {
   is_featured?: boolean;
 }
 
+export interface ExternalListingData {
+  id: string;
+  title: string;
+  provider: string;
+  provider_logo: string;
+  price_range: string;
+  rating?: number;
+  review_count?: number;
+  url: string;
+  image: string;
+  features: string[];
+  listing_type: 'flight' | 'transport' | 'hotel' | 'package';
+}
+
 export const mockFlights: FlightData[] = [
   {
     id: 'flight-1',
@@ -172,6 +186,40 @@ export const mockPackages: PackageData[] = [
     is_featured: false
   }
 ];
+
+export const mockExternalListings: ExternalListingData[] = [
+  {
+    id: 'external-1',
+    title: 'Premium Flight Deals to Jeddah',
+    provider: 'Booking.com',
+    provider_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop&crop=center',
+    price_range: '$450 - $890',
+    rating: 4.5,
+    review_count: 1234,
+    url: 'https://booking.com',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop',
+    features: ['Direct Flight', 'Baggage Included', 'Flexible Dates'],
+    listing_type: 'flight'
+  },
+  {
+    id: 'external-2',
+    title: 'Makkah to Madinah Transport',
+    provider: 'Saudi Transport Co',
+    provider_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=100&h=100&fit=crop&crop=center',
+    price_range: '$45 - $120',
+    rating: 4.3,
+    review_count: 567,
+    url: 'https://sauditransport.com',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop',
+    features: ['AC Bus', 'WiFi', 'Comfortable Seats'],
+    listing_type: 'transport'
+  }
+];
+
+// Named exports for compatibility
+export const featuredHotels = mockHotels.filter(hotel => hotel.is_featured);
+export const featuredPackages = mockPackages.filter(pkg => pkg.is_featured);
+export const externalListings = mockExternalListings;
 
 // Export for backward compatibility
 export const flights = mockFlights;

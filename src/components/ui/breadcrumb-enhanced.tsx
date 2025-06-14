@@ -1,89 +1,72 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Breadcrumb, 
-  BreadcrumbList, 
-  BreadcrumbItem, 
-  BreadcrumbLink, 
-  BreadcrumbPage, 
-  BreadcrumbSeparator 
-} from '@/components/ui/breadcrumb';
-import { Home, ChevronRight } from 'lucide-react';
+import React from "react";
+import { ChevronRight, Home } from "lucide-react";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
   href?: string;
+  current?: boolean;
 }
 
-interface EnhancedBreadcrumbProps {
-  items?: BreadcrumbItem[];
+interface BreadcrumbEnhancedProps {
+  items: BreadcrumbItem[];
   className?: string;
+  showHome?: boolean;
+  separator?: React.ReactNode;
 }
 
-const EnhancedBreadcrumb: React.FC<EnhancedBreadcrumbProps> = ({ items, className }) => {
-  const location = useLocation();
-  
-  // Auto-generate breadcrumbs if no items provided
-  const generateBreadcrumbs = (): BreadcrumbItem[] => {
-    const pathSegments = location.pathname.split('/').filter(Boolean);
-    const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }];
-    
-    let currentPath = '';
-    pathSegments.forEach((segment, index) => {
-      currentPath += `/${segment}`;
-      const isLast = index === pathSegments.length - 1;
-      
-      // Convert segment to readable label
-      const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-      
-      breadcrumbs.push({
-        label,
-        href: isLast ? undefined : currentPath
-      });
-    });
-    
-    return breadcrumbs;
-  };
-  
-  const breadcrumbItems = items || generateBreadcrumbs();
-  
-  if (breadcrumbItems.length <= 1) return null;
-  
+const BreadcrumbEnhanced: React.FC<BreadcrumbEnhancedProps> = ({ 
+  items, 
+  className,
+  showHome = true,
+  separator = <ChevronRight className="h-4 w-4 text-muted-foreground" />
+}) => {
+  const allItems = showHome 
+    ? [{ label: "Home", href: "/" }, ...items]
+    : items;
+
   return (
-    <div className={`mb-6 ${className}`}>
-      <Breadcrumb>
-        <BreadcrumbList className="flex items-center space-x-1 text-sm">
-          {breadcrumbItems.map((item, index) => (
-            <React.Fragment key={index}>
-              <BreadcrumbItem>
-                {item.href ? (
-                  <BreadcrumbLink asChild>
-                    <Link 
-                      to={item.href} 
-                      className="flex items-center gap-1 text-muted-foreground hover:text-saudi-green transition-colors"
-                    >
-                      {index === 0 && <Home className="h-4 w-4" />}
-                      {item.label}
-                    </Link>
-                  </BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage className="text-foreground font-medium">
-                    {item.label}
-                  </BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-              {index < breadcrumbItems.length - 1 && (
-                <BreadcrumbSeparator>
-                  <ChevronRight className="h-4 w-4" />
-                </BreadcrumbSeparator>
+    <nav 
+      aria-label="Breadcrumb" 
+      className={cn("flex items-center space-x-2 text-sm", className)}
+    >
+      {allItems.map((item, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && (
+            <span className="flex items-center">
+              {separator}
+            </span>
+          )}
+          
+          {item.current || !item.href ? (
+            <span 
+              className="text-foreground font-medium"
+              aria-current={item.current ? "page" : undefined}
+            >
+              {index === 0 && showHome ? (
+                <Home className="h-4 w-4" />
+              ) : (
+                item.label
               )}
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-    </div>
+            </span>
+          ) : (
+            <Link
+              to={item.href}
+              className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              {index === 0 && showHome ? (
+                <Home className="h-4 w-4" />
+              ) : (
+                item.label
+              )}
+            </Link>
+          )}
+        </React.Fragment>
+      ))}
+    </nav>
   );
 };
 
-export default EnhancedBreadcrumb;
+export default BreadcrumbEnhanced;

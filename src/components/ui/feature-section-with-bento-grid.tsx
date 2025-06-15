@@ -3,29 +3,41 @@ import { MapPin, Shield, Heart, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { useRtlHelpers } from '@/utils/rtl-helpers';
+import { cn } from '@/lib/utils';
 
 function Feature() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { getDirectionalClasses } = useRtlHelpers();
 
   return (
-    <div className="w-full py-20 lg:py-40">
+    <div className={cn("w-full py-20 lg:py-40", isRTL && "rtl")}>
       <div className="container mx-auto">
         <div className="flex flex-col gap-10">
-          <div className="flex gap-4 flex-col items-start">
+          <div className={cn("flex gap-4 flex-col", isRTL ? "items-end" : "items-start")}>
             <div>
               <Badge variant="saudi">{t('home.services.badge', 'Our Services')}</Badge>
             </div>
             <div className="flex gap-2 flex-col">
-              <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular text-left">
+              <h2 className={cn(
+                "text-3xl md:text-5xl tracking-tighter max-w-xl font-regular",
+                isRTL ? "text-right" : "text-left"
+              )}>
                 {t('home.services.title', 'Why Choose Our Pilgrimage Services?')}
               </h2>
-              <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
+              <p className={cn(
+                "text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground",
+                isRTL ? "text-right" : "text-left"
+              )}>
                 {t('home.services.subtitle', 'Experience unmatched comfort and spiritual guidance on your sacred journey to the holy lands.')}
               </p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+            <div className={cn(
+              "relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col",
+              isRTL && "text-right"
+            )}>
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -42,7 +54,10 @@ function Feature() {
                 </p>
               </div>
             </div>
-            <div className="relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+            <div className={cn(
+              "relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col",
+              isRTL && "text-right"
+            )}>
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -60,7 +75,10 @@ function Feature() {
               </div>
             </div>
 
-            <div className="relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+            <div className={cn(
+              "relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col",
+              isRTL && "text-right"
+            )}>
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -77,7 +95,10 @@ function Feature() {
                 </p>
               </div>
             </div>
-            <div className="relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+            <div className={cn(
+              "relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col",
+              isRTL && "text-right"
+            )}>
               <GlowingEffect
                 spread={40}
                 glow={true}

@@ -47,11 +47,11 @@ const StatsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center space-y-2"
+              className="flex flex-col items-center text-center space-y-3"
             >
               <stat.icon className="h-8 w-8 text-white/90" />
-              <div className="text-2xl md:text-3xl font-bold">{stat.value}</div>
-              <div className="text-white/80 text-xs md:text-sm leading-relaxed px-2">{stat.label}</div>
+              <div className="text-3xl font-bold text-center">{stat.value}</div>
+              <div className="text-white/80 text-sm text-center leading-relaxed">{stat.label}</div>
             </motion.div>
           ))}
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -45,56 +46,23 @@ const AdminHotels: React.FC = () => {
     console.log('=== FETCHING HOTELS FROM DATABASE ===');
     
     try {
-      // First, test the connection
-      const { data: testData, error: testError } = await supabase
+      const { data, error } = await supabase
         .from('hotels')
-        .select('count');
-      
-      console.log('Connection test result:', { testData, testError });
-
-      // Now fetch all hotels with detailed logging
-      const { data, error, count } = await supabase
-        .from('hotels')
-        .select('*', { count: 'exact' })
+        .select('*')
         .order('updated_at', { ascending: false });
 
-      console.log('Raw Supabase response:', { data, error, count });
-      console.log('Number of hotels returned:', data?.length || 0);
+      console.log('Supabase response:', { data, error });
       
       if (error) {
-        console.error('Supabase error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+        console.error('Supabase error:', error);
         throw error;
       }
       
       console.log('Hotels fetched successfully:', data);
-      
-      // Log each hotel for debugging
-      if (data) {
-        data.forEach((hotel, index) => {
-          console.log(`Hotel ${index + 1}:`, {
-            id: hotel.id,
-            name: hotel.name,
-            city: hotel.city,
-            price_per_night: hotel.price_per_night,
-            updated_at: hotel.updated_at
-          });
-        });
-      }
-      
       setHotels(data || []);
       
-      // Double-check state was set
-      console.log('Hotels state updated, current length:', data?.length || 0);
-      
     } catch (error: any) {
-      console.error('=== FETCH ERROR ===');
-      console.error('Error type:', typeof error);
-      console.error('Error details:', error);
+      console.error('=== FETCH ERROR ===', error);
       toast({
         title: "Error",
         description: `Failed to fetch hotels: ${error.message || 'Unknown error'}`,
@@ -102,28 +70,17 @@ const AdminHotels: React.FC = () => {
       });
     } finally {
       setLoading(false);
-      console.log('=== FETCH HOTELS COMPLETE ===');
     }
   };
 
   useEffect(() => {
-    console.log('Component mounted, fetching hotels...');
     fetchHotels();
   }, []);
-
-  // Log whenever hotels state changes
-  useEffect(() => {
-    console.log('Hotels state changed:', {
-      length: hotels.length,
-      hotels: hotels.map(h => ({ id: h.id, name: h.name, updated_at: h.updated_at }))
-    });
-  }, [hotels]);
 
   const handleDeleteHotel = async (hotelId: string) => {
     if (!confirm("Are you sure you want to delete this hotel?")) return;
     
     try {
-      console.log('=== DELETING HOTEL ===');
       console.log('Deleting hotel ID:', hotelId);
       
       const { error } = await supabase
@@ -142,7 +99,6 @@ const AdminHotels: React.FC = () => {
         description: "Hotel deleted successfully.",
       });
 
-      // Refresh the list
       await fetchHotels();
     } catch (error: any) {
       console.error('Error deleting hotel:', error);
@@ -155,15 +111,13 @@ const AdminHotels: React.FC = () => {
   };
 
   const handleEditHotel = (hotel: Hotel) => {
-    console.log('=== OPENING EDIT DIALOG ===');
-    console.log('Hotel to edit:', hotel);
+    console.log('Opening edit dialog for hotel:', hotel);
     setEditingHotel(hotel);
     setEditFormData({ ...hotel });
   };
 
   const handleUpdateHotel = async () => {
     if (!editFormData || !editFormData.id) {
-      console.error('No hotel data to update');
       toast({
         title: "Error",
         description: "No hotel data to update.",
@@ -173,9 +127,9 @@ const AdminHotels: React.FC = () => {
     }
 
     setUpdateLoading(true);
-    console.log('=== HOTEL UPDATE PROCESS START ===');
-    console.log('Hotel ID to update:', editFormData.id);
-    console.log('Current form data:', editFormData);
+    console.log('=== STARTING HOTEL UPDATE ===');
+    console.log('Hotel ID:', editFormData.id);
+    console.log('Form data:', editFormData);
 
     try {
       // Validate required fields
@@ -187,7 +141,7 @@ const AdminHotels: React.FC = () => {
         throw new Error('Price per night must be greater than 0');
       }
 
-      // Prepare the update data
+      // Prepare update data - only include fields that can be updated
       const updateData = {
         name: editFormData.name.trim(),
         city: editFormData.city.trim(),
@@ -200,28 +154,41 @@ const AdminHotels: React.FC = () => {
         updated_at: new Date().toISOString()
       };
 
-      console.log('Prepared update data:', updateData);
+      console.log('Update data being sent:', updateData);
 
-      // Perform the update WITHOUT .single() to avoid PGRST116 error
+      // First, check if the hotel exists
+      const { data: existingHotel, error: checkError } = await supabase
+        .from('hotels')
+        .select('id, name')
+        .eq('id', editFormData.id)
+        .single();
+
+      if (checkError || !existingHotel) {
+        console.error('Hotel not found:', checkError);
+        throw new Error('Hotel not found in database');
+      }
+
+      console.log('Hotel exists:', existingHotel);
+
+      // Perform the update
       const { data: updatedData, error: updateError } = await supabase
         .from('hotels')
         .update(updateData)
         .eq('id', editFormData.id)
         .select('*');
 
+      console.log('Update response:', { updatedData, updateError });
+
       if (updateError) {
         console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      console.log('Update response data:', updatedData);
-
       if (!updatedData || updatedData.length === 0) {
-        throw new Error('No hotel was updated. Please check if the hotel exists.');
+        throw new Error('Update operation completed but no data was returned');
       }
 
-      const updatedHotel = updatedData[0];
-      console.log('Hotel updated successfully:', updatedHotel);
+      console.log('Hotel updated successfully:', updatedData[0]);
 
       toast({
         title: "Success",
@@ -232,13 +199,11 @@ const AdminHotels: React.FC = () => {
       setEditingHotel(null);
       setEditFormData(null);
 
-      // Force a complete refresh from database
-      console.log('Forcing database refresh...');
+      // Refresh the hotels list
       await fetchHotels();
       
     } catch (error: any) {
-      console.error('=== UPDATE ERROR ===');
-      console.error('Error details:', error);
+      console.error('=== UPDATE ERROR ===', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update hotel. Please try again.",
@@ -246,20 +211,16 @@ const AdminHotels: React.FC = () => {
       });
     } finally {
       setUpdateLoading(false);
-      console.log('=== HOTEL UPDATE PROCESS END ===');
     }
   };
 
   const handleFormDataChange = (field: keyof Hotel, value: any) => {
-    console.log(`Updating field ${field} with value:`, value);
     setEditFormData(prev => {
       if (!prev) return null;
-      const updated = {
+      return {
         ...prev,
         [field]: value
       };
-      console.log('Updated form data:', updated);
-      return updated;
     });
   };
 
@@ -267,13 +228,6 @@ const AdminHotels: React.FC = () => {
     hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     hotel.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  console.log('Rendering component with:', {
-    loading,
-    hotelsCount: hotels.length,
-    filteredHotelsCount: filteredHotels.length,
-    searchTerm
-  });
 
   if (loading) {
     return (
@@ -290,14 +244,12 @@ const AdminHotels: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        
-        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Hotels</h1>
             <p className="text-muted-foreground">Manage hotel listings</p>
             <p className="text-sm text-muted-foreground">
-              Total hotels in database: {hotels.length}
+              Total hotels: {hotels.length}
             </p>
           </div>
           <HotelManagement onHotelAdded={fetchHotels} />
@@ -341,9 +293,7 @@ const AdminHotels: React.FC = () => {
                 {filteredHotels.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                      {searchTerm ? "No hotels found matching your search." : "No hotels found in database."}
-                      <br />
-                      <small>Database contains {hotels.length} hotels total</small>
+                      {searchTerm ? "No hotels found matching your search." : "No hotels found."}
                     </td>
                   </tr>
                 ) : (
@@ -391,17 +341,12 @@ const AdminHotels: React.FC = () => {
             <div className="text-sm text-muted-foreground">
               Showing <span className="font-medium">{filteredHotels.length}</span> of <span className="font-medium">{hotels.length}</span> hotels
             </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" disabled>Previous</Button>
-              <Button variant="outline" size="sm" disabled>Next</Button>
-            </div>
           </div>
         </div>
 
         {/* Edit Hotel Dialog */}
         <Dialog open={!!editingHotel} onOpenChange={(open) => {
           if (!open) {
-            console.log('Closing edit dialog');
             setEditingHotel(null);
             setEditFormData(null);
           }
@@ -514,7 +459,6 @@ const AdminHotels: React.FC = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => {
-                      console.log('Cancel button clicked');
                       setEditingHotel(null);
                       setEditFormData(null);
                     }}

@@ -61,31 +61,29 @@ const scaleIn = {
   }
 };
 const HomePage: React.FC = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [searchTab, setSearchTab] = useState("hotel");
   const [date, setDate] = useState<Date>();
 
   // Enhanced benefits with Saudi theme
   const benefits = [{
-    title: "Customized Packages",
-    description: "Tailored spiritual journeys designed specifically for your needs, schedule, and budget preferences",
+    title: t("benefits.customizedPackages", "Customized Packages"),
+    description: t("benefits.customizedPackagesDesc", "Tailored spiritual journeys designed specifically for your needs, schedule, and budget preferences"),
     icon: Package,
     gradient: "from-saudi-green-500 to-saudi-green-600"
   }, {
-    title: "Expert Spiritual Guidance",
-    description: "Knowledgeable guides to help you perform all rituals correctly with deep spiritual meaning",
+    title: t("benefits.expertGuidance", "Expert Spiritual Guidance"),
+    description: t("benefits.expertGuidanceDesc", "Knowledgeable guides to help you perform all rituals correctly with deep spiritual meaning"),
     icon: Compass,
     gradient: "from-saudi-green-600 to-saudi-green-700"
   }, {
-    title: "Verified & Trusted",
-    description: "All our service providers are authenticated and verified for your safety and peace of mind",
+    title: t("benefits.verifiedTrusted", "Verified & Trusted"),
+    description: t("benefits.verifiedTrustedDesc", "All our service providers are authenticated and verified for your safety and peace of mind"),
     icon: Shield,
     gradient: "from-saudi-green-400 to-saudi-green-500"
   }, {
-    title: "24/7 Support",
-    description: "Round-the-clock assistance throughout your sacred journey whenever you need help",
+    title: t("benefits.support24", "24/7 Support"),
+    description: t("benefits.support24Desc", "Round-the-clock assistance throughout your sacred journey whenever you need help"),
     icon: Users,
     gradient: "from-saudi-green-700 to-saudi-green-800"
   }];
@@ -93,19 +91,19 @@ const HomePage: React.FC = () => {
   // Enhanced statistics
   const stats = [{
     number: "50,000+",
-    label: "Pilgrims Served",
+    label: t("stats.pilgrimsServed", "Pilgrims Served"),
     icon: Users
   }, {
     number: "4.9/5",
-    label: "Average Rating",
+    label: t("stats.averageRating", "Average Rating"),
     icon: Star
   }, {
     number: "15+",
-    label: "Years Experience",
+    label: t("stats.yearsExperience", "Years Experience"),
     icon: Award
   }, {
     number: "24/7",
-    label: "Support Available",
+    label: t("stats.supportAvailable", "Support Available"),
     icon: Clock
   }];
 
@@ -113,29 +111,29 @@ const HomePage: React.FC = () => {
   const testimonials = [{
     id: 1,
     name: "Ahmed Khan",
-    location: "United Kingdom",
+    location: t("testimonials.location1", "United Kingdom"),
     rating: 5,
-    text: "InstaSafar made my Umrah journey absolutely perfect. From the moment I booked until I returned home, every detail was handled with care and professionalism.",
+    text: t("testimonials.text1", "InstaSafar made my Umrah journey absolutely perfect. From the moment I booked until I returned home, every detail was handled with care and professionalism."),
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&auto=format&q=60",
-    badge: "Verified Pilgrim"
+    badge: t("testimonials.badge1", "Verified Pilgrim")
   }, {
     id: 2,
     name: "Fatima Rahman",
-    location: "Canada",
+    location: t("testimonials.location2", "Canada"),
     rating: 5,
-    text: "As a first-time visitor to the Holy Cities, I was nervous about the journey. InstaSafar's team guided me through everything with patience and expertise.",
+    text: t("testimonials.text2", "As a first-time visitor to the Holy Cities, I was nervous about the journey. InstaSafar's team guided me through everything with patience and expertise."),
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&auto=format&q=60",
-    badge: "First-time Pilgrim"
+    badge: t("testimonials.badge2", "First-time Pilgrim")
   }, {
     id: 3,
     name: "Omar Abdullah",
-    location: "United States",
+    location: t("testimonials.location3", "United States"),
     rating: 4,
-    text: "The Hajj package was comprehensive and well-organized. The accommodations were excellent and the spiritual guidance made the experience truly meaningful.",
+    text: t("testimonials.text3", "The Hajj package was comprehensive and well-organized. The accommodations were excellent and the spiritual guidance made the experience truly meaningful."),
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&auto=format&q=60",
-    badge: "Hajj Pilgrim"
+    badge: t("testimonials.badge3", "Hajj Pilgrim")
   }];
-  return <div className="flex flex-col min-h-screen">
+  return <div className={`flex flex-col min-h-screen ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? "rtl" : "ltr"}>
       {/* Enhanced Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-saudi-green-50 via-background to-saudi-green-50 py-20 md:py-32">
         {/* Animated Background Elements */}
@@ -170,18 +168,18 @@ const HomePage: React.FC = () => {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial="hidden" animate="visible" variants={staggerChildren} className="flex flex-col items-start space-y-8">
+            <motion.div initial="hidden" animate="visible" variants={staggerChildren} className={`flex flex-col items-start space-y-8 ${isRTL ? 'items-end text-right' : ''}`}>
               <motion.div variants={fadeInUp}>
                 <Badge className="py-2 px-4 text-sm font-medium mb-6" variant="saudi">
                   <Sparkles className="w-4 h-4 mr-1" />
-                  Hajj & Umrah Specialists
+                  {t("hero.badge", "Hajj & Umrah Specialists")}
                 </Badge>
               </motion.div>
               
-              <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-                Your <span className="text-saudi-green bg-gradient-to-r from-saudi-green-600 to-saudi-green-700 bg-clip-text text-transparent">spiritual journey</span>{" "}
-                <br />made <span className="relative">
-                  simple
+              <motion.h1 variants={fadeInUp} className={`text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight ${isRTL ? 'text-right' : ''}`}>
+                {t("hero.title1", "Your")} <span className="text-saudi-green bg-gradient-to-r from-saudi-green-600 to-saudi-green-700 bg-clip-text text-transparent">{t("hero.spiritual", "spiritual journey")}</span>{" "}
+                <br />{t("hero.made", "made")} <span className="relative">
+                  {t("hero.simple", "simple")}
                   <motion.div initial={{
                   scaleX: 0
                 }} animate={{
@@ -193,20 +191,19 @@ const HomePage: React.FC = () => {
                 </span>
               </motion.h1>
               
-              <motion.p variants={fadeInUp} className="text-muted-foreground text-xl max-w-xl leading-relaxed">
-                Experience the sacred journey of a lifetime with our expertly curated Hajj and Umrah packages. 
-                We handle every detail so you can focus on your spiritual connection.
+              <motion.p variants={fadeInUp} className={`text-muted-foreground text-xl max-w-xl leading-relaxed ${isRTL ? 'text-right' : ''}`}>
+                {t("hero.description", "Experience the sacred journey of a lifetime with our expertly curated Hajj and Umrah packages. We handle every detail so you can focus on your spiritual connection.")}
               </motion.p>
               
-              <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
+              <motion.div variants={fadeInUp} className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button asChild variant="saudi" size="xl" effect="shimmer" className="group">
                   <Link to="/search">
-                    Explore Packages
-                    <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    {t("hero.explorePackages", "Explore Packages")}
+                    <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'ml-2 group-hover:-translate-x-1' : 'ml-2'}`} />
                   </Link>
                 </Button>
                 <Button asChild variant="saudi-outline" size="xl">
-                  <Link to="/packages">Learn More</Link>
+                  <Link to="/packages">{t("hero.learnMore", "Learn More")}</Link>
                 </Button>
               </motion.div>
               
@@ -214,18 +211,18 @@ const HomePage: React.FC = () => {
               <motion.div variants={staggerChildren} className="grid grid-cols-2 gap-4 mt-8 w-full">
                 {[{
                 icon: Clock,
-                text: "24/7 Customer Support"
+                text: t("hero.support247", "24/7 Customer Support")
               }, {
                 icon: Shield,
-                text: "Best Price Guarantee"
+                text: t("hero.bestPrice", "Best Price Guarantee")
               }, {
                 icon: Award,
-                text: "Expert Local Guides"
+                text: t("hero.expertGuides", "Expert Local Guides")
               }, {
                 icon: Heart,
-                text: "Secure Payments"
-              }].map((item, i) => <motion.div key={i} variants={fadeInUp} className="flex items-center p-3 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
-                    <div className="p-2 rounded-full bg-saudi-green/10 mr-3">
+                text: t("hero.securePayments", "Secure Payments")
+              }].map((item, i) => <motion.div key={i} variants={fadeInUp} className={`flex items-center p-3 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                    <div className={`p-2 rounded-full bg-saudi-green/10 ${isRTL ? 'ml-3' : 'mr-3'}`}>
                       <item.icon size={16} className="text-saudi-green" />
                     </div>
                     <span className="text-sm font-medium">{item.text}</span>
@@ -330,28 +327,28 @@ const HomePage: React.FC = () => {
         duration: 0.6,
         delay: 0.2
       }} className="bg-white dark:bg-slate-900 shadow-2xl rounded-2xl p-8 border border-saudi-green/10 py-[42px] my-[44px]">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Start Your Sacred Journey</h2>
-            <p className="text-muted-foreground">Find the perfect package for your spiritual needs</p>
+          <div className={`text-center mb-8 ${isRTL ? 'text-right' : ''}`}>
+            <h2 className="text-2xl font-bold mb-2">{t("search.title", "Start Your Sacred Journey")}</h2>
+            <p className="text-muted-foreground">{t("search.subtitle", "Find the perfect package for your spiritual needs")}</p>
           </div>
 
           <Tabs defaultValue={searchTab} onValueChange={setSearchTab} className="w-full">
             <TabsList className="grid grid-cols-4 w-full mb-8 bg-saudi-green/5">
               <TabsTrigger value="hotel" className="flex items-center gap-2 data-[state=active]:bg-saudi-green data-[state=active]:text-white">
                 <Hotel className="h-4 w-4" />
-                <span className="hidden sm:inline">Hotels</span>
+                <span className="hidden sm:inline">{t("hotels", "Hotels")}</span>
               </TabsTrigger>
               <TabsTrigger value="package" className="flex items-center gap-2 data-[state=active]:bg-saudi-green data-[state=active]:text-white">
                 <Package className="h-4 w-4" />
-                <span className="hidden sm:inline">Packages</span>
+                <span className="hidden sm:inline">{t("packages", "Packages")}</span>
               </TabsTrigger>
               <TabsTrigger value="flight" className="flex items-center gap-2 data-[state=active]:bg-saudi-green data-[state=active]:text-white">
                 <Plane className="h-4 w-4" />
-                <span className="hidden sm:inline">Flights</span>
+                <span className="hidden sm:inline">{t("flights", "Flights")}</span>
               </TabsTrigger>
               <TabsTrigger value="transport" className="flex items-center gap-2 data-[state=active]:bg-saudi-green data-[state=active]:text-white">
                 <Bus className="h-4 w-4" />
-                <span className="hidden sm:inline">Transport</span>
+                <span className="hidden sm:inline">{t("transport", "Transport")}</span>
               </TabsTrigger>
             </TabsList>
             
@@ -359,26 +356,26 @@ const HomePage: React.FC = () => {
             <TabsContent value="hotel" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Destination</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.destination", "Destination")}</Label>
                   <Select defaultValue="makkah">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder={t("search.selectLocation", "Select location")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="makkah">Makkah</SelectItem>
-                      <SelectItem value="madinah">Madinah</SelectItem>
-                      <SelectItem value="both">Both Cities</SelectItem>
+                      <SelectItem value="makkah">{t("cities.makkah", "Makkah")}</SelectItem>
+                      <SelectItem value="madinah">{t("cities.madinah", "Madinah")}</SelectItem>
+                      <SelectItem value="both">{t("search.bothCities", "Both Cities")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Check-in Date</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.checkInDate", "Check-in Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : "Pick a date"}
+                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -388,26 +385,26 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Duration</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.duration", "Duration")}</Label>
                   <Select defaultValue="7">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
+                      <SelectValue placeholder={t("search.selectDuration", "Select duration")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="3">3 Days</SelectItem>
-                      <SelectItem value="7">7 Days</SelectItem>
-                      <SelectItem value="14">14 Days</SelectItem>
-                      <SelectItem value="21">21 Days</SelectItem>
-                      <SelectItem value="30">30 Days</SelectItem>
+                      <SelectItem value="3">{t("search.duration3", "3 Days")}</SelectItem>
+                      <SelectItem value="7">{t("search.duration7", "7 Days")}</SelectItem>
+                      <SelectItem value="14">{t("search.duration14", "14 Days")}</SelectItem>
+                      <SelectItem value="21">{t("search.duration21", "21 Days")}</SelectItem>
+                      <SelectItem value="30">{t("search.duration30", "30 Days")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="flex items-end">
                   <Button className="w-full" variant="saudi" size="lg" asChild>
-                    <Link to="/search" className="flex items-center justify-center">
-                      Search Hotels
-                      <ChevronRight className="ml-1 h-4 w-4" />
+                    <Link to="/search" className={`flex items-center justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {t("search.searchHotels", "Search Hotels")}
+                      <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
                     </Link>
                   </Button>
                 </div>
@@ -418,26 +415,26 @@ const HomePage: React.FC = () => {
             <TabsContent value="package" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Package Type</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.packageType", "Package Type")}</Label>
                   <Select defaultValue="umrah">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select package" />
+                      <SelectValue placeholder={t("search.selectPackage", "Select package")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hajj">Hajj Package</SelectItem>
-                      <SelectItem value="umrah">Umrah Package</SelectItem>
-                      <SelectItem value="custom">Custom Package</SelectItem>
+                      <SelectItem value="hajj">{t("cities.hajj", "Hajj Package")}</SelectItem>
+                      <SelectItem value="umrah">{t("cities.umrah", "Umrah Package")}</SelectItem>
+                      <SelectItem value="custom">{t("search.customPackage", "Custom Package")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Start Date</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.startDate", "Start Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : "Pick a date"}
+                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -447,25 +444,25 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Duration</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.duration", "Duration")}</Label>
                   <Select defaultValue="14">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
+                      <SelectValue placeholder={t("search.selectDuration", "Select duration")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="7">7 Days</SelectItem>
-                      <SelectItem value="14">14 Days</SelectItem>
-                      <SelectItem value="21">21 Days</SelectItem>
-                      <SelectItem value="30">30 Days</SelectItem>
+                      <SelectItem value="7">{t("search.duration7", "7 Days")}</SelectItem>
+                      <SelectItem value="14">{t("search.duration14", "14 Days")}</SelectItem>
+                      <SelectItem value="21">{t("search.duration21", "21 Days")}</SelectItem>
+                      <SelectItem value="30">{t("search.duration30", "30 Days")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="flex items-end">
                   <Button className="w-full" size="lg" asChild>
-                    <Link to="/packages" className="flex items-center justify-center">
-                      Find Packages
-                      <ChevronRight className="ml-1 h-4 w-4" />
+                    <Link to="/packages" className={`flex items-center justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {t("search.findPackages", "Find Packages")}
+                      <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
                     </Link>
                   </Button>
                 </div>
@@ -476,30 +473,30 @@ const HomePage: React.FC = () => {
             <TabsContent value="flight" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">From</Label>
-                  <Input placeholder="Departure City/Airport" />
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.from", "From")}</Label>
+                  <Input placeholder={t("search.departureCity", "Departure City/Airport")} />
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">To</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.to", "To")}</Label>
                   <Select defaultValue="jeddah">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select destination" />
+                      <SelectValue placeholder={t("search.selectDestination", "Select destination")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="jeddah">Jeddah (JED)</SelectItem>
-                      <SelectItem value="madinah">Madinah (MED)</SelectItem>
+                      <SelectItem value="jeddah">{t("cities.jeddah", "Jeddah (JED)")}</SelectItem>
+                      <SelectItem value="madinah">{t("cities.madinah", "Madinah (MED)")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Departure Date</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.departureDate", "Departure Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : "Pick a date"}
+                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -510,9 +507,9 @@ const HomePage: React.FC = () => {
                 
                 <div className="flex items-end">
                   <Button className="w-full" size="lg" asChild>
-                    <Link to="/flights" className="flex items-center justify-center">
-                      Search Flights
-                      <ChevronRight className="ml-1 h-4 w-4" />
+                    <Link to="/flights" className={`flex items-center justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {t("search.searchFlights", "Search Flights")}
+                      <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
                     </Link>
                   </Button>
                 </div>
@@ -523,40 +520,40 @@ const HomePage: React.FC = () => {
             <TabsContent value="transport" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">From</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.from", "From")}</Label>
                   <Select defaultValue="jeddah">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select origin" />
+                      <SelectValue placeholder={t("search.selectOrigin", "Select origin")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="jeddah">Jeddah Airport</SelectItem>
-                      <SelectItem value="makkah">Makkah City</SelectItem>
-                      <SelectItem value="madinah">Madinah City</SelectItem>
+                      <SelectItem value="jeddah">{t("cities.jeddah", "Jeddah Airport")}</SelectItem>
+                      <SelectItem value="makkah">{t("cities.makkah", "Makkah City")}</SelectItem>
+                      <SelectItem value="madinah">{t("cities.madinah", "Madinah City")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">To</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.to", "To")}</Label>
                   <Select defaultValue="makkah">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select destination" />
+                      <SelectValue placeholder={t("search.selectDestination", "Select destination")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="makkah">Makkah City</SelectItem>
-                      <SelectItem value="madinah">Madinah City</SelectItem>
-                      <SelectItem value="jeddah">Jeddah Airport</SelectItem>
+                      <SelectItem value="makkah">{t("cities.makkah", "Makkah City")}</SelectItem>
+                      <SelectItem value="madinah">{t("cities.madinah", "Madinah City")}</SelectItem>
+                      <SelectItem value="jeddah">{t("cities.jeddah", "Jeddah Airport")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Date</Label>
+                  <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.date", "Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : "Pick a date"}
+                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
@@ -567,9 +564,9 @@ const HomePage: React.FC = () => {
                 
                 <div className="flex items-end">
                   <Button className="w-full" size="lg" asChild>
-                    <Link to="/transport" className="flex items-center justify-center">
-                      Find Transport
-                      <ChevronRight className="ml-1 h-4 w-4" />
+                    <Link to="/transport" className={`flex items-center justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {t("search.findTransport", "Find Transport")}
+                      <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
                     </Link>
                   </Button>
                 </div>
@@ -585,11 +582,11 @@ const HomePage: React.FC = () => {
           <motion.div initial="hidden" whileInView="visible" viewport={{
           once: true,
           margin: "-100px"
-        }} variants={fadeInUp} className="text-center max-w-3xl mx-auto mb-16">
-            <Badge className="mb-4" variant="saudi">Why Choose InstaSafar</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Making Your Journey <span className="text-saudi-green">Spiritual & Comfortable</span></h2>
+        }} variants={fadeInUp} className={`text-center max-w-3xl mx-auto mb-16 ${isRTL ? 'text-right' : ''}`}>
+            <Badge className="mb-4" variant="saudi">{t("benefits.whyChoose", "Why Choose InstaSafar")}</Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">{t("benefits.makingJourney", "Making Your Journey")} <span className="text-saudi-green">{t("benefits.spiritualComfortable", "Spiritual & Comfortable")}</span></h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              We understand the profound significance of Hajj and Umrah in your spiritual life. Every aspect of our service is designed to enhance your sacred journey with comfort, convenience, and deep meaning.
+              {t("benefits.description", "We understand the profound significance of Hajj and Umrah in your spiritual life. Every aspect of our service is designed to enhance your sacred journey with comfort, convenience, and deep meaning.")}
             </p>
           </motion.div>
 
@@ -600,15 +597,15 @@ const HomePage: React.FC = () => {
             {benefits.map((benefit, index) => <motion.div key={index} variants={scaleIn} className="group cursor-pointer">
                 <Card variant="interactive" className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 bg-white overflow-hidden relative">
                   <div className={`absolute inset-0 bg-gradient-to-br ${benefit.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                  <CardHeader className="pb-4 relative z-10">
-                    <div className={`bg-gradient-to-br ${benefit.gradient} rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <CardHeader className={`pb-4 relative z-10 ${isRTL ? 'text-right' : ''}`}>
+                    <div className={`bg-gradient-to-br ${benefit.gradient} rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'mr-auto' : ''}`}>
                       <benefit.icon className="text-white h-8 w-8" />
                     </div>
                     <CardTitle className="text-xl font-bold group-hover:text-saudi-green transition-colors duration-300">
                       {benefit.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 relative z-10">
+                  <CardContent className={`pt-0 relative z-10 ${isRTL ? 'text-right' : ''}`}>
                     <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
                   </CardContent>
                 </Card>
@@ -620,22 +617,22 @@ const HomePage: React.FC = () => {
       {/* Featured Hotels Section */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-end mb-10">
+          <div className={`flex justify-between items-end mb-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <motion.div initial="hidden" whileInView="visible" viewport={{
             once: true,
             margin: "-100px"
-          }} variants={fadeInUp}>
-              <Badge className="mb-3" variant="outline">Our Selection</Badge>
-              <h2 className="text-3xl font-bold">Featured Hotels</h2>
+          }} variants={fadeInUp} className={isRTL ? 'text-right' : ''}>
+              <Badge className="mb-3" variant="outline">{t("featured.ourSelection", "Our Selection")}</Badge>
+              <h2 className="text-3xl font-bold">{t("hotels.featuredHotels", "Featured Hotels")}</h2>
               <p className="text-muted-foreground mt-2 max-w-2xl">
-                Discover our handpicked selection of hotels in Makkah and Madinah offering comfort, convenience, and spiritual serenity.
+                {t("hotels.featuredDescription", "Discover our handpicked selection of hotels in Makkah and Madinah offering comfort, convenience, and spiritual serenity.")}
               </p>
             </motion.div>
             
             <Button variant="outline" asChild>
-              <Link to="/search?type=hotel" className="hidden md:flex items-center">
-                View All Hotels
-                <ChevronRight className="ml-1 h-4 w-4" />
+              <Link to="/search?type=hotel" className={`hidden md:flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {t("hotels.viewAll", "View All Hotels")}
+                <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
               </Link>
             </Button>
           </div>
@@ -653,8 +650,8 @@ const HomePage: React.FC = () => {
 
           <Button variant="outline" asChild className="mt-8 md:hidden w-full">
             <Link to="/search?type=hotel">
-              View All Hotels
-              <ChevronRight className="ml-1 h-4 w-4" />
+              {t("hotels.viewAll", "View All Hotels")}
+              <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
             </Link>
           </Button>
         </div>
@@ -663,22 +660,22 @@ const HomePage: React.FC = () => {
       {/* Featured Packages Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-end mb-10">
+          <div className={`flex justify-between items-end mb-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <motion.div initial="hidden" whileInView="visible" viewport={{
             once: true,
             margin: "-100px"
-          }} variants={fadeInUp}>
-              <Badge className="mb-3" variant="outline">Complete Solutions</Badge>
-              <h2 className="text-3xl font-bold">Hajj & Umrah Packages</h2>
+          }} variants={fadeInUp} className={isRTL ? 'text-right' : ''}>
+              <Badge className="mb-3" variant="outline">{t("featured.completeSolutions", "Complete Solutions")}</Badge>
+              <h2 className="text-3xl font-bold">{t("packages.hajjUmrah", "Hajj & Umrah Packages")}</h2>
               <p className="text-muted-foreground mt-2 max-w-2xl">
-                All-inclusive packages featuring accommodation, transportation, and guided visits to holy sites.
+                {t("packages.featuredDescription", "All-inclusive packages featuring accommodation, transportation, and guided visits to holy sites.")}
               </p>
             </motion.div>
             
             <Button variant="outline" asChild>
-              <Link to="/packages" className="hidden md:flex items-center">
-                Explore All Packages
-                <ChevronRight className="ml-1 h-4 w-4" />
+              <Link to="/packages" className={`hidden md:flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {t("packages.exploreAll", "Explore All Packages")}
+                <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
               </Link>
             </Button>
           </div>
@@ -696,8 +693,8 @@ const HomePage: React.FC = () => {
 
           <Button variant="outline" asChild className="mt-8 md:hidden w-full">
             <Link to="/packages">
-              Explore All Packages
-              <ChevronRight className="ml-1 h-4 w-4" />
+              {t("packages.exploreAll", "Explore All Packages")}
+              <ChevronRight className={`h-4 w-4 ${isRTL ? 'mr-1' : 'ml-1'}`} />
             </Link>
           </Button>
         </div>
@@ -710,11 +707,11 @@ const HomePage: React.FC = () => {
           <motion.div initial="hidden" whileInView="visible" viewport={{
           once: true,
           margin: "-100px"
-        }} variants={fadeInUp} className="text-center max-w-3xl mx-auto mb-16">
-            <Badge className="mb-4 bg-white text-saudi-green">Testimonials</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Stories from <span className="text-saudi-green-200">Our Pilgrims</span></h2>
+        }} variants={fadeInUp} className={`text-center max-w-3xl mx-auto mb-16 ${isRTL ? 'text-right' : ''}`}>
+            <Badge className="mb-4 bg-white text-saudi-green">{t("testimonials.title", "Testimonials")}</Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">{t("testimonials.storiesFrom", "Stories from")} <span className="text-saudi-green-200">{t("testimonials.ourPilgrims", "Our Pilgrims")}</span></h2>
             <p className="text-saudi-green-100 text-lg leading-relaxed">
-              Read about the transformative experiences of fellow pilgrims who have journeyed with us to the Holy Cities.
+              {t("testimonials.description", "Read about the transformative experiences of fellow pilgrims who have journeyed with us to the Holy Cities.")}
             </p>
           </motion.div>
 
@@ -725,15 +722,15 @@ const HomePage: React.FC = () => {
             {testimonials.map((testimonial, index) => <motion.div key={testimonial.id} variants={scaleIn} className="group">
                 <Card className="h-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/15 transition-all duration-300 group-hover:-translate-y-1">
                   <CardContent className="p-8">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-center space-x-4">
+                    <div className={`flex justify-between items-start mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse text-right' : ''}`}>
                         <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-white/20">
                           <img src={testimonial.image} alt={testimonial.name} className="object-cover w-full h-full" />
                         </div>
-                        <div>
+                        <div className={isRTL ? 'text-right' : ''}>
                           <h3 className="font-bold text-lg">{testimonial.name}</h3>
-                          <div className="flex items-center text-sm text-saudi-green-200 mb-1">
-                            <MapPin className="h-3 w-3 mr-1" />
+                          <div className={`flex items-center text-sm text-saudi-green-200 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <MapPin className={`h-3 w-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                             {testimonial.location}
                           </div>
                           <Badge variant="outline" className="text-xs border-white/30 text-white">
@@ -747,7 +744,7 @@ const HomePage: React.FC = () => {
                     }).map((_, i) => <Star key={i} size={18} className={cn(i < testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-400")} />)}
                       </div>
                     </div>
-                    <blockquote className="text-white/90 text-sm leading-relaxed italic">
+                    <blockquote className={`text-white/90 text-sm leading-relaxed italic ${isRTL ? 'text-right' : ''}`}>
                       "{testimonial.text}"
                     </blockquote>
                   </CardContent>
@@ -763,31 +760,31 @@ const HomePage: React.FC = () => {
         <motion.div initial="hidden" whileInView="visible" viewport={{
         once: true
       }} variants={fadeInUp} className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className={`max-w-4xl mx-auto text-center ${isRTL ? 'text-right' : ''}`}>
             <motion.div variants={staggerChildren} className="space-y-8">
               <motion.div variants={fadeInUp} className="mb-6">
                 <Sparkles className="h-12 w-12 mx-auto mb-4 text-saudi-green-200" />
               </motion.div>
               <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl font-bold leading-tight">
-                Ready to begin your 
+                {t("cta.readyToBegin", "Ready to begin your")}
                 <br />
-                <span className="text-saudi-green-200">sacred journey?</span>
+                <span className="text-saudi-green-200">{t("cta.sacredJourney", "sacred journey?")}</span>
               </motion.h2>
               <motion.p variants={fadeInUp} className="text-saudi-green-100 text-xl leading-relaxed max-w-2xl mx-auto">
-                Join thousands of pilgrims who have trusted us with their spiritual journey. Let us help you create memories that will last a lifetime.
+                {t("cta.description", "Join thousands of pilgrims who have trusted us with their spiritual journey. Let us help you create memories that will last a lifetime.")}
               </motion.p>
-              <motion.div variants={fadeInUp} className="flex flex-wrap justify-center gap-6 pt-4">
+              <motion.div variants={fadeInUp} className={`flex flex-wrap justify-center gap-6 pt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button asChild variant="secondary" size="xl" effect="glow" className="bg-white text-saudi-green hover:bg-saudi-green-50 shadow-xl">
-                  <Link to="/packages" className="flex items-center">
-                    <Package className="mr-2 h-5 w-5" />
-                    Explore Packages
-                    <ChevronRight className="ml-2 h-5 w-5" />
+                  <Link to="/packages" className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Package className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("cta.explorePackages", "Explore Packages")}
+                    <ChevronRight className={`h-5 w-5 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                   </Link>
                 </Button>
                 <Button asChild variant="saudi-outline" size="xl" className="border-white text-white hover:bg-white hover:text-saudi-green">
-                  <Link to="/contact">
-                    <Heart className="mr-2 h-5 w-5" />
-                    Contact Us
+                  <Link to="/contact" className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Heart className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("cta.contactUs", "Contact Us")}
                   </Link>
                 </Button>
               </motion.div>

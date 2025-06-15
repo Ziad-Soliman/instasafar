@@ -31,6 +31,7 @@ const Header: React.FC = () => {
     { href: "/hotels", label: t("hotels", "Hotels") },
     { href: "/packages", label: t("packages", "Packages") },
     { href: "/flights", label: t("flights", "Flights") },
+    { href: "/transport", label: t("transport", "Transport") },
   ];
 
   const mobileNavItems = [
@@ -59,9 +60,9 @@ const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className={`flex items-center justify-between h-16 ${isRTL ? 'flex-row-reverse' : ''}`}>
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
             <div className="w-8 h-8 bg-saudi-green rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">I</span>
             </div>
@@ -69,7 +70,7 @@ const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className={`hidden md:flex items-center space-x-6 ${isRTL ? 'space-x-reverse' : ''}`}>
             {mainNavItems.map((item) => (
               <Link
                 key={item.href}
@@ -82,13 +83,13 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <LanguageSelector />
             
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className={`gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <UserCircle className="h-4 w-4" />
                     <span className="hidden sm:inline">
                       {user.full_name || user.email}
@@ -96,10 +97,10 @@ const Header: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align={isRTL ? "start" : "end"} className="w-56">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
+                  <div className={`flex items-center justify-start gap-2 p-2 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                    <div className={`flex flex-col space-y-1 leading-none ${isRTL ? 'items-end' : ''}`}>
                       <p className="font-medium">{user.full_name || t("profile", "Profile")}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      <p className={`w-[200px] truncate text-sm text-muted-foreground ${isRTL ? 'text-right' : ''}`}>
                         {user.email}
                       </p>
                     </div>
@@ -109,8 +110,8 @@ const Header: React.FC = () => {
                   {dashboardLink && (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to={dashboardLink.href} className="cursor-pointer">
-                          <Settings className="mr-2 h-4 w-4" />
+                        <Link to={dashboardLink.href} className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Settings className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                           {dashboardLink.label}
                         </Link>
                       </DropdownMenuItem>
@@ -119,32 +120,32 @@ const Header: React.FC = () => {
                   )}
                   
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                    <Link to="/profile" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       {t("profile", "Profile")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/bookings" className="cursor-pointer">
-                      <BookOpen className="mr-2 h-4 w-4" />
+                    <Link to="/bookings" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <BookOpen className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       {t("bookings", "Bookings")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/wishlist" className="cursor-pointer">
-                      <Heart className="mr-2 h-4 w-4" />
+                    <Link to="/wishlist" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Heart className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       {t("wishlist", "Wishlist")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem onClick={handleLogout} className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <LogOut className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t("logout", "Logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
+              <div className={`hidden md:flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button asChild variant="ghost" size="sm">
                   <Link to="/auth">{t("auth.signIn", "Sign In")}</Link>
                 </Button>
@@ -179,7 +180,7 @@ const Header: React.FC = () => {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="block px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                  className={`block px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors ${isRTL ? 'text-right' : ''}`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -189,7 +190,7 @@ const Header: React.FC = () => {
               {dashboardLink && (
                 <Link
                   to={dashboardLink.href}
-                  className="block px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                  className={`block px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-accent rounded-md transition-colors ${isRTL ? 'text-right' : ''}`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {dashboardLink.label}
@@ -216,13 +217,13 @@ const Header: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full justify-start text-red-600"
+                    className={`w-full justify-start text-red-600 ${isRTL ? 'flex-row-reverse' : ''}`}
                     onClick={() => {
                       handleLogout();
                       setIsMenuOpen(false);
                     }}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t("logout", "Logout")}
                   </Button>
                 </div>

@@ -55,14 +55,14 @@ const Header: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg w-full max-w-7xl">
-          {/* Logo */}
-          <div className="flex-shrink-0">
+        <div className="flex items-center bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg w-full max-w-7xl relative">
+          {/* Logo - Positioned absolutely to the left */}
+          <div className="absolute left-6 flex-shrink-0">
             <HeaderLogo />
           </div>
 
-          {/* Navigation Items - Center */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Navigation Items - Centered */}
+          <div className="hidden md:flex items-center gap-1 mx-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.name;
@@ -102,8 +102,8 @@ const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Actions - Positioned absolutely to the right */}
+          <div className="absolute right-6 flex items-center gap-2 flex-shrink-0">
             <LanguageSelector />
             <UserDropdown />
 

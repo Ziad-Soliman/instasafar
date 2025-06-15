@@ -1,3 +1,4 @@
+
 export const arabicTranslations = {
   // Navigation
   "home": "الرئيسية",
@@ -124,6 +125,15 @@ export const arabicTranslations = {
   "home.search.departurePlaceholder": "اختر تاريخ المغادرة",
   "home.search.duration": "المدة",
   "home.search.durationPlaceholder": "اختر المدة",
+
+  // Home Journey Section (NEW)
+  "home.journey.title": "رحلتك الروحانية تبدأ من هنا",
+  "home.journey.step1.title": "اختر باقتك",
+  "home.journey.step1.content": "تصفح باقاتنا المصممة بعناية للحج والعمرة المخصصة لرحلتك الروحانية.",
+  "home.journey.step2.title": "احجز واستعد",
+  "home.journey.step2.content": "أكمل حجزك بمدفوعات آمنة واحصل على أدلة إعداد شاملة لحجك أو عمرتك.",
+  "home.journey.step3.title": "ابدأ رحلتك",
+  "home.journey.step3.content": "سافر براحة البال مع العلم أن مرشدينا الخبراء ودعمنا على مدار الساعة موجودون في كل خطوة.",
 
   // Home Testimonials Section
   "home.testimonials.title": "ماذا يقول حجاجنا ومعتمرونا",

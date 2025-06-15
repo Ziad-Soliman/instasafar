@@ -1,23 +1,27 @@
 
-import React from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { useRtlLayout } from '@/utils/rtl-layout-helpers';
 
 interface RtlContainerProps {
   children: React.ReactNode;
   className?: string;
+  as?: 'div' | 'section' | 'main' | 'article' | 'aside';
 }
 
-const RtlContainer: React.FC<RtlContainerProps> = ({ children, className }) => {
-  const { isRTL } = useLanguage();
-
+const RtlContainer: React.FC<RtlContainerProps> = ({ 
+  children, 
+  className = '', 
+  as: Component = 'div' 
+}) => {
+  const { isRTL } = useRtlLayout();
+  
   return (
-    <div 
-      className={cn(className)} 
-      dir={isRTL ? "rtl" : "ltr"}
+    <Component 
+      className={`${className} ${isRTL ? 'rtl' : 'ltr'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       {children}
-    </div>
+    </Component>
   );
 };
 

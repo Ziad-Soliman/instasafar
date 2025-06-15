@@ -1,141 +1,79 @@
-import { Suspense, lazy } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { WishlistProvider } from "@/contexts/WishlistContext";
-import { NotificationProvider } from "@/contexts/NotificationContext";
-import MainLayout from "@/layouts/MainLayout";
-import AdminLayout from "@/layouts/AdminLayout";
-import ProviderLayout from "@/layouts/ProviderLayout";
-import AuthLayout from "@/layouts/AuthLayout";
-import ScrollToTop from "@/components/ScrollToTop";
-import LoadingPage from "@/pages/LoadingPage";
-import RtlContainer from "@/components/layout/RtlContainer";
 
-// Lazy load pages
-const Index = lazy(() => import("@/pages/Index"));
-const SearchPage = lazy(() => import("@/pages/SearchPage"));
-const HotelDetailPage = lazy(() => import("@/pages/HotelDetailPage"));
-const PackagesPage = lazy(() => import("@/pages/PackagesPage"));
-const PackageDetailPage = lazy(() => import("@/pages/PackageDetailPage"));
-const FlightSearchPage = lazy(() => import("@/pages/FlightSearchPage"));
-const TransportSearchPage = lazy(() => import("@/pages/TransportSearchPage"));
-const BookingConfirmPage = lazy(() => import("@/pages/BookingConfirmPage"));
-const BookingSuccessPage = lazy(() => import("@/pages/BookingSuccessPage"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Toaster } from '@/components/ui/toaster';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import RtlContainer from '@/components/layout/RtlContainer';
 
-// Auth pages
-const AuthPage = lazy(() => import("@/pages/auth/AuthPage"));
-const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
-const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
-const ProviderRegisterPage = lazy(() => import("@/pages/auth/ProviderRegisterPage"));
-const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
-const UpdatePasswordPage = lazy(() => import("@/pages/auth/UpdatePasswordPage"));
-const AuthCallbackPage = lazy(() => import("@/pages/auth/AuthCallbackPage"));
+// Pages
+import HomePage from '@/pages/HomePage';
+import HotelsPage from '@/pages/HotelsPage';
+import PackagesPage from '@/pages/PackagesPage';
+import FlightsPage from '@/pages/FlightsPage';
+import TransportPage from '@/pages/TransportPage';
+import AuthPage from '@/pages/auth/AuthPage';
+import ProfilePage from '@/pages/ProfilePage';
+import BookingsPage from '@/pages/BookingsPage';
+import WishlistPage from '@/pages/WishlistPage';
 
-// Account pages
-const ProfilePage = lazy(() => import("@/pages/account/ProfilePage"));
-const BookingsPage = lazy(() => import("@/pages/account/BookingsPage"));
-const WishlistPage = lazy(() => import("@/pages/account/WishlistPage"));
-const CustomerDashboard = lazy(() => import("@/pages/account/DashboardPage"));
+// Admin Pages
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminHotels from '@/pages/admin/AdminHotels';
+import AdminPackages from '@/pages/admin/AdminPackages';
+import AdminBookings from '@/pages/admin/AdminBookings';
+import AdminUsers from '@/pages/admin/AdminUsers';
+import AdminReviews from '@/pages/admin/AdminReviews';
 
-// Admin pages
-const AdminDashboard = lazy(() => import("@/pages/admin/DashboardPage"));
-const AdminHotels = lazy(() => import("@/pages/admin/HotelsPage"));
-const AdminPackages = lazy(() => import("@/pages/admin/PackagesPage"));
-const AdminBookings = lazy(() => import("@/pages/admin/BookingsPage"));
-const AdminUsers = lazy(() => import("@/pages/admin/UsersPage"));
-const AdminProviders = lazy(() => import("@/pages/admin/ProvidersPage"));
-const AdminReviews = lazy(() => import("@/pages/admin/ReviewsPage"));
-const AdminExternalListings = lazy(() => import("@/pages/admin/ExternalListingsPage"));
+// Provider Pages
+import ProviderDashboard from '@/pages/provider/ProviderDashboard';
+import ProviderHotels from '@/pages/provider/ProviderHotels';
+import ProviderPackages from '@/pages/provider/ProviderPackages';
+import ProviderBookings from '@/pages/provider/ProviderBookings';
 
-// Provider pages
-const ProviderDashboard = lazy(() => import("@/pages/provider/DashboardPage"));
-const ProviderListings = lazy(() => import("@/pages/provider/ListingsPage"));
-const ProviderBookings = lazy(() => import("@/pages/provider/BookingsPage"));
-const ProviderBookingDetail = lazy(() => import("@/pages/provider/BookingDetailPage"));
-const ProviderProfile = lazy(() => import("@/pages/provider/ProfilePage"));
+function App() {
+  const { isRTL } = useLanguage();
 
-const queryClient = new QueryClient();
-
-const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <LanguageProvider>
-          <WishlistProvider>
-            <NotificationProvider>
-              <RtlContainer className="min-h-screen w-full">
-                <ScrollToTop />
-                <Suspense fallback={<LoadingPage />}>
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<MainLayout />}>
-                      <Route index element={<Index />} />
-                      <Route path="search" element={<SearchPage />} />
-                      <Route path="hotel/:id" element={<HotelDetailPage />} />
-                      <Route path="packages" element={<PackagesPage />} />
-                      <Route path="package/:id" element={<PackageDetailPage />} />
-                      <Route path="flights" element={<FlightSearchPage />} />
-                      <Route path="transport" element={<TransportSearchPage />} />
-                      <Route path="booking/confirm" element={<BookingConfirmPage />} />
-                      <Route path="booking/success" element={<BookingSuccessPage />} />
-                      
-                      {/* Account routes */}
-                      <Route path="account/dashboard" element={<CustomerDashboard />} />
-                      <Route path="account/profile" element={<ProfilePage />} />
-                      <Route path="account/bookings" element={<BookingsPage />} />
-                      <Route path="account/wishlist" element={<WishlistPage />} />
-                    </Route>
-
-                    {/* Auth routes */}
-                    <Route path="/auth" element={<AuthLayout />}>
-                      <Route index element={<AuthPage />} />
-                      <Route path="login" element={<LoginPage />} />
-                      <Route path="register" element={<RegisterPage />} />
-                      <Route path="provider-register" element={<ProviderRegisterPage />} />
-                      <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                      <Route path="update-password" element={<UpdatePasswordPage />} />
-                      <Route path="callback" element={<AuthCallbackPage />} />
-                    </Route>
-
-                    {/* Admin routes */}
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<AdminDashboard />} />
-                      <Route path="hotels" element={<AdminHotels />} />
-                      <Route path="packages" element={<AdminPackages />} />
-                      <Route path="bookings" element={<AdminBookings />} />
-                      <Route path="users" element={<AdminUsers />} />
-                      <Route path="providers" element={<AdminProviders />} />
-                      <Route path="reviews" element={<AdminReviews />} />
-                      <Route path="external-listings" element={<AdminExternalListings />} />
-                    </Route>
-
-                    {/* Provider routes */}
-                    <Route path="/provider" element={<ProviderLayout />}>
-                      <Route index element={<ProviderDashboard />} />
-                      <Route path="listings" element={<ProviderListings />} />
-                      <Route path="bookings" element={<ProviderBookings />} />
-                      <Route path="booking/:id" element={<ProviderBookingDetail />} />
-                      <Route path="profile" element={<ProviderProfile />} />
-                    </Route>
-
-                    {/* 404 route */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-                <Toaster />
-                <Sonner />
-              </RtlContainer>
-            </NotificationProvider>
-          </WishlistProvider>
-        </LanguageProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <RtlContainer className="min-h-screen bg-background">
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/hotels" element={<HotelsPage />} />
+            <Route path="/packages" element={<PackagesPage />} />
+            <Route path="/flights" element={<FlightsPage />} />
+            <Route path="/transport" element={<TransportPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/hotels" element={<AdminHotels />} />
+            <Route path="/admin/packages" element={<AdminPackages />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/reviews" element={<AdminReviews />} />
+            
+            {/* Provider Routes */}
+            <Route path="/provider" element={<ProviderDashboard />} />
+            <Route path="/provider/hotels" element={<ProviderHotels />} />
+            <Route path="/provider/packages" element={<ProviderPackages />} />
+            <Route path="/provider/bookings" element={<ProviderBookings />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+      </div>
+      
+      <Toaster />
+    </RtlContainer>
   );
-};
+}
 
 export default App;

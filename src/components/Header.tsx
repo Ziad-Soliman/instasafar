@@ -1,74 +1,56 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Building } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import DesktopNavigation from "@/components/header/DesktopNavigation";
-import UserDropdown from "@/components/header/UserDropdown";
-import MobileMenu from "@/components/header/MobileMenu";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "./LanguageSelector";
+import HeaderLogo from "./header/HeaderLogo";
+import DesktopNavigation from "./header/DesktopNavigation";
+import UserDropdown from "./header/UserDropdown";
+import MobileMenu from "./header/MobileMenu";
 
 const Header: React.FC = () => {
-  const { isRTL, t } = useLanguage();
   const { logout } = useAuth();
-  const { toast } = useToast();
+  const { isRTL } = useLanguage();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    toast({
-      title: t("auth.loggedOut", "Logged out successfully"),
-      description: t("auth.loggedOutDesc", "You have been logged out"),
-    });
     navigate("/");
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
-        <div className={`flex h-16 items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Logo */}
-          <Link to="/" className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-            <Building className="h-8 w-8 text-saudi-green" />
-            <span className="text-xl font-bold text-saudi-green">
-              {t("common.appName", "InstaSafar")}
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
+        <div className={`flex items-center justify-between h-16 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <HeaderLogo />
           <DesktopNavigation />
 
-          {/* Right side actions */}
-          <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-            <LanguageSwitcher />
+          {/* Right Side Actions */}
+          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <LanguageSelector />
             <UserDropdown />
-            
-            {/* Mobile menu button */}
+
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={t("common.menu", "Menu")}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          <MobileMenu
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-            onLogout={handleLogout}
-          />
-        </AnimatePresence>
+        <MobileMenu 
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          onLogout={handleLogout}
+        />
       </div>
     </header>
   );

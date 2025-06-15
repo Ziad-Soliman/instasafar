@@ -1,294 +1,233 @@
 
-import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Search, Filter, MapPin, Calendar, Users, Star, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import BreadcrumbEnhanced from '@/components/ui/breadcrumb-enhanced';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useRtlLayout } from '@/utils/rtl-layout-helpers';
+import RtlContainer from '@/components/layout/RtlContainer';
 import PackageCard from '@/components/cards/PackageCard';
-import { Filter, Search, MapPin, Calendar, Users, DollarSign } from 'lucide-react';
-import { mockPackages } from '@/data/mockData';
 
-const PackagesPage = () => {
-  const [searchParams] = useSearchParams();
-  const packageType = searchParams.get('type') as 'hajj' | 'umrah' | 'custom' | null;
-  
-  // Use only mockPackages data since packages export doesn't exist
-  const allPackages = useMemo(() => {
-    console.log('Available packages:', mockPackages);
-    
-    // Ensure consistent format
-    const formattedPackages = mockPackages.map(pkg => ({
-      id: pkg.id,
-      title: pkg.title,
-      image: pkg.image,
-      duration: pkg.duration,
-      price: pkg.price,
-      location: pkg.location,
-      rating: pkg.rating,
-      review_count: pkg.review_count,
-      includes: Array.isArray(pkg.includes) ? pkg.includes : [],
-      type: pkg.type,
-      is_featured: pkg.is_featured || false
-    }));
-    
-    return formattedPackages;
-  }, []);
+// Mock data for packages
+const mockPackages = [
+  {
+    id: '1',
+    title: 'Premium Umrah Package',
+    name: 'Premium Umrah Package',
+    name_ar: 'باقة العمرة المميزة',
+    image: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=400',
+    duration: '7 Days',
+    price: 2500,
+    location: 'Makkah & Madinah',
+    city: 'Makkah',
+    city_ar: 'مكة المكرمة',
+    rating: 4.8,
+    review_count: 124,
+    includes: ['5-Star Hotels', 'Transportation', 'Guided Tours', 'Meals'],
+    type: 'umrah' as const,
+    is_featured: true,
+  },
+  {
+    id: '2',
+    title: 'Hajj Complete Package',
+    name: 'Hajj Complete Package',
+    name_ar: 'باقة الحج الكاملة',
+    image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400',
+    duration: '14 Days',
+    price: 5500,
+    location: 'Makkah, Madinah, Mina',
+    city: 'Makkah',
+    city_ar: 'مكة المكرمة',
+    rating: 4.9,
+    review_count: 89,
+    includes: ['Premium Accommodation', 'All Transportation', 'Full Board', 'Spiritual Guide'],
+    type: 'hajj' as const,
+    is_featured: true,
+  },
+  {
+    id: '3',
+    title: 'Riyadh City Tour',
+    name: 'Riyadh City Tour',
+    name_ar: 'جولة مدينة الرياض',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
+    duration: '3 Days',
+    price: 800,
+    location: 'Riyadh',
+    city: 'Riyadh',
+    city_ar: 'الرياض',
+    rating: 4.6,
+    review_count: 67,
+    includes: ['Hotel', 'City Tour', 'Museum Visits', 'Local Guide'],
+    type: 'custom' as const,
+    is_featured: false,
+  },
+];
 
-  // Filter state
-  const [filters, setFilters] = useState({
-    search: '',
-    type: packageType || 'all',
-    priceRange: [0, 10000],
-    duration: 'all',
-    location: 'all',
-    rating: 0
-  });
-
-  // Available filter options
-  const filterOptions = useMemo(() => {
-    return {
-      locations: [...new Set(allPackages.map(pkg => pkg.location))],
-      durations: [...new Set(allPackages.map(pkg => pkg.duration))],
-      maxPrice: Math.max(...allPackages.map(pkg => pkg.price))
-    };
-  }, [allPackages]);
-
-  // Filtered packages
-  const filteredPackages = useMemo(() => {
-    return allPackages.filter(pkg => {
-      const matchesSearch = pkg.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-                           pkg.location.toLowerCase().includes(filters.search.toLowerCase());
-      const matchesType = filters.type === 'all' || pkg.type === filters.type;
-      const matchesPrice = pkg.price >= filters.priceRange[0] && pkg.price <= filters.priceRange[1];
-      const matchesDuration = filters.duration === 'all' || pkg.duration === filters.duration;
-      const matchesLocation = filters.location === 'all' || pkg.location === filters.location;
-      const matchesRating = pkg.rating >= filters.rating;
-
-      return matchesSearch && matchesType && matchesPrice && matchesDuration && matchesLocation && matchesRating;
-    });
-  }, [allPackages, filters]);
-
-  const featuredPackages = filteredPackages.filter(pkg => pkg.is_featured);
-  const regularPackages = filteredPackages.filter(pkg => !pkg.is_featured);
-
-  const breadcrumbItems = [
-    { label: 'Packages', href: '/packages' },
-    ...(packageType ? [{ label: packageType.charAt(0).toUpperCase() + packageType.slice(1), href: `/packages?type=${packageType}` }] : [])
-  ];
+const PackagesPage: React.FC = () => {
+  const { t, isRTL } = useLanguage();
+  const { getFlexDirection, getTextAlign, getSpacing } = useRtlLayout();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <RtlContainer className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <BreadcrumbEnhanced items={breadcrumbItems} className="mb-6" />
-
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-saudi-green to-saudi-green/80 bg-clip-text text-transparent">
-            {packageType ? `${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Packages` : 'Travel Packages'}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`text-center mb-8 ${getTextAlign('center')}`}
+        >
+          <h1 className="text-4xl font-bold mb-4">
+            {t('packages.title', 'Travel Packages')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover amazing travel packages designed for your perfect Saudi Arabian experience
+            {t('packages.description', 'Discover our carefully curated packages for Hajj, Umrah, and cultural tours across Saudi Arabia')}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <Filter className="h-5 w-5 text-saudi-green" />
-                  <h3 className="text-lg font-semibold">Filters</h3>
+        {/* Search and Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardContent className="p-6">
+              {/* Search Bar */}
+              <div className={`${getFlexDirection('row')} items-center gap-4 mb-6`}>
+                <div className="relative flex-1">
+                  <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    placeholder={t('search.searchPackages', 'Search packages...')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`${isRTL ? 'pr-10 text-right' : 'pl-10'}`}
+                  />
                 </div>
-
-                <div className="space-y-6">
-                  {/* Search */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Search</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                      <Input
-                        placeholder="Search packages..."
-                        value={filters.search}
-                        onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Package Type */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Package Type</label>
-                    <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({ ...prev, type: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="hajj">Hajj</SelectItem>
-                        <SelectItem value="umrah">Umrah</SelectItem>
-                        <SelectItem value="custom">Custom Tours</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Price Range */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                    </label>
-                    <Slider
-                      value={filters.priceRange}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-                      max={filterOptions.maxPrice}
-                      min={0}
-                      step={100}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Location */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Location</label>
-                    <Select value={filters.location} onValueChange={(value) => setFilters(prev => ({ ...prev, location: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        {filterOptions.locations.map(location => (
-                          <SelectItem key={location} value={location}>{location}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Duration */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Duration</label>
-                    <Select value={filters.duration} onValueChange={(value) => setFilters(prev => ({ ...prev, duration: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Any Duration</SelectItem>
-                        {filterOptions.durations.map(duration => (
-                          <SelectItem key={duration} value={duration}>{duration}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Minimum Rating */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      Minimum Rating: {filters.rating}+
-                    </label>
-                    <Slider
-                      value={[filters.rating]}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, rating: value[0] }))}
-                      max={5}
-                      min={0}
-                      step={0.5}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Clear Filters */}
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setFilters({
-                      search: '',
-                      type: 'all',
-                      priceRange: [0, filterOptions.maxPrice],
-                      duration: 'all',
-                      location: 'all',
-                      rating: 0
-                    })}
-                    className="w-full"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Results */}
-          <div className="lg:col-span-3">
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  {filteredPackages.length} {filteredPackages.length === 1 ? 'Package' : 'Packages'} Found
-                </h2>
-                <p className="text-muted-foreground">
-                  Showing results for your selected criteria
-                </p>
-              </div>
-            </div>
-
-            {/* Featured Packages */}
-            {featuredPackages.length > 0 && (
-              <div className="mb-12">
-                <div className="flex items-center gap-2 mb-6">
-                  <Badge variant="saudi" className="text-sm">Featured</Badge>
-                  <h3 className="text-lg font-semibold">Featured Packages</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {featuredPackages.map(pkg => (
-                    <PackageCard key={pkg.id} package={pkg} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* All Packages */}
-            {regularPackages.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-6">All Packages</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {regularPackages.map(pkg => (
-                    <PackageCard key={pkg.id} package={pkg} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {filteredPackages.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-32 h-32 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
-                  <MapPin className="h-16 w-16 text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">No packages found</h3>
-                <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters to see more results
-                </p>
-                <Button 
-                  variant="saudi"
-                  onClick={() => setFilters({
-                    search: '',
-                    type: 'all',
-                    priceRange: [0, filterOptions.maxPrice],
-                    duration: 'all',
-                    location: 'all',
-                    rating: 0
-                  })}
-                >
-                  Clear All Filters
+                <Button variant="outline" size="icon">
+                  <SlidersHorizontal className="h-4 w-4" />
                 </Button>
               </div>
-            )}
+
+              {/* Filters */}
+              <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 ${getFlexDirection('row')}`}>
+                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                  <SelectTrigger className={isRTL ? 'text-right' : ''}>
+                    <SelectValue placeholder={t('search.destination', 'Destination')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('common.all', 'All Cities')}</SelectItem>
+                    <SelectItem value="makkah">{t('cities.makkah', 'Makkah')}</SelectItem>
+                    <SelectItem value="madinah">{t('cities.madinah', 'Madinah')}</SelectItem>
+                    <SelectItem value="riyadh">{t('cities.riyadh', 'Riyadh')}</SelectItem>
+                    <SelectItem value="jeddah">{t('cities.jeddah', 'Jeddah')}</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger className={isRTL ? 'text-right' : ''}>
+                    <SelectValue placeholder={t('packages.packageType', 'Package Type')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('common.all', 'All Types')}</SelectItem>
+                    <SelectItem value="hajj">{t('packages.hajjPackage', 'Hajj Package')}</SelectItem>
+                    <SelectItem value="umrah">{t('packages.umrahPackage', 'Umrah Package')}</SelectItem>
+                    <SelectItem value="custom">{t('packages.cityTour', 'City Tour')}</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className={isRTL ? 'text-right' : ''}>
+                    <SelectValue placeholder={t('search.sortBy', 'Sort by')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="featured">{t('packages.featured', 'Featured')}</SelectItem>
+                    <SelectItem value="price-low">{t('search.priceLowToHigh', 'Price: Low to High')}</SelectItem>
+                    <SelectItem value="price-high">{t('search.priceHighToLow', 'Price: High to Low')}</SelectItem>
+                    <SelectItem value="rating">{t('common.rating', 'Rating')}</SelectItem>
+                    <SelectItem value="duration">{t('packages.duration', 'Duration')}</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button variant="outline" className="w-full">
+                  <Filter className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('search.filters', 'Filters')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Results Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={`${getFlexDirection('row')} items-center justify-between mb-6`}
+        >
+          <div>
+            <h2 className="text-2xl font-semibold mb-2">
+              {t('packages.availablePackages', 'Available Packages')}
+            </h2>
+            <p className="text-muted-foreground">
+              {mockPackages.length} {t('search.resultsFound', 'packages found')}
+            </p>
           </div>
-        </div>
+          
+          <div className={`${getFlexDirection('row')} items-center gap-2`}>
+            <Button variant="outline" size="sm">
+              <MapPin className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {t('common.map', 'Map View')}
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Package Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {mockPackages.map((pkg, index) => (
+            <motion.div
+              key={pkg.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
+            >
+              <PackageCard package={pkg} />
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Load More */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="text-center mt-8"
+        >
+          <Button variant="outline" size="lg">
+            {t('search.loadMore', 'Load More Packages')}
+          </Button>
+        </motion.div>
       </div>
-    </div>
+    </RtlContainer>
   );
 };
 

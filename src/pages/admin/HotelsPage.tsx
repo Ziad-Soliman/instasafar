@@ -32,6 +32,7 @@ const AdminHotels: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [editFormData, setEditFormData] = useState<Hotel | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const { toast } = useToast();
 
   const fetchHotels = async () => {
@@ -42,7 +43,12 @@ const AdminHotels: React.FC = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching hotels:', error);
+        throw error;
+      }
+      
+      console.log('Fetched hotels:', data);
       setHotels(data || []);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -76,7 +82,7 @@ const AdminHotels: React.FC = () => {
         description: "Hotel deleted successfully.",
       });
 
-      fetchHotels(); // Refresh the list
+      await fetchHotels(); // Refresh the list
     } catch (error) {
       console.error('Error deleting hotel:', error);
       toast({
@@ -88,29 +94,51 @@ const AdminHotels: React.FC = () => {
   };
 
   const handleEditHotel = (hotel: Hotel) => {
+    console.log('Editing hotel:', hotel);
     setEditingHotel(hotel);
-    setEditFormData(hotel);
+    setEditFormData({ ...hotel }); // Create a copy to avoid mutation
   };
 
   const handleUpdateHotel = async () => {
-    if (!editFormData) return;
+    if (!editFormData || !editFormData.id) {
+      toast({
+        title: "Error",
+        description: "No hotel data to update.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUpdateLoading(true);
+    console.log('Updating hotel with data:', editFormData);
 
     try {
-      const { error } = await supabase
-        .from('hotels')
-        .update({
-          name: editFormData.name,
-          city: editFormData.city,
-          address: editFormData.address,
-          description: editFormData.description,
-          distance_to_haram: editFormData.distance_to_haram,
-          rating: editFormData.rating,
-          price_per_night: editFormData.price_per_night,
-          thumbnail: editFormData.thumbnail
-        })
-        .eq('id', editFormData.id);
+      const updateData = {
+        name: editFormData.name,
+        city: editFormData.city,
+        address: editFormData.address,
+        description: editFormData.description,
+        distance_to_haram: editFormData.distance_to_haram,
+        rating: editFormData.rating,
+        price_per_night: editFormData.price_per_night,
+        thumbnail: editFormData.thumbnail,
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      console.log('Sending update data:', updateData);
+
+      const { data, error } = await supabase
+        .from('hotels')
+        .update(updateData)
+        .eq('id', editFormData.id)
+        .select(); // This will return the updated row
+
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+
+      console.log('Update successful, returned data:', data);
 
       toast({
         title: "Success",
@@ -119,14 +147,19 @@ const AdminHotels: React.FC = () => {
 
       setEditingHotel(null);
       setEditFormData(null);
-      fetchHotels(); // Refresh the list
+      
+      // Refresh the hotels list to show updated data
+      await fetchHotels();
+      
     } catch (error) {
       console.error('Error updating hotel:', error);
       toast({
         title: "Error",
-        description: "Failed to update hotel.",
+        description: `Failed to update hotel: ${error.message}`,
         variant: "destructive",
       });
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -250,7 +283,12 @@ const AdminHotels: React.FC = () => {
         </div>
 
         {/* Edit Hotel Dialog */}
-        <Dialog open={!!editingHotel} onOpenChange={() => setEditingHotel(null)}>
+        <Dialog open={!!editingHotel} onOpenChange={(open) => {
+          if (!open) {
+            setEditingHotel(null);
+            setEditFormData(null);
+          }
+        }}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Hotel</DialogTitle>
@@ -352,11 +390,21 @@ const AdminHotels: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setEditingHotel(null)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditingHotel(null);
+                      setEditFormData(null);
+                    }}
+                    disabled={updateLoading}
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={handleUpdateHotel}>
-                    Update Hotel
+                  <Button 
+                    onClick={handleUpdateHotel}
+                    disabled={updateLoading}
+                  >
+                    {updateLoading ? "Updating..." : "Update Hotel"}
                   </Button>
                 </div>
               </div>

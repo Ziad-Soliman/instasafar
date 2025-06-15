@@ -37,7 +37,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <AuroraBackground className="h-auto min-h-[50vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 relative overflow-hidden" showRadialGradient={true}>
+    <AuroraBackground className="h-auto min-h-[80vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 relative overflow-hidden" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-center justify-center">
           {/* Hero Content */}
@@ -93,9 +93,11 @@ const HeroSection = () => {
         </div>
       </div>
       
-      {/* Globe at the bottom */}
-      <div className="relative h-96 mt-8 flex items-center justify-center">
-        <Globe className="top-0" />
+      {/* Globe positioned properly */}
+      <div className="relative h-[500px] w-full mt-12 flex items-center justify-center">
+        <div className="w-full max-w-[600px] h-full relative">
+          <Globe />
+        </div>
         <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.1),rgba(255,255,255,0))]" />
       </div>
     </AuroraBackground>

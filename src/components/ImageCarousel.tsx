@@ -52,18 +52,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
     visible: {
       x: '0%',
       opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
     },
     exit: {
       x: '-100%',
       opacity: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
     },
   };
 
@@ -83,6 +75,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
           initial="hidden"
           animate="visible"
           exit="exit"
+          transition={{ duration: 0.5 }}
         />
       </AnimatePresence>
 

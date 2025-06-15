@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,8 +10,10 @@ import BreadcrumbEnhanced from '@/components/ui/breadcrumb-enhanced';
 import PackageCard from '@/components/cards/PackageCard';
 import { Filter, Search, MapPin, Calendar, Users, DollarSign } from 'lucide-react';
 import { mockPackages } from '@/data/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PackagesPage = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const packageType = searchParams.get('type') as 'hajj' | 'umrah' | 'custom' | null;
   
@@ -75,9 +76,13 @@ const PackagesPage = () => {
   const featuredPackages = filteredPackages.filter(pkg => pkg.is_featured);
   const regularPackages = filteredPackages.filter(pkg => !pkg.is_featured);
 
+  const pageTitle = packageType 
+    ? t('packages.pageTitle', `${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Packages`, { packageType: t(`packages.${packageType}`, packageType.charAt(0).toUpperCase() + packageType.slice(1)) })
+    : t('packages.defaultPageTitle', 'Travel Packages');
+
   const breadcrumbItems = [
-    { label: 'Packages', href: '/packages' },
-    ...(packageType ? [{ label: packageType.charAt(0).toUpperCase() + packageType.slice(1), href: `/packages?type=${packageType}` }] : [])
+    { label: t('packages.breadcrumbPackages', 'Packages'), href: '/packages' },
+    ...(packageType ? [{ label: t(`packages.${packageType}`, packageType.charAt(0).toUpperCase() + packageType.slice(1)), href: `/packages?type=${packageType}` }] : [])
   ];
 
   return (
@@ -89,10 +94,10 @@ const PackagesPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-saudi-green to-saudi-green/80 bg-clip-text text-transparent">
-            {packageType ? `${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Packages` : 'Travel Packages'}
+            {pageTitle}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover amazing travel packages designed for your perfect Saudi Arabian experience
+            {t('packages.pageDescription', 'Discover amazing travel packages designed for your perfect Saudi Arabian experience')}
           </p>
         </div>
 
@@ -103,17 +108,17 @@ const PackagesPage = () => {
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-6">
                   <Filter className="h-5 w-5 text-saudi-green" />
-                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <h3 className="text-lg font-semibold">{t('packages.filters', 'Filters')}</h3>
                 </div>
 
                 <div className="space-y-6">
                   {/* Search */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Search</label>
+                    <label className="text-sm font-medium mb-2 block">{t('common.search', 'Search')}</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
-                        placeholder="Search packages..."
+                        placeholder={t('packages.searchPlaceholder', 'Search packages...')}
                         value={filters.search}
                         onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                         className="pl-10"
@@ -123,16 +128,16 @@ const PackagesPage = () => {
 
                   {/* Package Type */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Package Type</label>
+                    <label className="text-sm font-medium mb-2 block">{t('packages.packageType', 'Package Type')}</label>
                     <Select value={filters.type} onValueChange={(value) => setFilters(prev => ({ ...prev, type: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="hajj">Hajj</SelectItem>
-                        <SelectItem value="umrah">Umrah</SelectItem>
-                        <SelectItem value="custom">Custom Tours</SelectItem>
+                        <SelectItem value="all">{t('packages.allTypes', 'All Types')}</SelectItem>
+                        <SelectItem value="hajj">{t('packages.hajj', 'Hajj')}</SelectItem>
+                        <SelectItem value="umrah">{t('packages.umrah', 'Umrah')}</SelectItem>
+                        <SelectItem value="custom">{t('packages.customTours', 'Custom Tours')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -140,7 +145,7 @@ const PackagesPage = () => {
                   {/* Price Range */}
                   <div>
                     <label className="text-sm font-medium mb-2 block">
-                      Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                      {t('packages.priceRangeWithValues', `Price Range: $${filters.priceRange[0]} - $${filters.priceRange[1]}`, { min: filters.priceRange[0], max: filters.priceRange[1]})}
                     </label>
                     <Slider
                       value={filters.priceRange}
@@ -154,13 +159,13 @@ const PackagesPage = () => {
 
                   {/* Location */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Location</label>
+                    <label className="text-sm font-medium mb-2 block">{t('common.location', 'Location')}</label>
                     <Select value={filters.location} onValueChange={(value) => setFilters(prev => ({ ...prev, location: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
+                        <SelectItem value="all">{t('packages.allLocations', 'All Locations')}</SelectItem>
                         {filterOptions.locations.map(location => (
                           <SelectItem key={location} value={location}>{location}</SelectItem>
                         ))}
@@ -170,13 +175,13 @@ const PackagesPage = () => {
 
                   {/* Duration */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Duration</label>
+                    <label className="text-sm font-medium mb-2 block">{t('common.duration', 'Duration')}</label>
                     <Select value={filters.duration} onValueChange={(value) => setFilters(prev => ({ ...prev, duration: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Any Duration</SelectItem>
+                        <SelectItem value="all">{t('packages.anyDuration', 'Any Duration')}</SelectItem>
                         {filterOptions.durations.map(duration => (
                           <SelectItem key={duration} value={duration}>{duration}</SelectItem>
                         ))}
@@ -187,7 +192,7 @@ const PackagesPage = () => {
                   {/* Minimum Rating */}
                   <div>
                     <label className="text-sm font-medium mb-2 block">
-                      Minimum Rating: {filters.rating}+
+                      {t('packages.minRating', `Minimum Rating: ${filters.rating}+`, { rating: filters.rating })}
                     </label>
                     <Slider
                       value={[filters.rating]}
@@ -212,7 +217,7 @@ const PackagesPage = () => {
                     })}
                     className="w-full"
                   >
-                    Clear Filters
+                    {t('packages.clearFilters', 'Clear Filters')}
                   </Button>
                 </div>
               </CardContent>
@@ -225,10 +230,13 @@ const PackagesPage = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold">
-                  {filteredPackages.length} {filteredPackages.length === 1 ? 'Package' : 'Packages'} Found
+                  {t('packages.resultsFound', '{count} {entity} Found', {
+                      count: filteredPackages.length,
+                      entity: filteredPackages.length === 1 ? t('packages.packageSingular', 'Package') : t('packages.packagePlural', 'Packages')
+                  })}
                 </h2>
                 <p className="text-muted-foreground">
-                  Showing results for your selected criteria
+                  {t('packages.showingResults', 'Showing results for your selected criteria')}
                 </p>
               </div>
             </div>
@@ -237,8 +245,8 @@ const PackagesPage = () => {
             {featuredPackages.length > 0 && (
               <div className="mb-12">
                 <div className="flex items-center gap-2 mb-6">
-                  <Badge variant="saudi" className="text-sm">Featured</Badge>
-                  <h3 className="text-lg font-semibold">Featured Packages</h3>
+                  <Badge variant="saudi" className="text-sm">{t('packages.featured', 'Featured')}</Badge>
+                  <h3 className="text-lg font-semibold">{t('packages.featuredPackages', 'Featured Packages')}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {featuredPackages.map(pkg => (
@@ -251,7 +259,7 @@ const PackagesPage = () => {
             {/* All Packages */}
             {regularPackages.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-6">All Packages</h3>
+                <h3 className="text-lg font-semibold mb-6">{t('packages.allPackages', 'All Packages')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {regularPackages.map(pkg => (
                     <PackageCard key={pkg.id} package={pkg} />
@@ -266,9 +274,9 @@ const PackagesPage = () => {
                 <div className="w-32 h-32 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
                   <MapPin className="h-16 w-16 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">No packages found</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('packages.noPackagesFound', 'No packages found')}</h3>
                 <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters to see more results
+                  {t('packages.noPackagesFoundDesc', 'Try adjusting your filters to see more results')}
                 </p>
                 <Button 
                   variant="saudi"
@@ -281,7 +289,7 @@ const PackagesPage = () => {
                     rating: 0
                   })}
                 >
-                  Clear All Filters
+                  {t('packages.clearAllFilters', 'Clear All Filters')}
                 </Button>
               </div>
             )}

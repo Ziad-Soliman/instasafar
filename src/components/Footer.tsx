@@ -14,24 +14,24 @@ const Footer: React.FC = () => {
   // Footer links organized by section
   const footerLinks = {
     company: [
-      { label: "About Us", href: "/about" },
-      { label: "Our Services", href: "/services" },
-      { label: "Contact Us", href: "/contact" },
-      { label: "Career", href: "/careers" },
+      { label: t("footer.aboutUs", "About Us"), href: "/about" },
+      { label: t("footer.ourServices", "Our Services"), href: "/services" },
+      { label: t("footer.contactUs", "Contact Us"), href: "/contact" },
+      { label: t("footer.careers", "Career"), href: "/careers" },
     ],
     services: [
-      { label: "Hajj Packages", href: "/packages?type=hajj" },
-      { label: "Umrah Packages", href: "/packages?type=umrah" },
-      { label: "Hotel Booking", href: "/search" },
-      { label: "Flight Booking", href: "/flights" },
-      { label: "Transport Services", href: "/transport" },
+      { label: t("footer.hajjPackages", "Hajj Packages"), href: "/packages?type=hajj" },
+      { label: t("footer.umrahPackages", "Umrah Packages"), href: "/packages?type=umrah" },
+      { label: t("footer.hotelBooking", "Hotel Booking"), href: "/search" },
+      { label: t("footer.flightBooking", "Flight Booking"), href: "/flights" },
+      { label: t("footer.transportServices", "Transport Services"), href: "/transport" },
     ],
     support: [
-      { label: "Help Center", href: "/help" },
-      { label: "FAQs", href: "/faqs" },
-      { label: "Visa Information", href: "/visa-info" },
-      { label: "Terms & Conditions", href: "/terms" },
-      { label: "Privacy Policy", href: "/privacy" },
+      { label: t("footer.helpCenter", "Help Center"), href: "/help" },
+      { label: t("footer.faqs", "FAQs"), href: "/faqs" },
+      { label: t("footer.visaInfo", "Visa Information"), href: "/visa-info" },
+      { label: t("footer.termsAndConditions", "Terms & Conditions"), href: "/terms" },
+      { label: t("footer.privacyPolicyLink", "Privacy Policy"), href: "/privacy" },
     ],
   };
 
@@ -68,7 +68,7 @@ const Footer: React.FC = () => {
                 <span className="text-2xl font-bold text-primary">InstaSafar</span>
               </Link>
               <p className="mt-3 text-sm text-muted-foreground">
-                Your trusted partner for Hajj and Umrah journeys, committed to making your spiritual experience memorable and comfortable.
+                {t("footer.tagline", "Your trusted partner for Hajj and Umrah journeys, committed to making your spiritual experience memorable and comfortable.")}
               </p>
             </motion.div>
 
@@ -97,19 +97,19 @@ const Footer: React.FC = () => {
             </motion.div>
 
             <motion.div variants={itemVariants} className="pt-4">
-              <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
+              <h3 className="text-sm font-semibold mb-3">{t("footer.contactUs", "Contact Us")}</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-start">
                   <MapPin size={16} className="mr-2 mt-0.5 flex-shrink-0" />
-                  <span>123 Business Avenue, Makkah, Saudi Arabia</span>
+                  <span>{t("footer.address", "123 Business Avenue, Makkah, Saudi Arabia")}</span>
                 </div>
                 <div className="flex items-center">
                   <Phone size={16} className="mr-2 flex-shrink-0" />
-                  <span>+966 123 456 7890</span>
+                  <span>{t("footer.phone", "+966 123 456 7890")}</span>
                 </div>
                 <div className="flex items-center">
                   <Mail size={16} className="mr-2 flex-shrink-0" />
-                  <span>info@instasafar.com</span>
+                  <span>{t("footer.email", "info@instasafar.com")}</span>
                 </div>
               </div>
             </motion.div>
@@ -124,7 +124,7 @@ const Footer: React.FC = () => {
             className="space-y-4"
           >
             <motion.h3 variants={itemVariants} className="text-sm font-semibold">
-              Company
+              {t("footer.company", "Company")}
             </motion.h3>
             <motion.ul variants={containerVariants} className="space-y-2">
               {footerLinks.company.map((link, index) => (
@@ -149,7 +149,7 @@ const Footer: React.FC = () => {
             className="space-y-4"
           >
             <motion.h3 variants={itemVariants} className="text-sm font-semibold">
-              Services
+              {t("footer.services", "Services")}
             </motion.h3>
             <motion.ul variants={containerVariants} className="space-y-2">
               {footerLinks.services.map((link, index) => (
@@ -174,7 +174,7 @@ const Footer: React.FC = () => {
             className="space-y-4"
           >
             <motion.h3 variants={itemVariants} className="text-sm font-semibold">
-              Support
+              {t("footer.support", "Support")}
             </motion.h3>
             <motion.ul variants={containerVariants} className="space-y-2">
               {footerLinks.support.map((link, index) => (
@@ -190,17 +190,17 @@ const Footer: React.FC = () => {
             </motion.ul>
 
             <motion.div variants={itemVariants} className="pt-4">
-              <h3 className="text-sm font-semibold mb-3">Newsletter</h3>
+              <h3 className="text-sm font-semibold mb-3">{t("footer.newsletter", "Newsletter")}</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                Subscribe to receive updates on new packages and offers.
+                {t("footer.newsletterTagline", "Subscribe to receive updates on new packages and offers.")}
               </p>
               <div className="flex space-x-2">
                 <Input
                   type="email"
-                  placeholder="Your email"
+                  placeholder={t("footer.yourEmail", "Your email")}
                   className="max-w-[220px]"
                 />
-                <Button size="sm">Subscribe</Button>
+                <Button size="sm">{t("footer.subscribe", "Subscribe")}</Button>
               </div>
             </motion.div>
           </motion.div>
@@ -214,11 +214,11 @@ const Footer: React.FC = () => {
               className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               <Building size={16} className="mr-2" />
-              Provider Portal
+              {t("footer.providerPortal", "Provider Portal")}
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">
-            &copy; {currentYear} InstaSafar. All rights reserved.
+            {t('footer.copyright', `© {year} InstaSafar. All rights reserved.`, { year: currentYear })}
           </p>
         </div>
       </div>

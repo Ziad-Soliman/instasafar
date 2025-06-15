@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Language = 'en' | 'ar';
@@ -9,7 +8,7 @@ interface LanguageContextType {
   direction: Direction;
   isRTL: boolean;
   setLanguage: (lang: Language) => void;
-  t: (key: string, fallback?: string) => string;
+  t: (key: string, fallback?: string, replacements?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -732,9 +731,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const direction: Direction = language === 'ar' ? 'rtl' : 'ltr';
   const isRTL = language === 'ar';
 
-  // Updated translation function that accepts optional fallback
-  const t = (key: string, fallback?: string): string => {
-    return translations[language][key] || fallback || key;
+  // Updated translation function that accepts optional fallback and replacements
+  const t = (key: string, fallback?: string, replacements?: Record<string, string | number>): string => {
+    let translation = translations[language][key] || fallback || key;
+
+    if (replacements) {
+      Object.keys(replacements).forEach((replacementKey) => {
+        const value = replacements[replacementKey];
+        translation = translation.replace(new RegExp(`{${replacementKey}}`, 'g'), String(value));
+      });
+    }
+    
+    return translation;
   };
 
   useEffect(() => {

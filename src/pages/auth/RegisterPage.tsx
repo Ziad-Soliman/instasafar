@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -23,7 +23,7 @@ const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const formSchema = z.object({
+  const formSchema = useMemo(() => z.object({
     fullName: z.string().min(2, {
       message: t("auth.validation.fullNameRequired", "Full name must be at least 2 characters"),
     }),
@@ -37,7 +37,7 @@ const RegisterPage: React.FC = () => {
   }).refine((data) => data.password === data.confirmPassword, {
     message: t("auth.validation.passwordMismatch", "Passwords don't match"),
     path: ["confirmPassword"],
-  });
+  }), [t]);
 
   type FormValues = z.infer<typeof formSchema>;
 

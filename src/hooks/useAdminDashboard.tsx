@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -75,8 +74,9 @@ export const useAdminDashboard = () => {
       const transformedData: Booking[] = (data || []).map(item => {
         // Safely extract profiles data, handling potential errors
         let profilesData = null;
-        if (item.profiles && typeof item.profiles === 'object' && item.profiles !== null && 'full_name' in item.profiles) {
-          profilesData = { full_name: item.profiles.full_name };
+        const profiles = item.profiles;
+        if (profiles && typeof profiles === 'object' && profiles !== null && 'full_name' in profiles) {
+          profilesData = { full_name: profiles.full_name };
         }
 
         return {

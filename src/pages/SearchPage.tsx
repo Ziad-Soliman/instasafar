@@ -45,7 +45,7 @@ const SearchPage = () => {
         .select('*')
         .order('rating', { ascending: false });
 
-      if (selectedCity) {
+      if (selectedCity && selectedCity !== 'all') {
         query = query.eq('city', selectedCity);
       }
 
@@ -131,7 +131,7 @@ const SearchPage = () => {
                   <SelectValue placeholder={t('common.city', 'City')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Cities</SelectItem>
+                  <SelectItem value="all">All Cities</SelectItem>
                   <SelectItem value="Makkah">Makkah</SelectItem>
                   <SelectItem value="Medina">Medina</SelectItem>
                   <SelectItem value="Riyadh">Riyadh</SelectItem>
@@ -144,7 +144,7 @@ const SearchPage = () => {
                   <SelectValue placeholder={t('common.priceRange', 'Price Range')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Prices</SelectItem>
+                  <SelectItem value="all">All Prices</SelectItem>
                   <SelectItem value="0-200">$0 - $200</SelectItem>
                   <SelectItem value="200-400">$200 - $400</SelectItem>
                   <SelectItem value="400+">$400+</SelectItem>

@@ -161,7 +161,7 @@ const HotelDetailPage = () => {
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <ImageCarousel images={images} alt={hotel.name} />
+          <ImageCarousel images={images} />
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -292,7 +292,7 @@ const HotelDetailPage = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-12"
         >
-          <ReviewsSection hotelId={hotel.id} />
+          <ReviewsSection />
         </motion.div>
       </div>
 
@@ -302,7 +302,7 @@ const HotelDetailPage = () => {
           id: hotel.id,
           name: hotel.name,
           price_per_night: hotel.price_per_night,
-          image: hotel.thumbnail || '',
+          thumbnail: hotel.thumbnail || '',
           location: hotel.city
         }}
         isOpen={showBookingModal}

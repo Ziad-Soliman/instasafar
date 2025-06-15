@@ -1,4 +1,3 @@
-
 export const englishTranslations = {
   // Navigation
   "nav.home": "Home",
@@ -164,6 +163,18 @@ export const englishTranslations = {
   "home.journey.step2.content": "Complete your booking with secure payments and receive comprehensive preparation guides for your pilgrimage.",
   "home.journey.step3.title": "Begin Your Journey",
   "home.journey.step3.content": "Travel with peace of mind knowing our expert guides and 24/7 support are there every step of the way.",
+
+  "home.services.badge": "Our Services",
+  "home.services.title": "Why Choose Our Pilgrimage Services?",
+  "home.services.subtitle": "Experience unmatched comfort and spiritual guidance on your sacred journey to the holy lands.",
+  "home.services.guidance.title": "Expert Spiritual Guidance",
+  "home.services.guidance.description": "Our knowledgeable guides provide comprehensive spiritual support and religious education throughout your pilgrimage journey.",
+  "home.services.safety.title": "Safety & Security",
+  "home.services.safety.description": "Your safety is our priority with 24/7 support and comprehensive travel insurance coverage.",
+  "home.services.comfort.title": "Premium Comfort",
+  "home.services.comfort.description": "Enjoy luxury accommodations and comfortable transportation designed for your spiritual focus.",
+  "home.services.support.title": "24/7 Dedicated Support",
+  "home.services.support.description": "Round-the-clock assistance ensuring your pilgrimage experience is smooth, peaceful, and spiritually fulfilling from start to finish.",
 
   "home.testimonials.title": "What Our Pilgrims Say",
   "home.testimonials.subtitle": "Hear from thousands who completed their spiritual journey with us",

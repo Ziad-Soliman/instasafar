@@ -8,6 +8,7 @@ import SearchSection from '@/components/home/SearchSection';
 import FeaturedPackagesSection from '@/components/home/FeaturedPackagesSection';
 import FeaturedHotelsSection from '@/components/home/FeaturedHotelsSection';
 import JourneySection from '@/components/home/JourneySection';
+import ServicesSection from '@/components/home/ServicesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
 
@@ -22,6 +23,7 @@ const Index = () => {
       <FeaturedPackagesSection />
       <FeaturedHotelsSection />
       <JourneySection />
+      <ServicesSection />
       <TestimonialsSection />
       <CallToActionSection />
     </div>

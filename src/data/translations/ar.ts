@@ -1,4 +1,3 @@
-
 export const arabicTranslations = {
   // Navigation
   "home": "الرئيسية",
@@ -134,6 +133,19 @@ export const arabicTranslations = {
   "home.journey.step2.content": "أكمل حجزك بمدفوعات آمنة واحصل على أدلة إعداد شاملة لحجك أو عمرتك.",
   "home.journey.step3.title": "ابدأ رحلتك",
   "home.journey.step3.content": "سافر براحة البال مع العلم أن مرشدينا الخبراء ودعمنا على مدار الساعة موجودون في كل خطوة.",
+
+  // Home Services Section
+  "home.services.badge": "خدماتنا",
+  "home.services.title": "لماذا تختار خدمات الحج والعمرة لدينا؟",
+  "home.services.subtitle": "اختبر راحة لا مثيل لها وإرشاداً روحانياً في رحلتك المقدسة إلى الأراضي المقدسة.",
+  "home.services.guidance.title": "إرشاد روحاني خبير",
+  "home.services.guidance.description": "يقدم مرشدونا ذوو المعرفة دعماً روحانياً شاملاً وتعليماً دينياً طوال رحلة حجك أو عمرتك.",
+  "home.services.safety.title": "الأمان والحماية",
+  "home.services.safety.description": "سلامتك أولويتنا مع دعم على مدار الساعة وتغطية تأمين سفر شاملة.",
+  "home.services.comfort.title": "راحة فاخرة",
+  "home.services.comfort.description": "استمتع بالإقامة الفاخرة والنقل المريح المصمم لتركيزك الروحاني.",
+  "home.services.support.title": "دعم مخصص على مدار الساعة",
+  "home.services.support.description": "مساعدة على مدار الساعة تضمن أن تكون تجربة حجك أو عمرتك سلسة وهادئة ومفعمة بالروحانية من البداية إلى النهاية.",
 
   // Home Testimonials Section
   "home.testimonials.title": "ماذا يقول حجاجنا ومعتمرونا",

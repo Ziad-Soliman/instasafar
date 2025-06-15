@@ -48,20 +48,20 @@ const Header: React.FC = () => {
     <>
       <motion.header
         className={cn(
-          "fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
+          "fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-full max-w-6xl px-4",
           isSticky ? "top-4" : "top-6"
         )}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-2 px-4 rounded-full shadow-lg">
-          {/* Logo */}
-          <div className={`flex-shrink-0 ${isRTL ? 'order-3' : 'order-1'}`}>
+        <div className="flex items-center justify-between bg-background/5 border border-border backdrop-blur-lg py-2 px-4 rounded-full shadow-lg">
+          {/* Logo - Left Side */}
+          <div className="flex-shrink-0">
             <HeaderLogo />
           </div>
 
-          {/* Navigation Items */}
+          {/* Navigation Items - Center */}
           <div className="hidden md:flex items-center gap-1 mx-4">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -102,8 +102,8 @@ const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Actions */}
-          <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'order-1' : 'order-3'}`}>
+          {/* Actions - Right Side */}
+          <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <LanguageSelector />
             <UserDropdown />
 

@@ -7,7 +7,7 @@ const HeaderLogo: React.FC = () => {
   const { isRTL } = useLanguage();
 
   return (
-    <Link to="/" className={`flex items-center ${isRTL ? 'space-x-reverse' : ''}`}>
+    <Link to="/" className="flex items-center">
       <span className="text-lg font-bold text-foreground whitespace-nowrap">InstaSafar</span>
     </Link>
   );

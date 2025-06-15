@@ -100,7 +100,7 @@ const HeroSection = () => {
             <Card className="overflow-hidden">
               <div className="relative aspect-[4/3]">
                 <img
-                  src="https://images.unsplash.com/photo-1564769625392-651b64d96e7f?auto=format&fit=crop&w=800&q=80"
+                  src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
                   alt={t('home.hero.kaaba')}
                   className="w-full h-full object-cover"
                 />

@@ -3,8 +3,8 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import HeroSection from '@/components/home/HeroSection';
-import StatsSection from '@/components/home/StatsSection';
 import SearchSection from '@/components/home/SearchSection';
+import StatsSection from '@/components/home/StatsSection';
 import FeaturedPackagesSection from '@/components/home/FeaturedPackagesSection';
 import FeaturedHotelsSection from '@/components/home/FeaturedHotelsSection';
 import JourneySection from '@/components/home/JourneySection';
@@ -18,8 +18,8 @@ const Index = () => {
   return (
     <div className={cn("min-h-screen", isRTL && "rtl")}>
       <HeroSection />
-      <StatsSection />
       <SearchSection />
+      <StatsSection />
       <FeaturedPackagesSection />
       <FeaturedHotelsSection />
       <JourneySection />

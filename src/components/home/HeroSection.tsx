@@ -41,32 +41,47 @@ const HeroSection = () => {
   return (
     <AuroraBackground className="h-auto min-h-[50vh] pt-16 pb-12 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className={cn(
+          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
+          isRTL && "lg:grid-flow-col-dense"
+        )}>
           {/* Hero Content */}
           <motion.div
             initial={{ opacity: 0, x: isRTL ? 50 : -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className={cn("space-y-8", isRTL && "text-right")}
+            className={cn(
+              "space-y-8",
+              isRTL ? "text-right lg:order-2" : "text-left lg:order-1"
+            )}
           >
             <div className="space-y-6">
-              <Badge variant="saudi" className="text-sm px-4 py-2">
+              <Badge variant="saudi" className={cn(
+                "text-sm px-4 py-2",
+                isRTL ? "self-end" : "self-start"
+              )}>
                 {t('home.hero.badge')}
               </Badge>
               
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              <h1 className={cn(
+                "text-4xl md:text-6xl font-bold leading-tight",
+                isRTL ? "text-right" : "text-left"
+              )}>
                 <span className="text-foreground">{t('home.hero.title').split(' ').slice(0, 1).join(' ')} </span>
                 <span className="text-saudi-green">{t('home.hero.title').split(' ').slice(1, 3).join(' ')} </span>
                 <span className="text-foreground">{t('home.hero.title').split(' ').slice(3).join(' ')}</span>
               </h1>
               
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              <p className={cn(
+                "text-lg text-muted-foreground leading-relaxed max-w-2xl",
+                isRTL ? "text-right" : "text-left"
+              )}>
                 {t('home.hero.subtitle')}
               </p>
               
               <div className={cn(
                 "flex flex-col sm:flex-row gap-4",
-                isRTL ? "sm:flex-row-reverse sm:justify-end" : "sm:justify-start"
+                isRTL ? "sm:flex-row-reverse items-end sm:items-start" : "items-start"
               )}>
                 <Button size="lg" className="bg-saudi-green hover:bg-saudi-green/90">
                   {t('home.hero.explorePackages')}
@@ -85,7 +100,10 @@ const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                  className={cn("flex items-center gap-3", isRTL && "flex-row-reverse")}
+                  className={cn(
+                    "flex items-center gap-3",
+                    isRTL ? "flex-row-reverse text-right" : "flex-row text-left"
+                  )}
                 >
                   <feature.icon className="h-5 w-5 text-saudi-green flex-shrink-0" />
                   <span className="text-sm text-muted-foreground">{feature.title}</span>
@@ -99,7 +117,10 @@ const HeroSection = () => {
             initial={{ opacity: 0, x: isRTL ? -50 : 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+            className={cn(
+              "relative",
+              isRTL ? "lg:order-1" : "lg:order-2"
+            )}
           >
             <Card className="overflow-hidden">
               <div className="relative aspect-[4/3]">
@@ -112,13 +133,19 @@ const HeroSection = () => {
                 {/* Rating overlay */}
                 <div className={cn(
                   "absolute top-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg",
-                  isRTL ? "right-4" : "left-4"
+                  isRTL ? "left-4" : "right-4"
                 )}>
-                  <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
+                  <div className={cn(
+                    "flex items-center gap-2",
+                    isRTL ? "flex-row-reverse" : "flex-row"
+                  )}>
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="font-semibold">{t('home.hero.rating')}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className={cn(
+                    "text-xs text-muted-foreground mt-1",
+                    isRTL ? "text-right" : "text-left"
+                  )}>
                     {t('home.hero.fromReviews')}
                   </p>
                 </div>
@@ -126,9 +153,12 @@ const HeroSection = () => {
                 {/* Pilgrims count overlay */}
                 <div className={cn(
                   "absolute bottom-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg",
-                  isRTL ? "right-4" : "left-4"
+                  isRTL ? "left-4" : "right-4"
                 )}>
-                  <div className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}>
+                  <div className={cn(
+                    "flex items-center gap-2",
+                    isRTL ? "flex-row-reverse" : "flex-row"
+                  )}>
                     <Users className="h-4 w-4 text-saudi-green" />
                     <span className="font-semibold">{t('home.hero.pilgrimsServed')}</span>
                   </div>

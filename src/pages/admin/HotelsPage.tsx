@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -36,68 +37,123 @@ const AdminHotels: React.FC = () => {
 
   const fetchHotels = async () => {
     setLoading(true);
+    console.log('=== FETCHING HOTELS FROM DATABASE ===');
+    
     try {
-      console.log('Fetching hotels...');
-      const { data, error } = await supabase
+      // First, test the connection
+      const { data: testData, error: testError } = await supabase
         .from('hotels')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('count');
+      
+      console.log('Connection test result:', { testData, testError });
 
+      // Now fetch all hotels with detailed logging
+      const { data, error, count } = await supabase
+        .from('hotels')
+        .select('*', { count: 'exact' })
+        .order('updated_at', { ascending: false });
+
+      console.log('Raw Supabase response:', { data, error, count });
+      console.log('Number of hotels returned:', data?.length || 0);
+      
       if (error) {
-        console.error('Error fetching hotels:', error);
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
       
-      console.log('Fetched hotels:', data);
+      console.log('Hotels fetched successfully:', data);
+      
+      // Log each hotel for debugging
+      if (data) {
+        data.forEach((hotel, index) => {
+          console.log(`Hotel ${index + 1}:`, {
+            id: hotel.id,
+            name: hotel.name,
+            city: hotel.city,
+            price_per_night: hotel.price_per_night,
+            updated_at: hotel.updated_at
+          });
+        });
+      }
+      
       setHotels(data || []);
-    } catch (error) {
-      console.error('Error fetching hotels:', error);
+      
+      // Double-check state was set
+      console.log('Hotels state updated, current length:', data?.length || 0);
+      
+    } catch (error: any) {
+      console.error('=== FETCH ERROR ===');
+      console.error('Error type:', typeof error);
+      console.error('Error details:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch hotels.",
+        description: `Failed to fetch hotels: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+      console.log('=== FETCH HOTELS COMPLETE ===');
     }
   };
 
   useEffect(() => {
+    console.log('Component mounted, fetching hotels...');
     fetchHotels();
   }, []);
+
+  // Log whenever hotels state changes
+  useEffect(() => {
+    console.log('Hotels state changed:', {
+      length: hotels.length,
+      hotels: hotels.map(h => ({ id: h.id, name: h.name, updated_at: h.updated_at }))
+    });
+  }, [hotels]);
 
   const handleDeleteHotel = async (hotelId: string) => {
     if (!confirm("Are you sure you want to delete this hotel?")) return;
     
     try {
-      console.log('Deleting hotel:', hotelId);
+      console.log('=== DELETING HOTEL ===');
+      console.log('Deleting hotel ID:', hotelId);
+      
       const { error } = await supabase
         .from('hotels')
         .delete()
         .eq('id', hotelId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
 
+      console.log('Hotel deleted successfully');
       toast({
         title: "Success",
         description: "Hotel deleted successfully.",
       });
 
-      await fetchHotels(); // Refresh the list
-    } catch (error) {
+      // Refresh the list
+      await fetchHotels();
+    } catch (error: any) {
       console.error('Error deleting hotel:', error);
       toast({
         title: "Error",
-        description: "Failed to delete hotel.",
+        description: `Failed to delete hotel: ${error.message}`,
         variant: "destructive",
       });
     }
   };
 
   const handleEditHotel = (hotel: Hotel) => {
-    console.log('Opening edit dialog for hotel:', hotel);
+    console.log('=== OPENING EDIT DIALOG ===');
+    console.log('Hotel to edit:', hotel);
     setEditingHotel(hotel);
-    setEditFormData({ ...hotel }); // Create a deep copy
+    setEditFormData({ ...hotel });
   };
 
   const handleUpdateHotel = async () => {
@@ -162,15 +218,6 @@ const AdminHotels: React.FC = () => {
       const updatedHotel = updatedData[0];
       console.log('Hotel updated successfully:', updatedHotel);
 
-      // Update local state immediately
-      setHotels(prevHotels => {
-        const updatedHotels = prevHotels.map(hotel => 
-          hotel.id === editFormData.id ? updatedHotel : hotel
-        );
-        console.log('Updated local hotels state');
-        return updatedHotels;
-      });
-
       toast({
         title: "Success",
         description: "Hotel updated successfully!",
@@ -216,6 +263,13 @@ const AdminHotels: React.FC = () => {
     hotel.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  console.log('Rendering component with:', {
+    loading,
+    hotelsCount: hotels.length,
+    filteredHotelsCount: filteredHotels.length,
+    searchTerm
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -237,6 +291,9 @@ const AdminHotels: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold">Hotels</h1>
             <p className="text-muted-foreground">Manage hotel listings</p>
+            <p className="text-sm text-muted-foreground">
+              Total hotels in database: {hotels.length}
+            </p>
           </div>
           <HotelManagement onHotelAdded={fetchHotels} />
         </div>
@@ -254,6 +311,7 @@ const AdminHotels: React.FC = () => {
                 />
               </div>
               <div className="flex gap-2">
+                <Button variant="outline" onClick={fetchHotels}>Refresh</Button>
                 <Button variant="outline">Filter</Button>
                 <Button variant="outline">Export</Button>
               </div>
@@ -278,7 +336,9 @@ const AdminHotels: React.FC = () => {
                 {filteredHotels.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                      {searchTerm ? "No hotels found matching your search." : "No hotels found."}
+                      {searchTerm ? "No hotels found matching your search." : "No hotels found in database."}
+                      <br />
+                      <small>Database contains {hotels.length} hotels total</small>
                     </td>
                   </tr>
                 ) : (
@@ -286,6 +346,7 @@ const AdminHotels: React.FC = () => {
                     <tr key={hotel.id}>
                       <td className="py-3 px-4">
                         <div className="font-medium">{hotel.name}</div>
+                        <div className="text-xs text-muted-foreground">ID: {hotel.id}</div>
                       </td>
                       <td className="py-3 px-4">{hotel.city}</td>
                       <td className="py-3 px-4">{hotel.distance_to_haram || 'N/A'}</td>
@@ -323,7 +384,7 @@ const AdminHotels: React.FC = () => {
           
           <div className="py-4 px-6 bg-muted/50 border-t flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Showing <span className="font-medium">{filteredHotels.length}</span> hotels
+              Showing <span className="font-medium">{filteredHotels.length}</span> of <span className="font-medium">{hotels.length}</span> hotels
             </div>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm" disabled>Previous</Button>

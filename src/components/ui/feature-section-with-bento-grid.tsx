@@ -2,6 +2,7 @@
 import { MapPin, Shield, Heart, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 function Feature() {
   const { t } = useLanguage();
@@ -24,7 +25,15 @@ function Feature() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+            <div className="relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
               <MapPin className="w-8 h-8 stroke-1 text-saudi-green" />
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">{t('home.services.guidance.title', 'Expert Spiritual Guidance')}</h3>
@@ -33,7 +42,15 @@ function Feature() {
                 </p>
               </div>
             </div>
-            <div className="bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+            <div className="relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
               <Shield className="w-8 h-8 stroke-1 text-saudi-green" />
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">{t('home.services.safety.title', 'Safety & Security')}</h3>
@@ -43,7 +60,15 @@ function Feature() {
               </div>
             </div>
 
-            <div className="bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+            <div className="relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
               <Heart className="w-8 h-8 stroke-1 text-saudi-green" />
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">{t('home.services.comfort.title', 'Premium Comfort')}</h3>
@@ -52,7 +77,15 @@ function Feature() {
                 </p>
               </div>
             </div>
-            <div className="bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+            <div className="relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
               <Clock className="w-8 h-8 stroke-1 text-saudi-green" />
               <div className="flex flex-col">
                 <h3 className="text-xl tracking-tight">{t('home.services.support.title', '24/7 Dedicated Support')}</h3>

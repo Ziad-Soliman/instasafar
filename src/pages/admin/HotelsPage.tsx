@@ -38,6 +38,7 @@ const AdminHotels: React.FC = () => {
   const fetchHotels = async () => {
     setLoading(true);
     try {
+      console.log('Fetching hotels...');
       const { data, error } = await supabase
         .from('hotels')
         .select('*')
@@ -70,6 +71,7 @@ const AdminHotels: React.FC = () => {
     if (!confirm("Are you sure you want to delete this hotel?")) return;
     
     try {
+      console.log('Deleting hotel:', hotelId);
       const { error } = await supabase
         .from('hotels')
         .delete()
@@ -94,13 +96,14 @@ const AdminHotels: React.FC = () => {
   };
 
   const handleEditHotel = (hotel: Hotel) => {
-    console.log('Editing hotel:', hotel);
+    console.log('Opening edit dialog for hotel:', hotel);
     setEditingHotel(hotel);
-    setEditFormData({ ...hotel }); // Create a copy to avoid mutation
+    setEditFormData({ ...hotel }); // Create a deep copy
   };
 
   const handleUpdateHotel = async () => {
     if (!editFormData || !editFormData.id) {
+      console.error('No hotel data to update');
       toast({
         title: "Error",
         description: "No hotel data to update.",
@@ -110,57 +113,91 @@ const AdminHotels: React.FC = () => {
     }
 
     setUpdateLoading(true);
-    console.log('Updating hotel with data:', editFormData);
+    console.log('Starting hotel update process...');
+    console.log('Update data being sent:', editFormData);
 
     try {
+      // Prepare the update data with proper types
       const updateData = {
-        name: editFormData.name,
-        city: editFormData.city,
-        address: editFormData.address,
-        description: editFormData.description,
-        distance_to_haram: editFormData.distance_to_haram,
-        rating: editFormData.rating,
-        price_per_night: editFormData.price_per_night,
-        thumbnail: editFormData.thumbnail,
+        name: editFormData.name?.trim(),
+        city: editFormData.city?.trim(),
+        address: editFormData.address?.trim(),
+        description: editFormData.description?.trim() || null,
+        distance_to_haram: editFormData.distance_to_haram?.trim() || null,
+        rating: editFormData.rating ? Number(editFormData.rating) : null,
+        price_per_night: Number(editFormData.price_per_night),
+        thumbnail: editFormData.thumbnail?.trim() || null,
         updated_at: new Date().toISOString()
       };
 
-      console.log('Sending update data:', updateData);
+      console.log('Prepared update data:', updateData);
 
-      const { data, error } = await supabase
+      // Validate required fields
+      if (!updateData.name || !updateData.city || !updateData.address) {
+        throw new Error('Name, city, and address are required fields');
+      }
+
+      if (updateData.price_per_night <= 0) {
+        throw new Error('Price per night must be greater than 0');
+      }
+
+      // Perform the update
+      const { data: updatedData, error } = await supabase
         .from('hotels')
         .update(updateData)
         .eq('id', editFormData.id)
-        .select(); // This will return the updated row
+        .select()
+        .single();
 
       if (error) {
         console.error('Supabase update error:', error);
         throw error;
       }
 
-      console.log('Update successful, returned data:', data);
+      console.log('Update successful, returned data:', updatedData);
+
+      // Update the local state immediately with the returned data
+      setHotels(currentHotels => 
+        currentHotels.map(hotel => 
+          hotel.id === editFormData.id ? { ...hotel, ...updatedData } : hotel
+        )
+      );
 
       toast({
         title: "Success",
-        description: "Hotel updated successfully.",
+        description: "Hotel updated successfully!",
       });
 
+      // Close the dialog
       setEditingHotel(null);
       setEditFormData(null);
+
+      // Also refresh from database to ensure consistency
+      setTimeout(() => {
+        fetchHotels();
+      }, 500);
       
-      // Refresh the hotels list to show updated data
-      await fetchHotels();
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating hotel:', error);
       toast({
         title: "Error",
-        description: `Failed to update hotel: ${error.message}`,
+        description: error.message || "Failed to update hotel. Please try again.",
         variant: "destructive",
       });
     } finally {
       setUpdateLoading(false);
     }
+  };
+
+  const handleFormDataChange = (field: keyof Hotel, value: any) => {
+    console.log(`Updating field ${field} with value:`, value);
+    setEditFormData(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
 
   const filteredHotels = hotels.filter(hotel =>
@@ -285,33 +322,35 @@ const AdminHotels: React.FC = () => {
         {/* Edit Hotel Dialog */}
         <Dialog open={!!editingHotel} onOpenChange={(open) => {
           if (!open) {
+            console.log('Closing edit dialog');
             setEditingHotel(null);
             setEditFormData(null);
           }
         }}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Hotel</DialogTitle>
+              <DialogTitle>Edit Hotel: {editFormData?.name}</DialogTitle>
             </DialogHeader>
             {editFormData && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="edit-name">Hotel Name</Label>
+                    <Label htmlFor="edit-name">Hotel Name *</Label>
                     <Input
                       id="edit-name"
-                      value={editFormData.name}
-                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                      value={editFormData.name || ''}
+                      onChange={(e) => handleFormDataChange('name', e.target.value)}
+                      placeholder="Enter hotel name"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="edit-city">City</Label>
+                    <Label htmlFor="edit-city">City *</Label>
                     <Select 
-                      value={editFormData.city} 
-                      onValueChange={(value) => setEditFormData({...editFormData, city: value})}
+                      value={editFormData.city || ''} 
+                      onValueChange={(value) => handleFormDataChange('city', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select city" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Makkah">Makkah</SelectItem>
@@ -324,11 +363,12 @@ const AdminHotels: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="edit-address">Address</Label>
+                  <Label htmlFor="edit-address">Address *</Label>
                   <Input
                     id="edit-address"
-                    value={editFormData.address}
-                    onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
+                    value={editFormData.address || ''}
+                    onChange={(e) => handleFormDataChange('address', e.target.value)}
+                    placeholder="Enter hotel address"
                   />
                 </div>
 
@@ -337,8 +377,9 @@ const AdminHotels: React.FC = () => {
                   <Textarea
                     id="edit-description"
                     value={editFormData.description || ''}
-                    onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                    onChange={(e) => handleFormDataChange('description', e.target.value)}
                     rows={3}
+                    placeholder="Enter hotel description"
                   />
                 </div>
 
@@ -348,7 +389,7 @@ const AdminHotels: React.FC = () => {
                     <Input
                       id="edit-distance"
                       value={editFormData.distance_to_haram || ''}
-                      onChange={(e) => setEditFormData({...editFormData, distance_to_haram: e.target.value})}
+                      onChange={(e) => handleFormDataChange('distance_to_haram', e.target.value)}
                       placeholder="e.g., 0.5 km"
                     />
                   </div>
@@ -361,20 +402,21 @@ const AdminHotels: React.FC = () => {
                       max="5"
                       step="0.1"
                       value={editFormData.rating || 0}
-                      onChange={(e) => setEditFormData({...editFormData, rating: parseFloat(e.target.value) || 0})}
+                      onChange={(e) => handleFormDataChange('rating', e.target.value ? parseFloat(e.target.value) : 0)}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="edit-price">Price per Night (USD)</Label>
+                    <Label htmlFor="edit-price">Price per Night (USD) *</Label>
                     <Input
                       id="edit-price"
                       type="number"
-                      min="0"
-                      value={editFormData.price_per_night}
-                      onChange={(e) => setEditFormData({...editFormData, price_per_night: parseFloat(e.target.value) || 0})}
+                      min="1"
+                      value={editFormData.price_per_night || 0}
+                      onChange={(e) => handleFormDataChange('price_per_night', e.target.value ? parseFloat(e.target.value) : 0)}
+                      placeholder="Enter price"
                     />
                   </div>
                   <div>
@@ -383,7 +425,7 @@ const AdminHotels: React.FC = () => {
                       id="edit-thumbnail"
                       type="url"
                       value={editFormData.thumbnail || ''}
-                      onChange={(e) => setEditFormData({...editFormData, thumbnail: e.target.value})}
+                      onChange={(e) => handleFormDataChange('thumbnail', e.target.value)}
                       placeholder="https://..."
                     />
                   </div>
@@ -393,6 +435,7 @@ const AdminHotels: React.FC = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => {
+                      console.log('Cancel button clicked');
                       setEditingHotel(null);
                       setEditFormData(null);
                     }}
@@ -402,7 +445,7 @@ const AdminHotels: React.FC = () => {
                   </Button>
                   <Button 
                     onClick={handleUpdateHotel}
-                    disabled={updateLoading}
+                    disabled={updateLoading || !editFormData?.name || !editFormData?.city || !editFormData?.address || !editFormData?.price_per_night}
                   >
                     {updateLoading ? "Updating..." : "Update Hotel"}
                   </Button>

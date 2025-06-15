@@ -114,18 +114,38 @@ const AdminHotels: React.FC = () => {
 
     setUpdateLoading(true);
     console.log('Starting hotel update process...');
+    console.log('Hotel ID to update:', editFormData.id);
     console.log('Update data being sent:', editFormData);
 
     try {
+      // First, let's check if the hotel exists
+      const { data: existingHotel, error: checkError } = await supabase
+        .from('hotels')
+        .select('id')
+        .eq('id', editFormData.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking hotel existence:', checkError);
+        throw new Error('Failed to verify hotel existence');
+      }
+
+      if (!existingHotel) {
+        console.error('Hotel not found with ID:', editFormData.id);
+        throw new Error('Hotel not found');
+      }
+
+      console.log('Hotel exists, proceeding with update...');
+
       // Prepare the update data with proper types
       const updateData = {
-        name: editFormData.name?.trim(),
-        city: editFormData.city?.trim(),
-        address: editFormData.address?.trim(),
+        name: editFormData.name?.trim() || '',
+        city: editFormData.city?.trim() || '',
+        address: editFormData.address?.trim() || '',
         description: editFormData.description?.trim() || null,
         distance_to_haram: editFormData.distance_to_haram?.trim() || null,
         rating: editFormData.rating ? Number(editFormData.rating) : null,
-        price_per_night: Number(editFormData.price_per_night),
+        price_per_night: Number(editFormData.price_per_night) || 0,
         thumbnail: editFormData.thumbnail?.trim() || null,
         updated_at: new Date().toISOString()
       };
@@ -141,25 +161,25 @@ const AdminHotels: React.FC = () => {
         throw new Error('Price per night must be greater than 0');
       }
 
-      // Perform the update
-      const { data: updatedData, error } = await supabase
+      // Perform the update without expecting a return
+      const { error: updateError } = await supabase
         .from('hotels')
         .update(updateData)
-        .eq('id', editFormData.id)
-        .select()
-        .single();
+        .eq('id', editFormData.id);
 
-      if (error) {
-        console.error('Supabase update error:', error);
-        throw error;
+      if (updateError) {
+        console.error('Supabase update error:', updateError);
+        throw updateError;
       }
 
-      console.log('Update successful, returned data:', updatedData);
+      console.log('Update successful');
 
-      // Update the local state immediately with the returned data
+      // Update the local state immediately
       setHotels(currentHotels => 
         currentHotels.map(hotel => 
-          hotel.id === editFormData.id ? { ...hotel, ...updatedData } : hotel
+          hotel.id === editFormData.id 
+            ? { ...hotel, ...updateData, id: editFormData.id }
+            : hotel
         )
       );
 
@@ -172,7 +192,7 @@ const AdminHotels: React.FC = () => {
       setEditingHotel(null);
       setEditFormData(null);
 
-      // Also refresh from database to ensure consistency
+      // Refresh from database to ensure consistency
       setTimeout(() => {
         fetchHotels();
       }, 500);

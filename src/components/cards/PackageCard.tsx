@@ -6,15 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, MapPin, Star, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBilingualText } from '@/utils/bilingual-helpers';
 
 interface PackageCardProps {
   package: {
     id: string;
     title: string;
+    name?: string;
+    name_ar?: string;
     image: string;
     duration: string;
     price: number;
     location: string;
+    city?: string;
+    city_ar?: string;
     rating: number;
     review_count: number;
     includes: string[];
@@ -26,6 +31,7 @@ interface PackageCardProps {
 
 const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) => {
   const { t } = useLanguage();
+  const { getText } = useBilingualText();
   
   // Ensure includes is always an array
   const includes = Array.isArray(pkg.includes) ? pkg.includes : [];
@@ -56,6 +62,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
     }
   };
 
+  // Use name if available, fallback to title
+  const packageName = getText(pkg.name || pkg.title, pkg.name_ar);
+  const packageLocation = getText(pkg.location || pkg.city || '', pkg.city_ar);
+
   return (
     <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {pkg.is_featured && (
@@ -73,7 +83,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
       <div className="relative h-48 overflow-hidden">
         <img 
           src={pkg.image} 
-          alt={pkg.title}
+          alt={packageName}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -95,12 +105,12 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
           {/* Header */}
           <div>
             <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-saudi-green transition-colors duration-200">
-              {pkg.title}
+              {packageName}
             </h3>
             
             <div className="flex items-center text-muted-foreground text-sm">
               <MapPin className="h-4 w-4 mr-1" />
-              {pkg.location}
+              {packageLocation}
             </div>
           </div>
           

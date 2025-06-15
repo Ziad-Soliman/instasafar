@@ -123,6 +123,77 @@ export type Database = {
         }
         Relationships: []
       }
+      flights: {
+        Row: {
+          aircraft_type: string | null
+          airline_name: string
+          airline_name_ar: string | null
+          arrival_time: string
+          available_seats: number | null
+          class: string | null
+          created_at: string | null
+          departure_time: string
+          destination: string
+          destination_ar: string | null
+          flight_number: string
+          id: string
+          origin: string
+          origin_ar: string | null
+          price: number
+          provider_id: string | null
+          total_seats: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          aircraft_type?: string | null
+          airline_name: string
+          airline_name_ar?: string | null
+          arrival_time: string
+          available_seats?: number | null
+          class?: string | null
+          created_at?: string | null
+          departure_time: string
+          destination: string
+          destination_ar?: string | null
+          flight_number: string
+          id?: string
+          origin: string
+          origin_ar?: string | null
+          price: number
+          provider_id?: string | null
+          total_seats?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          aircraft_type?: string | null
+          airline_name?: string
+          airline_name_ar?: string | null
+          arrival_time?: string
+          available_seats?: number | null
+          class?: string | null
+          created_at?: string | null
+          departure_time?: string
+          destination?: string
+          destination_ar?: string | null
+          flight_number?: string
+          id?: string
+          origin?: string
+          origin_ar?: string | null
+          price?: number
+          provider_id?: string | null
+          total_seats?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flights_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hotel_amenities: {
         Row: {
           created_at: string | null
@@ -187,12 +258,16 @@ export type Database = {
       hotels: {
         Row: {
           address: string
+          address_ar: string | null
           city: string
+          city_ar: string | null
           created_at: string | null
           description: string | null
+          description_ar: string | null
           distance_to_haram: string | null
           id: string
           name: string
+          name_ar: string | null
           price_per_night: number
           provider_id: string | null
           rating: number | null
@@ -201,12 +276,16 @@ export type Database = {
         }
         Insert: {
           address: string
+          address_ar?: string | null
           city: string
+          city_ar?: string | null
           created_at?: string | null
           description?: string | null
+          description_ar?: string | null
           distance_to_haram?: string | null
           id?: string
           name: string
+          name_ar?: string | null
           price_per_night: number
           provider_id?: string | null
           rating?: number | null
@@ -215,12 +294,16 @@ export type Database = {
         }
         Update: {
           address?: string
+          address_ar?: string | null
           city?: string
+          city_ar?: string | null
           created_at?: string | null
           description?: string | null
+          description_ar?: string | null
           distance_to_haram?: string | null
           id?: string
           name?: string
+          name_ar?: string | null
           price_per_night?: number
           provider_id?: string | null
           rating?: number | null
@@ -272,8 +355,10 @@ export type Database = {
       packages: {
         Row: {
           city: string | null
+          city_ar: string | null
           created_at: string | null
           description: string | null
+          description_ar: string | null
           duration_days: number
           end_date: string | null
           id: string
@@ -281,6 +366,7 @@ export type Database = {
           includes_hotel: boolean | null
           includes_transport: boolean | null
           name: string
+          name_ar: string | null
           price: number
           provider_id: string | null
           start_date: string | null
@@ -289,8 +375,10 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          city_ar?: string | null
           created_at?: string | null
           description?: string | null
+          description_ar?: string | null
           duration_days: number
           end_date?: string | null
           id?: string
@@ -298,6 +386,7 @@ export type Database = {
           includes_hotel?: boolean | null
           includes_transport?: boolean | null
           name: string
+          name_ar?: string | null
           price: number
           provider_id?: string | null
           start_date?: string | null
@@ -306,8 +395,10 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          city_ar?: string | null
           created_at?: string | null
           description?: string | null
+          description_ar?: string | null
           duration_days?: number
           end_date?: string | null
           id?: string
@@ -315,6 +406,7 @@ export type Database = {
           includes_hotel?: boolean | null
           includes_transport?: boolean | null
           name?: string
+          name_ar?: string | null
           price?: number
           provider_id?: string | null
           start_date?: string | null
@@ -438,6 +530,83 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_options: {
+        Row: {
+          arrival_time: string | null
+          available_seats: number | null
+          capacity: number | null
+          created_at: string | null
+          departure_time: string | null
+          description: string | null
+          description_ar: string | null
+          duration_hours: number | null
+          from_city: string
+          from_city_ar: string | null
+          id: string
+          name: string
+          name_ar: string | null
+          price: number
+          provider_id: string | null
+          thumbnail: string | null
+          to_city: string
+          to_city_ar: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          arrival_time?: string | null
+          available_seats?: number | null
+          capacity?: number | null
+          created_at?: string | null
+          departure_time?: string | null
+          description?: string | null
+          description_ar?: string | null
+          duration_hours?: number | null
+          from_city: string
+          from_city_ar?: string | null
+          id?: string
+          name: string
+          name_ar?: string | null
+          price: number
+          provider_id?: string | null
+          thumbnail?: string | null
+          to_city: string
+          to_city_ar?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          arrival_time?: string | null
+          available_seats?: number | null
+          capacity?: number | null
+          created_at?: string | null
+          departure_time?: string | null
+          description?: string | null
+          description_ar?: string | null
+          duration_hours?: number | null
+          from_city?: string
+          from_city_ar?: string | null
+          id?: string
+          name?: string
+          name_ar?: string | null
+          price?: number
+          provider_id?: string | null
+          thumbnail?: string | null
+          to_city?: string
+          to_city_ar?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_options_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
         ]

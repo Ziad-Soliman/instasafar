@@ -6,13 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Star, MapPin, Wifi, Car, Coffee, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useBilingualText } from '@/utils/bilingual-helpers';
 
 interface HotelCardProps {
   hotel: {
     id: string;
     name: string;
+    name_ar?: string;
     image: string;
     location: string;
+    city?: string;
+    city_ar?: string;
     distance_to_haram: string;
     rating: number;
     review_count: number;
@@ -25,6 +29,7 @@ interface HotelCardProps {
 
 const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
   const { t } = useLanguage();
+  const { getText } = useBilingualText();
   
   // Ensure amenities is always an array
   const amenities = Array.isArray(hotel.amenities) ? hotel.amenities : [];
@@ -44,6 +49,9 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
     }
   };
 
+  const hotelName = getText(hotel.name, hotel.name_ar);
+  const hotelLocation = getText(hotel.location || hotel.city || '', hotel.city_ar);
+
   return (
     <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {hotel.is_featured && (
@@ -55,7 +63,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
       <div className="relative h-48 overflow-hidden">
         <img 
           src={hotel.image} 
-          alt={hotel.name}
+          alt={hotelName}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -67,7 +75,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
           <div>
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-saudi-green transition-colors duration-200">
-                {hotel.name}
+                {hotelName}
               </h3>
               <div className="flex items-center gap-1 bg-saudi-green/10 px-2 py-1 rounded-md">
                 <Star className="h-4 w-4 fill-saudi-green text-saudi-green" />
@@ -77,7 +85,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
             
             <div className="flex items-center text-muted-foreground text-sm mb-1">
               <MapPin className="h-4 w-4 mr-1" />
-              {hotel.location}
+              {hotelLocation}
             </div>
             
             <p className="text-xs text-muted-foreground">

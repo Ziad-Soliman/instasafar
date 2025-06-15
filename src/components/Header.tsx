@@ -27,17 +27,17 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo - Left in LTR, Right in RTL */}
-          <div className={`${isRTL ? 'order-3' : 'order-1'}`}>
+          <div className={`flex-shrink-0 ${isRTL ? 'order-3' : 'order-1'}`}>
             <HeaderLogo />
           </div>
 
-          {/* Center - Navigation - Always centered */}
-          <div className="order-2 flex-1 flex justify-center">
+          {/* Center - Navigation - Absolutely centered to the page */}
+          <div className="order-2 absolute left-1/2 transform -translate-x-1/2">
             <DesktopNavigation />
           </div>
 
           {/* Actions - Right in LTR, Left in RTL */}
-          <div className={`flex items-center gap-2 ${isRTL ? 'order-1' : 'order-3'}`}>
+          <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'order-1' : 'order-3'}`}>
             <LanguageSelector />
             <UserDropdown />
 

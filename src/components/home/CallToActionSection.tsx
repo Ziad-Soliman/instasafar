@@ -26,7 +26,7 @@ const CallToActionSection = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t('home.cta.title')}
           </h2>
-          <p className="text-white/90 text-lg mb-8 leading-relaxed">
+          <p className="text-white/90 text-lg mb-8 leading-relaxed text-center px-0 py-[7px]">
             {t('home.cta.subtitle')}
           </p>
           <div className={cn("flex flex-col sm:flex-row gap-4 justify-center", isRTL && "sm:flex-row-reverse")}>

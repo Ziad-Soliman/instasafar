@@ -1,4 +1,3 @@
-
 import { MapPin, Shield, Heart, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,21 +13,15 @@ function Feature() {
     <div className={cn("w-full py-20 lg:py-40", isRTL && "rtl")}>
       <div className="container mx-auto">
         <div className="flex flex-col gap-10">
-          <div className={cn("flex gap-4 flex-col", isRTL ? "items-end" : "items-start")}>
+          <div className="flex gap-4 flex-col items-center text-center">
             <div>
               <Badge variant="saudi">{t('home.services.badge', 'Our Services')}</Badge>
             </div>
-            <div className="flex gap-2 flex-col">
-              <h2 className={cn(
-                "text-3xl md:text-5xl tracking-tighter max-w-xl font-regular",
-                isRTL ? "text-right" : "text-left"
-              )}>
+            <div className="flex gap-2 flex-col items-center">
+              <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular text-center">
                 {t('home.services.title', 'Why Choose Our Pilgrimage Services?')}
               </h2>
-              <p className={cn(
-                "text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground",
-                isRTL ? "text-right" : "text-left"
-              )}>
+              <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-center">
                 {t('home.services.subtitle', 'Experience unmatched comfort and spiritual guidance on your sacred journey to the holy lands.')}
               </p>
             </div>

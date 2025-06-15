@@ -35,6 +35,8 @@ export const arabicTranslations = {
   // Package Page
   "packages.title": "باقات الحج والعمرة",
   "packages.subtitle": "اكتشف باقاتنا الشاملة لرحلتك الروحانية",
+  "packages.featuredPackages": "الباقات المميزة",
+  "packages.pageDescription": "اكتشف باقات السفر المذهلة المصممة لتجربتك المثالية في المملكة العربية السعودية",
   "packages.searchPlaceholder": "البحث في الباقات...",
   "packages.noPackages": "لم يتم العثور على باقات",
   "packages.noPackagesMessage": "جرب تعديل معايير البحث",
@@ -83,6 +85,33 @@ export const arabicTranslations = {
   "transport.ziyaratTour": "جولة زيارات",
   "transport.privateCar": "سيارة خاصة",
 
+  // Home Hero Section
+  "home.hero.badge": "✨ موثوق من قبل أكثر من 50,000 حاج ومعتمر",
+  "home.hero.title": "رحلتك المقدسة في انتظارك",
+  "home.hero.subtitle": "اختبر أشمل باقات الحج والعمرة مع إقامة فاخرة وجولات مع مرشدين وإرشاد روحاني طوال رحلتك المقدسة.",
+  "home.hero.explorePackages": "استكشف الباقات",
+  "home.hero.learnMore": "اعرف المزيد",
+  "home.hero.kaaba": "الكعبة",
+  "home.hero.rating": "4.9/5",
+  "home.hero.fromReviews": "من أكثر من 2,500 تقييم",
+  "home.hero.pilgrimsServed": "أكثر من 50,000 حاج ومعتمر",
+
+  // Home Features
+  "home.features.bestPrice": "ضمان أفضل سعر",
+  "home.features.customerSupport": "دعم العملاء على مدار الساعة",
+  "home.features.securePayments": "مدفوعات آمنة",
+  "home.features.expertGuides": "مرشدين خبراء",
+
+  // Home Stats Section
+  "home.stats.support": "24/7",
+  "home.stats.supportDesc": "دعم العملاء",
+  "home.stats.experience": "أكثر من 15 سنة",
+  "home.stats.experienceDesc": "خبرة",
+  "home.stats.rating": "4.9/5",
+  "home.stats.ratingDesc": "تقييم العملاء",
+  "home.stats.pilgrims": "أكثر من 50,000",
+  "home.stats.pilgrimsDesc": "حاج ومعتمر سعيد",
+
   // Home Search Section
   "home.search.title": "ابحث عن رحلتك المثالية",
   "home.search.subtitle": "ابحث عن الفنادق والباقات والرحلات الجوية والنقل",
@@ -96,6 +125,25 @@ export const arabicTranslations = {
   "home.search.departurePlaceholder": "اختر تاريخ المغادرة",
   "home.search.duration": "المدة",
   "home.search.durationPlaceholder": "اختر المدة",
+
+  // Home Testimonials Section
+  "home.testimonials.title": "ماذا يقول حجاجنا ومعتمرونا",
+  "home.testimonials.subtitle": "اقرأ شهادات آلاف الحجاج والمعتمرين الراضين",
+  "home.testimonials.testimonial1.name": "أحمد الراشد",
+  "home.testimonials.testimonial1.text": "خدمة متميزة من البداية إلى النهاية. جعل الفريق رحلة الحج سلسة ولا تُنسى. أنصح به بشدة!",
+  "home.testimonials.testimonial1.location": "الرياض، المملكة العربية السعودية",
+  "home.testimonials.testimonial2.name": "فاطمة حسن",
+  "home.testimonials.testimonial2.text": "طاقم محترف ومهتم. اعتنوا بكل التفاصيل حتى نتمكن من التركيز على رحلتنا الروحانية.",
+  "home.testimonials.testimonial2.location": "القاهرة، مصر",
+  "home.testimonials.testimonial3.name": "محمد علي",
+  "home.testimonials.testimonial3.text": "إقامة ممتازة ونقل سلس. كانت تجربة العمرة مباركة حقاً.",
+  "home.testimonials.testimonial3.location": "لندن، المملكة المتحدة",
+
+  // Home Call to Action Section
+  "home.cta.title": "هل أنت مستعد لبدء رحلتك المقدسة؟",
+  "home.cta.subtitle": "انضم إلى آلاف الحجاج والمعتمرين الذين يثقون بنا في رحلتهم الروحانية. احجز باقتك اليوم واختبر الفرق.",
+  "home.cta.browsePackages": "تصفح الباقات",
+  "home.cta.startJourney": "ابدأ رحلتك",
 
   // Common
   "common.viewAll": "عرض الكل",

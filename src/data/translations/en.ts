@@ -35,6 +35,8 @@ export const englishTranslations = {
   // Package Page
   "packages.title": "Hajj & Umrah Packages",
   "packages.subtitle": "Discover our comprehensive packages for your spiritual journey",
+  "packages.featuredPackages": "Featured Packages",
+  "packages.pageDescription": "Discover amazing travel packages designed for your perfect Saudi Arabian experience",
   "packages.searchPlaceholder": "Search packages...",
   "packages.noPackages": "No packages found",
   "packages.noPackagesMessage": "Try adjusting your search criteria",
@@ -83,6 +85,33 @@ export const englishTranslations = {
   "transport.ziyaratTour": "Ziyarat Tour",
   "transport.privateCar": "Private Car",
 
+  // Home Hero Section
+  "home.hero.badge": "✨ Trusted by 50,000+ Pilgrims",
+  "home.hero.title": "Your Sacred Journey Awaits",
+  "home.hero.subtitle": "Experience the most comprehensive Hajj and Umrah packages with premium accommodations, guided tours, and spiritual guidance throughout your sacred journey.",
+  "home.hero.explorePackages": "Explore Packages",
+  "home.hero.learnMore": "Learn More",
+  "home.hero.kaaba": "Kaaba",
+  "home.hero.rating": "4.9/5",
+  "home.hero.fromReviews": "from 2,500+ reviews",
+  "home.hero.pilgrimsServed": "50,000+ Pilgrims",
+
+  // Home Features
+  "home.features.bestPrice": "Best Price Guarantee",
+  "home.features.customerSupport": "24/7 Customer Support",
+  "home.features.securePayments": "Secure Payments",
+  "home.features.expertGuides": "Expert Guides",
+
+  // Home Stats Section
+  "home.stats.support": "24/7",
+  "home.stats.supportDesc": "Customer Support",
+  "home.stats.experience": "15+ Years",
+  "home.stats.experienceDesc": "Experience",
+  "home.stats.rating": "4.9/5",
+  "home.stats.ratingDesc": "Customer Rating",
+  "home.stats.pilgrims": "50,000+",
+  "home.stats.pilgrimsDesc": "Happy Pilgrims",
+
   // Home Search Section
   "home.search.title": "Find Your Perfect Journey",
   "home.search.subtitle": "Search for hotels, packages, flights, and transport",
@@ -96,6 +125,25 @@ export const englishTranslations = {
   "home.search.departurePlaceholder": "Select departure date",
   "home.search.duration": "Duration",
   "home.search.durationPlaceholder": "Select duration",
+
+  // Home Testimonials Section
+  "home.testimonials.title": "What Our Pilgrims Say",
+  "home.testimonials.subtitle": "Read testimonials from thousands of satisfied pilgrims",
+  "home.testimonials.testimonial1.name": "Ahmed Al-Rashid",
+  "home.testimonials.testimonial1.text": "Outstanding service from start to finish. The team made our Hajj journey smooth and memorable. Highly recommended!",
+  "home.testimonials.testimonial1.location": "Riyadh, Saudi Arabia",
+  "home.testimonials.testimonial2.name": "Fatima Hassan",
+  "home.testimonials.testimonial2.text": "Professional and caring staff. They took care of every detail so we could focus on our spiritual journey.",
+  "home.testimonials.testimonial2.location": "Cairo, Egypt",
+  "home.testimonials.testimonial3.name": "Mohammad Ali",
+  "home.testimonials.testimonial3.text": "Excellent accommodations and seamless transportation. Our Umrah experience was truly blessed.",
+  "home.testimonials.testimonial3.location": "London, UK",
+
+  // Home Call to Action Section
+  "home.cta.title": "Ready to Begin Your Sacred Journey?",
+  "home.cta.subtitle": "Join thousands of pilgrims who trust us with their spiritual journey. Book your package today and experience the difference.",
+  "home.cta.browsePackages": "Browse Packages",
+  "home.cta.startJourney": "Start Your Journey",
 
   // Common
   "common.viewAll": "View All",

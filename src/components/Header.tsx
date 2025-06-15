@@ -48,21 +48,21 @@ const Header: React.FC = () => {
     <>
       <motion.header
         className={cn(
-          "fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-full max-w-6xl px-4",
+          "fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
           isSticky ? "top-4" : "top-6"
         )}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between bg-background/5 border border-border backdrop-blur-lg py-2 px-4 rounded-full shadow-lg">
-          {/* Logo - Left Side */}
-          <div className="flex-shrink-0">
+        <div className="flex items-center bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg min-w-fit">
+          {/* Logo - Always on the left in LTR, right in RTL */}
+          <div className={cn("flex-shrink-0", isRTL ? "order-3" : "order-1")}>
             <HeaderLogo />
           </div>
 
-          {/* Navigation Items - Center */}
-          <div className="hidden md:flex items-center gap-1 mx-4">
+          {/* Navigation Items - Always in the center */}
+          <div className="hidden md:flex items-center gap-1 mx-8 order-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.name;
@@ -102,8 +102,8 @@ const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Actions - Right Side */}
-          <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Actions - Always on the right in LTR, left in RTL */}
+          <div className={cn("flex items-center gap-2 flex-shrink-0", isRTL ? "order-1" : "order-3")}>
             <LanguageSelector />
             <UserDropdown />
 

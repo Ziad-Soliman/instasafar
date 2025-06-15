@@ -28,7 +28,7 @@ const ProviderDashboard: React.FC = () => {
   } = useProviderDashboard();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -37,16 +37,16 @@ const ProviderDashboard: React.FC = () => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              {t("dashboard.title", "Dashboard")}
+            <h1 className="text-4xl font-bold text-navy-700 dark:text-white mb-2">
+              {t("dashboard.title", "Provider Dashboard")}
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Manage your business and track performance
+              Manage your business and track performance with insights
             </p>
           </div>
           <Button 
             onClick={() => navigate("/provider/listings")}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            className="!bg-gradient-to-r from-brand-400 to-brand-600 hover:from-brand-500 hover:to-brand-700 text-white shadow-xl shadow-shadow-500 hover:shadow-2xl transition-all duration-300 rounded-xl px-6 py-3"
           >
             {t("dashboard.manageListings", "Manage Listings")}
             <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-2 rotate-180" : "ml-2")} />
@@ -56,7 +56,7 @@ const ProviderDashboard: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-400 mx-auto mb-4"></div>
               <p className="text-xl font-semibold text-gray-600 dark:text-gray-300 animate-pulse">
                 {t("dashboard.loadingData", "Loading dashboard data...")}
               </p>

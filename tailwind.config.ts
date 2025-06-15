@@ -79,6 +79,48 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Horizon UI Color Palette
+				brand: {
+					50: '#E6F3FF',
+					100: '#CCE7FF',
+					200: '#99CFFF',
+					300: '#66B7FF',
+					400: '#422AFB', // Main brand color
+					500: '#422AFB',
+					600: '#3311DB',
+					700: '#240EBB',
+					800: '#150A9B',
+					900: '#06067B',
+					DEFAULT: '#422AFB',
+					foreground: '#FFFFFF'
+				},
+				navy: {
+					50: '#d0dcfb',
+					100: '#aac0fe',
+					200: '#a3b9f8',
+					300: '#728fea',
+					400: '#3652ba',
+					500: '#1b3bbb',
+					600: '#24388a',
+					700: '#1B254B', // Main navy color
+					800: '#111c44',
+					900: '#0b1426',
+				},
+				gray: {
+					50: '#f8fafc',
+					100: '#f1f5f9',
+					200: '#e2e8f0',
+					300: '#cbd5e1',
+					400: '#94a3b8',
+					500: '#64748b',
+					600: '#475569',
+					700: '#334155', // Main gray color
+					800: '#1e293b',
+					900: '#0f172a',
+				},
+				shadow: {
+					500: 'rgba(112, 144, 176, 0.08)',
+				},
 				// Enhanced Saudi Green Color Palette
 				'saudi-green': {
 					DEFAULT: 'hsl(140, 100%, 20%)', // #006C35
@@ -93,9 +135,6 @@ export default {
 					800: 'hsl(140, 100%, 12%)',
 					900: 'hsl(140, 100%, 8%)',
 				},
-				// Brand colors for CTA
-				brand: "hsl(var(--brand))",
-				"brand-foreground": "hsl(var(--brand-foreground))",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -226,6 +265,8 @@ export default {
 				'saudi-gradient-light': 'linear-gradient(135deg, hsl(140, 50%, 45%) 0%, hsl(140, 30%, 70%) 100%)'
 			},
 			boxShadow: {
+				'shadow-500': '0px 18px 40px rgba(112, 144, 176, 0.12)',
+				'shadow-100': '0px 5px 14px rgba(112, 144, 176, 0.08)',
 				'saudi': '0 4px 14px 0 hsl(140, 100%, 20%, 0.15)',
 				'saudi-lg': '0 10px 25px -3px hsl(140, 100%, 20%, 0.2), 0 4px 6px -2px hsl(140, 100%, 20%, 0.05)',
 				'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.06)',
@@ -233,10 +274,6 @@ export default {
 				'floating': '0 16px 48px 0 rgba(0, 0, 0, 0.18)',
 				glow: "0 -16px 128px 0 hsla(var(--brand-foreground) / 0.5) inset, 0 -16px 32px 0 hsla(var(--brand) / 0.5) inset",
 			},
-			backgroundPattern: {
-				'dots': 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-				'grid': 'linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)',
-			}
 		}
 	},
 	plugins: [

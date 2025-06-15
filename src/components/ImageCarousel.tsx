@@ -50,11 +50,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const imageVariants = {
     hidden: { x: '100%', opacity: 0 },
     visible: {
-      x: 0,
+      x: '0%',
       opacity: 1,
       transition: {
         duration: 0.5,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1],
       },
     },
     exit: {
@@ -62,7 +62,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       opacity: 0,
       transition: {
         duration: 0.3,
-        ease: "easeOut",
+        ease: [0.4, 0, 0.2, 1],
       },
     },
   };

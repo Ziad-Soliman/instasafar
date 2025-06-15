@@ -13,9 +13,9 @@ const CustomerDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-navy-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-400 mx-auto mb-4"></div>
           <div className="text-xl font-semibold text-gray-600 dark:text-gray-300 animate-pulse">
             Loading dashboard...
           </div>
@@ -25,7 +25,7 @@ const CustomerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-navy-900">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -33,76 +33,76 @@ const CustomerDashboard: React.FC = () => {
         className="p-6 space-y-8"
       >
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Dashboard</h1>
+          <h1 className="text-4xl font-bold text-navy-700 dark:text-white mb-2">Customer Dashboard</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300">Welcome back! Here's your travel overview</p>
         </div>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+          <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] hover:scale-105 transition-transform duration-300">
+            <CardContent className="p-6 !bg-gradient-to-br from-blue-400 to-blue-600 rounded-[20px] text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Total Bookings</p>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.total_bookings || 0}</h3>
+                  <p className="text-sm font-medium text-white/80 mb-1">Total Bookings</p>
+                  <h3 className="text-3xl font-bold text-white">{stats?.total_bookings || 0}</h3>
                   <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">+12%</span>
+                    <TrendingUp className="h-4 w-4 text-green-200 mr-1" />
+                    <span className="text-sm text-green-200 font-medium">+12%</span>
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-white/50 dark:bg-black/20">
-                  <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div className="p-3 rounded-xl bg-white/20">
+                  <Calendar className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+          <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] hover:scale-105 transition-transform duration-300">
+            <CardContent className="p-6 !bg-gradient-to-br from-green-400 to-green-600 rounded-[20px] text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Upcoming Trips</p>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.upcoming_bookings || 0}</h3>
+                  <p className="text-sm font-medium text-white/80 mb-1">Upcoming Trips</p>
+                  <h3 className="text-3xl font-bold text-white">{stats?.upcoming_bookings || 0}</h3>
                   <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">+5%</span>
+                    <TrendingUp className="h-4 w-4 text-green-200 mr-1" />
+                    <span className="text-sm text-green-200 font-medium">+5%</span>
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-white/50 dark:bg-black/20">
-                  <Clock className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <div className="p-3 rounded-xl bg-white/20">
+                  <Clock className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+          <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] hover:scale-105 transition-transform duration-300">
+            <CardContent className="p-6 !bg-gradient-to-br from-purple-400 to-purple-600 rounded-[20px] text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Total Spent</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(Number(stats?.total_spent || 0))}</h3>
+                  <p className="text-sm font-medium text-white/80 mb-1">Total Spent</p>
+                  <h3 className="text-2xl font-bold text-white">{formatCurrency(Number(stats?.total_spent || 0))}</h3>
                   <div className="flex items-center mt-2">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">+18%</span>
+                    <TrendingUp className="h-4 w-4 text-green-200 mr-1" />
+                    <span className="text-sm text-green-200 font-medium">+18%</span>
                   </div>
                 </div>
-                <div className="p-3 rounded-xl bg-white/50 dark:bg-black/20">
-                  <CreditCard className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                <div className="p-3 rounded-xl bg-white/20">
+                  <CreditCard className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <CardContent className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+          <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] hover:scale-105 transition-transform duration-300">
+            <CardContent className="p-6 !bg-gradient-to-br from-orange-400 to-orange-600 rounded-[20px] text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Favorite City</p>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{stats?.favorite_city || 'N/A'}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Most visited</p>
+                  <p className="text-sm font-medium text-white/80 mb-1">Favorite City</p>
+                  <h3 className="text-lg font-bold text-white">{stats?.favorite_city || 'N/A'}</h3>
+                  <p className="text-sm text-white/70 mt-1">Most visited</p>
                 </div>
-                <div className="p-3 rounded-xl bg-white/50 dark:bg-black/20">
-                  <MapPin className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                <div className="p-3 rounded-xl bg-white/20">
+                  <MapPin className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -110,14 +110,14 @@ const CustomerDashboard: React.FC = () => {
         </div>
 
         {/* Upcoming Bookings */}
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-            <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Upcoming Trips</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">Your confirmed upcoming bookings</CardDescription>
+        <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] mb-6">
+          <CardHeader className="!bg-gradient-to-br from-brand-400 to-brand-600 rounded-t-[20px] text-white">
+            <CardTitle className="text-xl font-bold text-white">Upcoming Trips</CardTitle>
+            <CardDescription className="text-white/80">Your confirmed upcoming bookings</CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             {upcomingBookings.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-center py-12 bg-gray-50 dark:bg-navy-700 rounded-xl">
                 <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 dark:text-gray-400 text-lg">No upcoming trips</p>
                 <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Book your next adventure!</p>
@@ -158,14 +158,14 @@ const CustomerDashboard: React.FC = () => {
         </Card>
 
         {/* Recent Bookings */}
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-            <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Recent Bookings</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">Your latest booking history</CardDescription>
+        <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px]">
+          <CardHeader className="!bg-gradient-to-br from-green-400 to-green-600 rounded-t-[20px] text-white">
+            <CardTitle className="text-xl font-bold text-white">Recent Bookings</CardTitle>
+            <CardDescription className="text-white/80">Your latest booking history</CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             {recentBookings.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-center py-12 bg-gray-50 dark:bg-navy-700 rounded-xl">
                 <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 dark:text-gray-400 text-lg">No bookings yet</p>
                 <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start exploring amazing destinations!</p>

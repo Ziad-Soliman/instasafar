@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -104,11 +105,20 @@ const HotelDetailPage: React.FC = () => {
             ...data,
             is_internal: true,
             amenities: ["Free WiFi", "Breakfast Included", "Prayer Room", "Shuttle Service", "Room Service", "Air Conditioning", "Concierge", "24/7 Front Desk"],
-            images: data.thumbnail ? [data.thumbnail] : ["/placeholder.svg"]
+            images: data.thumbnail ? [
+              data.thumbnail,
+              "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            ] : [
+              "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+              "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            ]
           };
           setHotel(hotelData);
           
-          // Mock rooms data for now
+          // Mock rooms data with proper images
           const roomsData: Room[] = [
             {
               id: "room-1",
@@ -117,7 +127,7 @@ const HotelDetailPage: React.FC = () => {
               capacity: 2,
               description: "Comfortable standard room with two single beds",
               amenities: ["Free WiFi", "Air Conditioning", "TV", "Private Bathroom"],
-              images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
+              images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"]
             },
             {
               id: "room-2",
@@ -126,7 +136,7 @@ const HotelDetailPage: React.FC = () => {
               capacity: 3,
               description: "Spacious deluxe room with Haram view, king bed and additional single bed",
               amenities: ["Free WiFi", "Air Conditioning", "TV", "Mini Fridge", "Safe", "Haram View"],
-              images: ["https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"]
+              images: ["https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"]
             }
           ];
           setRooms(roomsData);
@@ -271,7 +281,7 @@ const HotelDetailPage: React.FC = () => {
             {/* Main Image Carousel */}
             <div className="rounded-lg overflow-hidden">
               <ImageCarousel 
-                images={hotel.images || [hotel.thumbnail || "/placeholder.svg"]}
+                images={hotel.images || [hotel.thumbnail || "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"]}
                 aspectRatio={16/9}
                 allowFullscreen={true}
                 caption={`${hotel.name} - ${hotel.city}`}
@@ -330,7 +340,7 @@ const HotelDetailPage: React.FC = () => {
                               <div className="md:col-span-1">
                                 <div className="h-full bg-muted">
                                   <img 
-                                    src={room.images[0] || "/placeholder.svg"} 
+                                    src={room.images[0] || "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"} 
                                     alt={room.room_type} 
                                     className="w-full h-full object-cover aspect-square md:aspect-auto" 
                                   />

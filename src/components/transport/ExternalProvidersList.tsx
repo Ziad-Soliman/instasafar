@@ -53,7 +53,7 @@ const ExternalProvidersList: React.FC<ExternalProvidersListProps> = ({
           <CardContent className="p-6">
             <div className="h-12 mb-4 bg-muted flex items-center justify-center rounded">
               <img
-                src={provider.logo}
+                src={provider.logo || "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=50"}
                 alt={provider.name}
                 className="h-8 max-w-full object-contain"
               />

@@ -62,7 +62,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-1',
     airline: 'Saudi Arabian Airlines',
-    airline_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop&crop=center',
+    airline_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Riyadh',
     departure_airport: 'RUH',
     departure_time: '08:30',
@@ -77,7 +77,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-2',
     airline: 'Flynas',
-    airline_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop&crop=center',
+    airline_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Dammam',
     departure_airport: 'DMM',
     departure_time: '14:20',
@@ -92,7 +92,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-3',
     airline: 'Emirates',
-    airline_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop&crop=center',
+    airline_logo: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Dubai',
     departure_airport: 'DXB',
     departure_time: '22:40',
@@ -110,7 +110,7 @@ export const mockHotels: HotelData[] = [
   {
     id: 'hotel-1',
     name: 'Makkah Clock Royal Tower',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     location: 'Makkah',
     distance_to_haram: '0.1 km',
     rating: 4.8,
@@ -122,7 +122,7 @@ export const mockHotels: HotelData[] = [
   {
     id: 'hotel-2',
     name: 'Madinah Hilton',
-    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     location: 'Medina',
     distance_to_haram: '0.3 km',
     rating: 4.6,
@@ -134,7 +134,7 @@ export const mockHotels: HotelData[] = [
   {
     id: 'hotel-3',
     name: 'Riyadh Palace Hotel',
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     location: 'Riyadh',
     distance_to_haram: 'N/A',
     rating: 4.4,
@@ -149,7 +149,7 @@ export const mockPackages: PackageData[] = [
   {
     id: 'package-1',
     title: 'Premium Hajj Package 2024',
-    image: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     duration: '21 days',
     price: 5500,
     location: 'Makkah & Medina',
@@ -162,7 +162,7 @@ export const mockPackages: PackageData[] = [
   {
     id: 'package-2',
     title: 'Luxury Umrah Experience',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1564769625392-651b64d96e7f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     duration: '7 days',
     price: 1200,
     location: 'Makkah & Medina',
@@ -175,7 +175,7 @@ export const mockPackages: PackageData[] = [
   {
     id: 'package-3',
     title: 'Saudi Discovery Tour',
-    image: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73095?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73095?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     duration: '10 days',
     price: 2800,
     location: 'Riyadh, Jeddah & AlUla',
@@ -192,12 +192,12 @@ export const mockExternalListings: ExternalListingData[] = [
     id: 'external-1',
     title: 'Premium Flight Deals to Jeddah',
     provider: 'Booking.com',
-    provider_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop&crop=center',
+    provider_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     price_range: '$450 - $890',
     rating: 4.5,
     review_count: 1234,
     url: 'https://booking.com',
-    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     features: ['Direct Flight', 'Baggage Included', 'Flexible Dates'],
     listing_type: 'flight'
   },
@@ -205,12 +205,12 @@ export const mockExternalListings: ExternalListingData[] = [
     id: 'external-2',
     title: 'Makkah to Madinah Transport',
     provider: 'Saudi Transport Co',
-    provider_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=100&h=100&fit=crop&crop=center',
+    provider_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     price_range: '$45 - $120',
     rating: 4.3,
     review_count: 567,
     url: 'https://sauditransport.com',
-    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     features: ['AC Bus', 'WiFi', 'Comfortable Seats'],
     listing_type: 'transport'
   }

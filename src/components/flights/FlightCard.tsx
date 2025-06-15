@@ -78,9 +78,9 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
 
           {/* Flight Route */}
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-3 gap-4 items-center h-full">
+            <div className={`grid grid-cols-3 gap-4 items-center h-full ${isRTL ? 'rtl:text-center' : 'text-center'}`}>
               {/* Departure */}
-              <div className="text-center space-y-1">
+              <div className="space-y-1">
                 <div className="text-2xl font-bold">{format(new Date(flight.departure_time), 'HH:mm')}</div>
                 <div className="text-sm font-medium text-muted-foreground truncate">
                   {getDisplayName(flight.origin, flight.origin_ar)}
@@ -104,7 +104,7 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
               </div>
               
               {/* Arrival */}
-              <div className="text-center space-y-1">
+              <div className="space-y-1">
                 <div className="text-2xl font-bold">{format(new Date(flight.arrival_time), 'HH:mm')}</div>
                 <div className="text-sm font-medium text-muted-foreground truncate">
                   {getDisplayName(flight.destination, flight.destination_ar)}

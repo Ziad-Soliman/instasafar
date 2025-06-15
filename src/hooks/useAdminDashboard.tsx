@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -70,7 +71,7 @@ export const useAdminDashboard = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our interface, handling potential null values
+      // Transform the data to match our interface, safely handling null/undefined values
       const transformedData: Booking[] = (data || []).map(item => ({
         id: item.id,
         user_id: item.user_id,
@@ -84,9 +85,9 @@ export const useAdminDashboard = () => {
         status: item.status,
         payment_status: item.payment_status,
         created_at: item.created_at,
-        hotels: item.hotels,
-        packages: item.packages,
-        profiles: item.profiles
+        hotels: item.hotels || null,
+        packages: item.packages || null,
+        profiles: item.profiles || null
       }));
       
       setRecentBookings(transformedData);

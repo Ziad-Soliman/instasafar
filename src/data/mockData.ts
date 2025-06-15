@@ -77,7 +77,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-2',
     airline: 'Flynas',
-    airline_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    airline_logo: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Dammam',
     departure_airport: 'DMM',
     departure_time: '14:20',

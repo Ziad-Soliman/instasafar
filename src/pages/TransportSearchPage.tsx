@@ -1,272 +1,192 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Car, Clock, ArrowRight, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Bus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface Transport {
-  id: string;
-  name: string;
-  description?: string;
-  type: string;
-  from_city: string;
-  to_city: string;
-  price: number;
-  duration_hours?: number;
-  departure_time?: string;
-  arrival_time?: string;
-  capacity?: number;
-  available_seats?: number;
-  thumbnail?: string;
-}
+import TransportSearchForm from "@/components/transport/TransportSearchForm";
+import TransportResultsList from "@/components/transport/TransportResultsList";
+import ExternalProvidersList, { ExternalTransportProvider } from "@/components/transport/ExternalProvidersList";
+import { Transport } from "@/components/transport/TransportCard";
 
 const TransportSearchPage: React.FC = () => {
-  const [transports, setTransports] = useState<Transport[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchFilters, setSearchFilters] = useState({
-    from_city: "",
-    to_city: "",
-    type: "",
-    date: ""
-  });
+  const { t } = useLanguage();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const cities = ["Makkah", "Madinah", "Riyadh", "Jeddah", "Dammam", "Taif"];
-  const transportTypes = ["Bus", "Car", "Van", "Train", "Shuttle"];
+  // State for search form
+  const [fromCity, setFromCity] = useState("Makkah");
+  const [toCity, setToCity] = useState("Madinah");
+  const [travelDate, setTravelDate] = useState<Date | undefined>(new Date());
+  const [passengers, setPassengers] = useState(1);
+  const [transportType, setTransportType] = useState<string>("all");
 
-  const fetchTransports = async () => {
+  // State for results
+  const [loading, setLoading] = useState(false);
+  const [transports, setTransports] = useState<Transport[]>([]);
+  const [externalProviders, setExternalProviders] = useState<ExternalTransportProvider[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch transport options from Supabase
+  const handleSearch = useCallback(async () => {
     setLoading(true);
-    try {
-      let query = supabase
-        .from('transport_options')
-        .select('*')
-        .order('departure_time', { ascending: true });
+    setError(null);
 
-      if (searchFilters.from_city) {
-        query = query.eq('from_city', searchFilters.from_city);
-      }
-      if (searchFilters.to_city) {
-        query = query.eq('to_city', searchFilters.to_city);
-      }
-      if (searchFilters.type) {
-        query = query.eq('type', searchFilters.type);
+    try {
+      let query = supabase.from("transport_options").select("*");
+      
+      if (transportType && transportType !== "all") {
+        query = query.eq("type", transportType);
       }
 
       const { data, error } = await query;
 
-      if (error) throw error;
-      setTransports(data || []);
-    } catch (error) {
-      console.error('Error fetching transport:', error);
+      if (error) {
+        setTransports([]);
+        setError(t("transport.noTransport", "No transport options found"));
+        toast({
+          title: t("common.error", "Error"),
+          description: t("transport.noTransportMessage", "Could not load transport options."),
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Transform the data to match component expectations
+      const transportData: Transport[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        name_ar: item.name_ar,
+        provider_logo: item.thumbnail,
+        type: item.type,
+        from_city: item.from_city,
+        from_city_ar: item.from_city_ar,
+        to_city: item.to_city,
+        to_city_ar: item.to_city_ar,
+        departure_time: item.departure_time || "08:00",
+        duration_hours: item.duration_hours || 2,
+        price: Number(item.price),
+        capacity: item.capacity || 50,
+        available_seats: item.available_seats || 30,
+        features: []
+      }));
+
+      setTransports(transportData);
+
+      // External providers - still mocked for now
+      setExternalProviders([
+        {
+          id: "provider-1",
+          name: "GetYourGuide",
+          logo: "/placeholder.svg",
+          url: "https://getyourguide.com",
+          price_indication: t("transport.from", "From") + " $50"
+        },
+        {
+          id: "provider-2",
+          name: "Uber",
+          logo: "/placeholder.svg",
+          url: "https://uber.com",
+          price_indication: t("transport.from", "From") + " $120"
+        },
+        {
+          id: "provider-3",
+          name: "Viator",
+          logo: "/placeholder.svg",
+          url: "https://viator.com",
+          price_indication: t("transport.from", "From") + " $65"
+        }
+      ]);
+
+      setLoading(false);
+    } catch (err: any) {
+      setError(t("common.error", "Unknown error fetching data"));
+      setLoading(false);
       toast({
-        title: "Error",
-        description: "Failed to fetch transport options. Please try again.",
+        title: t("common.error", "Error"),
+        description: err?.message || t("common.tryAgain", "An error occurred."),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [toast, transportType, t]);
 
+  // Run search on mount and whenever filter changes
   useEffect(() => {
-    fetchTransports();
-  }, []);
+    handleSearch();
+  }, [handleSearch]);
 
-  const handleSearch = () => {
-    fetchTransports();
+  // Handle view details/book now
+  const handleViewDetails = (transport: Transport) => {
+    navigate(`/transport/${transport.id}`);
   };
 
-  const handleFilterChange = (field: string, value: string) => {
-    setSearchFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const formatTime = (timeString?: string) => {
-    if (!timeString) return 'Not specified';
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Handle external provider click
+  const handleExternalProviderClick = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Find Transport Options</h1>
-            <p className="text-xl text-gray-600">Book reliable transport for your journey</p>
-          </div>
-
-          {/* Search Filters */}
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">From</label>
-                  <Select value={searchFilters.from_city} onValueChange={(value) => handleFilterChange('from_city', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select origin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Cities</SelectItem>
-                      {cities.map(city => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">To</label>
-                  <Select value={searchFilters.to_city} onValueChange={(value) => handleFilterChange('to_city', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select destination" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Cities</SelectItem>
-                      {cities.map(city => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Transport Type</label>
-                  <Select value={searchFilters.type} onValueChange={(value) => handleFilterChange('type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
-                      {transportTypes.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Travel Date</label>
-                  <Input
-                    type="date"
-                    value={searchFilters.date}
-                    onChange={(e) => handleFilterChange('date', e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-end">
-                  <Button onClick={handleSearch} className="w-full">
-                    <Search className="w-4 h-4 mr-2" />
-                    Search Transport
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Results */}
+    <div className="container mx-auto py-8 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold mb-6">{t("transport.title", "Transportation Services")}</h1>
+        
+        <TransportSearchForm
+          fromCity={fromCity}
+          setFromCity={setFromCity}
+          toCity={toCity}
+          setToCity={setToCity}
+          travelDate={travelDate}
+          setTravelDate={setTravelDate}
+          passengers={passengers}
+          setPassengers={setPassengers}
+          transportType={transportType}
+          setTransportType={setTransportType}
+          onSearch={handleSearch}
+        />
+        
+        <div className="grid grid-cols-1 gap-8">
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Available Transport</h2>
-              <div className="text-sm text-gray-600">
-                {!loading && `${transports.length} options found`}
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, index) => (
-                  <Card key={index} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : transports.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Car className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No transport options found</h3>
-                  <p className="text-gray-600">Try adjusting your search criteria or check back later.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {transports.map((transport) => (
-                  <Card key={transport.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between">
-                        <div className="mb-4 lg:mb-0">
-                          <div className="flex items-center mb-2">
-                            <Car className="h-5 w-5 text-brand-600 mr-2" />
-                            <h3 className="text-lg font-semibold">{transport.name}</h3>
-                            <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full capitalize">
-                              {transport.type}
-                            </span>
-                          </div>
-                          
-                          <div className="flex items-center text-gray-600 mb-2">
-                            <span>{transport.from_city}</span>
-                            <ArrowRight className="h-4 w-4 mx-2" />
-                            <span>{transport.to_city}</span>
-                          </div>
-
-                          {transport.description && (
-                            <p className="text-gray-600 text-sm mb-2">{transport.description}</p>
-                          )}
-
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            {transport.duration_hours && (
-                              <div className="flex items-center">
-                                <Clock className="h-4 w-4 mr-1" />
-                                <span>{transport.duration_hours}h</span>
-                              </div>
-                            )}
-                            {transport.departure_time && (
-                              <span>Departs: {formatTime(transport.departure_time)}</span>
-                            )}
-                            {transport.available_seats && transport.capacity && (
-                              <div className="flex items-center">
-                                <Users className="h-4 w-4 mr-1" />
-                                <span>{transport.available_seats}/{transport.capacity} seats</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col items-end">
-                          <div className="text-2xl font-bold text-brand-600 mb-2">
-                            ${Number(transport.price).toFixed(0)}
-                          </div>
-                          <Button>
-                            Book Now
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+            <Tabs defaultValue="transport">
+              <TabsList className="mb-6">
+                <TabsTrigger value="transport">
+                  <Bus className="h-4 w-4 mr-2" />
+                  {t("transport.options", "Transport Options")}
+                </TabsTrigger>
+                <TabsTrigger value="external">
+                  <Search className="h-4 w-4 mr-2" />
+                  {t("transport.externalProviders", "External Providers")}
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="transport" className="mt-0">
+                <TransportResultsList
+                  loading={loading}
+                  error={error}
+                  transports={transports}
+                  onSearch={handleSearch}
+                  onViewDetails={handleViewDetails}
+                />
+              </TabsContent>
+              
+              <TabsContent value="external" className="mt-0">
+                <ExternalProvidersList
+                  loading={loading}
+                  providers={externalProviders}
+                  onProviderClick={handleExternalProviderClick}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

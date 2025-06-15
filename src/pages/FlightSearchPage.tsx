@@ -180,9 +180,9 @@ const FlightSearchPage: React.FC = () => {
 
                     {/* Flight Route */}
                     <div className="flex-1 min-w-0">
-                      <div className="grid grid-cols-3 gap-4 items-center h-full">
+                      <div className="grid grid-cols-3 gap-4 items-center justify-items-center">
                         {/* Departure */}
-                        <div className="text-center space-y-1">
+                        <div className="text-center space-y-1 w-full">
                           <div className="text-2xl font-bold">{format(new Date(flight.departure_time), 'HH:mm')}</div>
                           <div className="text-sm font-medium text-muted-foreground truncate">
                             {getDisplayName(flight.origin, flight.origin_ar)}
@@ -191,22 +191,22 @@ const FlightSearchPage: React.FC = () => {
                         </div>
                         
                         {/* Flight Duration & Icon */}
-                        <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="flex flex-col items-center justify-center space-y-2 w-full">
                           <div className="text-xs text-muted-foreground font-medium">
                             {calculateDuration(flight.departure_time, flight.arrival_time)}
                           </div>
                           <div className="w-full flex items-center justify-center">
-                            <div className="h-[2px] bg-border flex-1 max-w-12"></div>
+                            <div className="h-[2px] bg-border flex-1"></div>
                             <div className="mx-2 p-1 bg-saudi-green/10 rounded-full">
                               <Plane className="h-4 w-4 text-saudi-green" />
                             </div>
-                            <div className="h-[2px] bg-border flex-1 max-w-12"></div>
+                            <div className="h-[2px] bg-border flex-1"></div>
                           </div>
                           <div className="text-xs text-muted-foreground">Non-stop</div>
                         </div>
                         
                         {/* Arrival */}
-                        <div className="text-center space-y-1">
+                        <div className="text-center space-y-1 w-full">
                           <div className="text-2xl font-bold">{format(new Date(flight.arrival_time), 'HH:mm')}</div>
                           <div className="text-sm font-medium text-muted-foreground truncate">
                             {getDisplayName(flight.destination, flight.destination_ar)}

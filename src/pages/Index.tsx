@@ -138,68 +138,58 @@ const HomePage: React.FC = () => {
       <section className="relative overflow-hidden bg-gradient-to-br from-saudi-green-50 via-background to-saudi-green-50 py-20 md:py-32">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <motion.div initial={{
-          opacity: 0,
-          scale: 0.8,
-          rotate: 0
-        }} animate={{
-          opacity: 0.1,
-          scale: 1,
-          rotate: 45
-        }} transition={{
-          duration: 2,
-          ease: "easeOut"
-        }} className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-saudi-gradient" />
-          <motion.div initial={{
-          opacity: 0,
-          scale: 0.8,
-          rotate: 0
-        }} animate={{
-          opacity: 0.1,
-          scale: 1,
-          rotate: -45
-        }} transition={{
-          duration: 2,
-          delay: 0.3,
-          ease: "easeOut"
-        }} className="absolute top-60 -left-40 w-96 h-96 rounded-full bg-saudi-gradient-light" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+            animate={{ opacity: 0.1, scale: 1, rotate: 45 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+            className={`absolute -top-40 w-96 h-96 rounded-full bg-saudi-gradient ${isRTL ? '-left-40' : '-right-40'}`}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
+            animate={{ opacity: 0.1, scale: 1, rotate: -45 }}
+            transition={{ duration: 2, delay: 0.3, ease: "easeOut" }}
+            className={`absolute top-60 w-96 h-96 rounded-full bg-saudi-gradient-light ${isRTL ? '-right-40' : '-left-40'}`}
+          />
           <div className="absolute inset-0 pattern-dots opacity-5"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial="hidden" animate="visible" variants={staggerChildren} className={`flex flex-col items-start space-y-8 ${isRTL ? 'items-end text-right' : ''}`}>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerChildren}
+              className={`flex flex-col space-y-8 ${isRTL ? 'items-end text-right lg:order-2' : 'items-start lg:order-1'}`}
+            >
               <motion.div variants={fadeInUp}>
                 <Badge className="py-2 px-4 text-sm font-medium mb-6" variant="saudi">
-                  <Sparkles className="w-4 h-4 mr-1" />
+                  <Sparkles className={`w-4 h-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
                   {t("hero.badge", "Hajj & Umrah Specialists")}
                 </Badge>
               </motion.div>
               
-              <motion.h1 variants={fadeInUp} className={`text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight ${isRTL ? 'text-right' : ''}`}>
+              <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
                 {t("hero.title1", "Your")} <span className="text-saudi-green bg-gradient-to-r from-saudi-green-600 to-saudi-green-700 bg-clip-text text-transparent">{t("hero.spiritual", "spiritual journey")}</span>{" "}
                 <br />{t("hero.made", "made")} <span className="relative">
                   {t("hero.simple", "simple")}
-                  <motion.div initial={{
-                  scaleX: 0
-                }} animate={{
-                  scaleX: 1
-                }} transition={{
-                  delay: 1,
-                  duration: 0.8
-                }} className="absolute bottom-2 left-0 right-0 h-3 bg-saudi-green/20 -z-10" />
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 1, duration: 0.8 }}
+                    className="absolute bottom-2 left-0 right-0 h-3 bg-saudi-green/20 -z-10"
+                  />
                 </span>
               </motion.h1>
               
-              <motion.p variants={fadeInUp} className={`text-muted-foreground text-xl max-w-xl leading-relaxed ${isRTL ? 'text-right' : ''}`}>
+              <motion.p variants={fadeInUp} className="text-muted-foreground text-xl max-w-xl leading-relaxed">
                 {t("hero.description", "Experience the sacred journey of a lifetime with our expertly curated Hajj and Umrah packages. We handle every detail so you can focus on your spiritual connection.")}
               </motion.p>
               
               <motion.div variants={fadeInUp} className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Button asChild variant="saudi" size="xl" effect="shimmer" className="group">
+                <Button asChild variant="saudi" size="xl" className="group">
                   <Link to="/search">
                     {t("hero.explorePackages", "Explore Packages")}
-                    <ChevronRight className={`h-5 w-5 transition-transform group-hover:translate-x-1 ${isRTL ? 'ml-2 group-hover:-translate-x-1' : 'ml-2'}`} />
+                    <ChevronRight className={`h-5 w-5 transition-transform group-hover:${isRTL ? '-translate-x-1' : 'translate-x-1'} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                   </Link>
                 </Button>
                 <Button asChild variant="saudi-outline" size="xl">
@@ -209,82 +199,67 @@ const HomePage: React.FC = () => {
               
               {/* Enhanced trust indicators */}
               <motion.div variants={staggerChildren} className="grid grid-cols-2 gap-4 mt-8 w-full">
-                {[{
-                icon: Clock,
-                text: t("hero.support247", "24/7 Customer Support")
-              }, {
-                icon: Shield,
-                text: t("hero.bestPrice", "Best Price Guarantee")
-              }, {
-                icon: Award,
-                text: t("hero.expertGuides", "Expert Local Guides")
-              }, {
-                icon: Heart,
-                text: t("hero.securePayments", "Secure Payments")
-              }].map((item, i) => <motion.div key={i} variants={fadeInUp} className={`flex items-center p-3 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                {[
+                  { icon: Clock, text: t("hero.support247", "24/7 Customer Support") },
+                  { icon: Shield, text: t("hero.bestPrice", "Best Price Guarantee") },
+                  { icon: Award, text: t("hero.expertGuides", "Expert Local Guides") },
+                  { icon: Heart, text: t("hero.securePayments", "Secure Payments") }
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    variants={fadeInUp}
+                    className={`flex items-center p-3 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                  >
                     <div className={`p-2 rounded-full bg-saudi-green/10 ${isRTL ? 'ml-3' : 'mr-3'}`}>
                       <item.icon size={16} className="text-saudi-green" />
                     </div>
                     <span className="text-sm font-medium">{item.text}</span>
-                  </motion.div>)}
+                  </motion.div>
+                ))}
               </motion.div>
             </motion.div>
 
-            <motion.div initial={{
-            opacity: 0,
-            scale: 0.9,
-            rotateY: 20
-          }} animate={{
-            opacity: 1,
-            scale: 1,
-            rotateY: 0
-          }} transition={{
-            duration: 0.8,
-            delay: 0.4
-          }} className="lg:flex justify-center hidden">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, rotateY: isRTL ? -20 : 20 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className={`lg:flex justify-center hidden ${isRTL ? 'lg:order-1' : 'lg:order-2'}`}
+            >
               <div className="relative w-full max-w-lg">
                 <div className="absolute inset-0 bg-saudi-gradient rounded-3xl transform rotate-3 scale-105 blur-xl opacity-30"></div>
                 <img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80" alt="Kaaba, Makkah" className="relative z-10 w-full h-auto object-cover rounded-3xl shadow-2xl" />
                 
                 {/* Floating Stats Cards */}
-                <motion.div initial={{
-                opacity: 0,
-                y: 20
-              }} animate={{
-                opacity: 1,
-                y: 0
-              }} transition={{
-                delay: 1,
-                duration: 0.6
-              }} className="absolute -bottom-8 -left-8 bg-white rounded-xl shadow-xl p-4 z-20">
-                  <div className="flex items-center">
-                    <div className="p-3 rounded-xl bg-saudi-green/10 mr-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1, duration: 0.6 }}
+                  className={`absolute -bottom-8 bg-white rounded-xl shadow-xl p-4 z-20 ${isRTL ? '-right-8' : '-left-8'}`}
+                >
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`p-3 rounded-xl bg-saudi-green/10 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                       <Users size={24} className="text-saudi-green" />
                     </div>
-                    <div>
+                    <div className={isRTL ? 'text-right' : ''}>
                       <p className="font-bold text-lg">50,000+</p>
-                      <p className="text-sm text-muted-foreground">Pilgrims served</p>
+                      <p className="text-sm text-muted-foreground">{t("stats.pilgrimsServed", "Pilgrims served")}</p>
                     </div>
                   </div>
                 </motion.div>
                 
-                <motion.div initial={{
-                opacity: 0,
-                y: -20
-              }} animate={{
-                opacity: 1,
-                y: 0
-              }} transition={{
-                delay: 1.2,
-                duration: 0.6
-              }} className="absolute -top-8 -right-8 bg-white rounded-xl shadow-xl p-4 z-20">
-                  <div className="flex items-center">
-                    <div className="p-3 rounded-xl bg-saudi-green/10 mr-4">
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2, duration: 0.6 }}
+                  className={`absolute -top-8 bg-white rounded-xl shadow-xl p-4 z-20 ${isRTL ? '-left-8' : '-right-8'}`}
+                >
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`p-3 rounded-xl bg-saudi-green/10 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                       <Star size={24} className="text-saudi-green" />
                     </div>
-                    <div>
-                      <p className="font-bold text-lg">4.9 Rating</p>
-                      <p className="text-sm text-muted-foreground">From 5000+ reviews</p>
+                    <div className={isRTL ? 'text-right' : ''}>
+                      <p className="font-bold text-lg">4.9 {t("stats.rating", "Rating")}</p>
+                      <p className="text-sm text-muted-foreground">{t("stats.from5000Reviews", "From 5000+ reviews")}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -298,11 +273,15 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-saudi-green text-white relative overflow-hidden">
         <div className="absolute inset-0 pattern-grid opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <motion.div initial="hidden" whileInView="visible" viewport={{
-          once: true,
-          margin: "-100px"
-        }} variants={staggerChildren} className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => <motion.div key={index} variants={scaleIn} className="text-center group">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {stats.map((stat, index) => (
+              <motion.div key={index} variants={scaleIn} className={`text-center group ${isRTL ? 'text-right' : ''}`}>
                 <div className="mb-4 flex justify-center">
                   <div className="p-4 rounded-full bg-white/10 group-hover:bg-white/20 transition-all duration-300">
                     <stat.icon className="h-8 w-8" />
@@ -310,23 +289,20 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
                 <div className="text-saudi-green-100 text-sm font-medium">{stat.label}</div>
-              </motion.div>)}
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
       {/* Enhanced Search Section */}
       <section className="container mx-auto px-4 -mt-16 relative z-20">
-        <motion.div initial={{
-        opacity: 0,
-        y: 30
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        duration: 0.6,
-        delay: 0.2
-      }} className="bg-white dark:bg-slate-900 shadow-2xl rounded-2xl p-8 border border-saudi-green/10 py-[42px] my-[44px]">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white dark:bg-slate-900 shadow-2xl rounded-2xl p-8 border border-saudi-green/10 py-[42px] my-[44px]"
+        >
           <div className={`text-center mb-8 ${isRTL ? 'text-right' : ''}`}>
             <h2 className="text-2xl font-bold mb-2">{t("search.title", "Start Your Sacred Journey")}</h2>
             <p className="text-muted-foreground">{t("search.subtitle", "Find the perfect package for your spiritual needs")}</p>
@@ -373,7 +349,7 @@ const HomePage: React.FC = () => {
                   <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.checkInDate", "Check-in Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                      <Button variant="outline" className={`w-full ${isRTL ? 'justify-end text-right flex-row-reverse' : 'justify-start text-left'}`}>
                         <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
@@ -432,7 +408,7 @@ const HomePage: React.FC = () => {
                   <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.startDate", "Start Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                      <Button variant="outline" className={`w-full ${isRTL ? 'justify-end text-right flex-row-reverse' : 'justify-start text-left'}`}>
                         <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
@@ -494,7 +470,7 @@ const HomePage: React.FC = () => {
                   <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.departureDate", "Departure Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                      <Button variant="outline" className={`w-full ${isRTL ? 'justify-end text-right flex-row-reverse' : 'justify-start text-left'}`}>
                         <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
@@ -551,7 +527,7 @@ const HomePage: React.FC = () => {
                   <Label className={`text-sm font-medium mb-2 block ${isRTL ? 'text-right' : ''}`}>{t("search.date", "Date")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={`w-full justify-start text-left ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                      <Button variant="outline" className={`w-full ${isRTL ? 'justify-end text-right flex-row-reverse' : 'justify-start text-left'}`}>
                         <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         {date ? format(date, "PPP") : t("search.pickDate", "Pick a date")}
                       </Button>
@@ -579,26 +555,35 @@ const HomePage: React.FC = () => {
       {/* Enhanced Benefits Section */}
       <section className="py-24 bg-gradient-to-br from-saudi-green-50 to-white">
         <div className="container mx-auto px-4">
-          <motion.div initial="hidden" whileInView="visible" viewport={{
-          once: true,
-          margin: "-100px"
-        }} variants={fadeInUp} className={`text-center max-w-3xl mx-auto mb-16 ${isRTL ? 'text-right' : ''}`}>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeInUp}
+            className={`text-center max-w-3xl mx-auto mb-16 ${isRTL ? 'text-right' : ''}`}
+          >
             <Badge className="mb-4" variant="saudi">{t("benefits.whyChoose", "Why Choose InstaSafar")}</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">{t("benefits.makingJourney", "Making Your Journey")} <span className="text-saudi-green">{t("benefits.spiritualComfortable", "Spiritual & Comfortable")}</span></h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              {t("benefits.makingJourney", "Making Your Journey")} <span className="text-saudi-green">{t("benefits.spiritualComfortable", "Spiritual & Comfortable")}</span>
+            </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
               {t("benefits.description", "We understand the profound significance of Hajj and Umrah in your spiritual life. Every aspect of our service is designed to enhance your sacred journey with comfort, convenience, and deep meaning.")}
             </p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{
-          once: true,
-          margin: "-100px"
-        }} variants={staggerChildren} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => <motion.div key={index} variants={scaleIn} className="group cursor-pointer">
-                <Card variant="interactive" className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 bg-white overflow-hidden relative">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {benefits.map((benefit, index) => (
+              <motion.div key={index} variants={scaleIn} className="group cursor-pointer">
+                <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 bg-white overflow-hidden relative">
                   <div className={`absolute inset-0 bg-gradient-to-br ${benefit.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
                   <CardHeader className={`pb-4 relative z-10 ${isRTL ? 'text-right' : ''}`}>
-                    <div className={`bg-gradient-to-br ${benefit.gradient} rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'mr-auto' : ''}`}>
+                    <div className={`bg-gradient-to-br ${benefit.gradient} rounded-2xl p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'ml-auto' : ''}`}>
                       <benefit.icon className="text-white h-8 w-8" />
                     </div>
                     <CardTitle className="text-xl font-bold group-hover:text-saudi-green transition-colors duration-300">
@@ -609,7 +594,8 @@ const HomePage: React.FC = () => {
                     <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
                   </CardContent>
                 </Card>
-              </motion.div>)}
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>

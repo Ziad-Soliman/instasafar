@@ -3,13 +3,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { cn } from '@/lib/utils';
 import { 
-  Star, 
-  Users, 
   CheckCircle,
   Clock,
   Shield,
@@ -42,47 +39,35 @@ const HeroSection = () => {
     <AuroraBackground className="h-auto min-h-[50vh] pt-16 pb-12 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
-          isRTL && "lg:grid-flow-col-dense"
+          "flex items-center justify-center",
+          isRTL && "text-right"
         )}>
           {/* Hero Content */}
           <motion.div
-            initial={{ opacity: 0, x: isRTL ? 50 : -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className={cn(
-              "space-y-8",
-              isRTL ? "text-right lg:order-2" : "text-left lg:order-1"
+              "space-y-8 max-w-4xl mx-auto text-center",
+              isRTL && "text-right"
             )}
           >
             <div className="space-y-6">
-              <Badge variant="saudi" className={cn(
-                "text-sm px-4 py-2",
-                isRTL ? "self-end" : "self-start"
-              )}>
+              <Badge variant="saudi" className="text-sm px-4 py-2">
                 {t('home.hero.badge')}
               </Badge>
               
-              <h1 className={cn(
-                "text-4xl md:text-6xl font-bold leading-tight",
-                isRTL ? "text-right" : "text-left"
-              )}>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 <span className="text-foreground">{t('home.hero.title').split(' ').slice(0, 1).join(' ')} </span>
                 <span className="text-saudi-green">{t('home.hero.title').split(' ').slice(1, 3).join(' ')} </span>
                 <span className="text-foreground">{t('home.hero.title').split(' ').slice(3).join(' ')}</span>
               </h1>
               
-              <p className={cn(
-                "text-lg text-muted-foreground leading-relaxed max-w-2xl",
-                isRTL ? "text-right" : "text-left"
-              )}>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                 {t('home.hero.subtitle')}
               </p>
               
-              <div className={cn(
-                "flex flex-col sm:flex-row gap-4",
-                isRTL ? "sm:flex-row-reverse items-end sm:items-start" : "items-start"
-              )}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="bg-saudi-green hover:bg-saudi-green/90">
                   {t('home.hero.explorePackages')}
                 </Button>
@@ -93,7 +78,7 @@ const HeroSection = () => {
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4 pt-8">
+            <div className="grid grid-cols-2 gap-4 pt-8 max-w-2xl mx-auto">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
@@ -110,55 +95,6 @@ const HeroSection = () => {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
-
-          {/* Hero Image/Card */}
-          <motion.div
-            initial={{ opacity: 0, x: isRTL ? -50 : 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className={cn(
-              "relative",
-              isRTL ? "lg:order-1" : "lg:order-2"
-            )}
-          >
-            <Card className="overflow-hidden">
-              <div className="relative aspect-[4/3]">
-                {/* Rating overlay */}
-                <div className={cn(
-                  "absolute top-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg",
-                  isRTL ? "left-4" : "right-4"
-                )}>
-                  <div className={cn(
-                    "flex items-center gap-2",
-                    isRTL ? "flex-row-reverse" : "flex-row"
-                  )}>
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{t('home.hero.rating')}</span>
-                  </div>
-                  <p className={cn(
-                    "text-xs text-muted-foreground mt-1",
-                    isRTL ? "text-right" : "text-left"
-                  )}>
-                    {t('home.hero.fromReviews')}
-                  </p>
-                </div>
-
-                {/* Pilgrims count overlay */}
-                <div className={cn(
-                  "absolute bottom-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg",
-                  isRTL ? "left-4" : "right-4"
-                )}>
-                  <div className={cn(
-                    "flex items-center gap-2",
-                    isRTL ? "flex-row-reverse" : "flex-row"
-                  )}>
-                    <Users className="h-4 w-4 text-saudi-green" />
-                    <span className="font-semibold">{t('home.hero.pilgrimsServed')}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
           </motion.div>
         </div>
       </div>

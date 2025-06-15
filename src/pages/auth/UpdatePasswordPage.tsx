@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -12,7 +14,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import AuthPage from "./AuthPage";
 import { useRtlHelpers } from "@/utils/rtl-helpers";
 
 // Define the form schema
@@ -35,7 +36,7 @@ const UpdatePasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
   const { getDirectionalClasses } = useRtlHelpers();
   
@@ -232,20 +233,27 @@ const UpdatePasswordPage: React.FC = () => {
   );
 
   return (
-    <AuthPage
-      title={t("auth.resetPassword", "Reset Your Password")}
-      description={t(
-        "auth.resetPasswordDescription",
-        "Create a new password for your account"
-      )}
-      tabs={[
-        {
-          id: "update-password",
-          label: t("auth.newPassword", "New Password"),
-          content: updatePasswordContent,
-        },
-      ]}
-    />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="flex flex-col items-center justify-center w-full max-w-md mx-auto"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">{t("auth.resetPassword", "Reset Your Password")}</h1>
+        <p className="text-muted-foreground mt-2">{t(
+          "auth.resetPasswordDescription",
+          "Create a new password for your account"
+        )}</p>
+      </div>
+      
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          {updatePasswordContent}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

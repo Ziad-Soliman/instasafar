@@ -99,29 +99,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
+        
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
-          const userData: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            user_metadata: session.user.user_metadata,
-            name: session.user.user_metadata?.full_name,
-            full_name: session.user.user_metadata?.full_name,
-            avatar: session.user.user_metadata?.avatar_url,
-            phone_number: session.user.user_metadata?.phone_number,
-            preferred_language: session.user.user_metadata?.preferred_language || 'en',
-            role: role || session.user.user_metadata?.role || 'user'
-          };
-          setUser(userData);
-          setUserRole(role || session.user.user_metadata?.role || 'user');
+          // Defer role fetching to avoid deadlocks
+          setTimeout(async () => {
+            const role = await fetchUserRole(session.user.id);
+            const userData: User = {
+              id: session.user.id,
+              email: session.user.email || '',
+              user_metadata: session.user.user_metadata,
+              name: session.user.user_metadata?.full_name,
+              full_name: session.user.user_metadata?.full_name,
+              avatar: session.user.user_metadata?.avatar_url,
+              phone_number: session.user.user_metadata?.phone_number,
+              preferred_language: session.user.user_metadata?.preferred_language || 'en',
+              role: role || session.user.user_metadata?.role || 'user'
+            };
+            setUser(userData);
+            setUserRole(role || session.user.user_metadata?.role || 'user');
+            setLoading(false);
+          }, 0);
         } else {
           setUser(null);
           setUserRole(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
+    // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const role = await fetchUserRole(session.user.id);

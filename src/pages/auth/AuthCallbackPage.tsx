@@ -14,7 +14,7 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get auth type from URL
+        // Get auth result from URL and session
         const result = await supabase.auth.getUser();
         
         if (result.error) {
@@ -27,17 +27,29 @@ const AuthCallbackPage: React.FC = () => {
           // Redirect to login after a short delay
           setTimeout(() => navigate("/auth/login"), 2000);
         } else if (result.data?.user) {
-          // Check if we need to create profile, etc.
+          // Fetch user role from database
+          const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', { 
+            _user_id: result.data.user.id 
+          });
+          
+          let userRole = 'user'; // default role
+          
+          if (!roleError && roleData) {
+            userRole = roleData;
+          } else {
+            // Fallback to metadata role if RPC fails
+            userRole = result.data.user.user_metadata?.role || 'user';
+          }
+          
+          console.log('User role detected:', userRole);
           
           // Redirect based on user role
-          const role = result.data.user.user_metadata?.role || 'user';
-          
-          if (role === 'admin') {
+          if (userRole === 'admin') {
             navigate("/admin/dashboard");
-          } else if (role === 'provider') {
+          } else if (userRole === 'provider') {
             navigate("/provider/dashboard");
           } else {
-            navigate("/");
+            navigate("/account/dashboard");
           }
           
           toast({

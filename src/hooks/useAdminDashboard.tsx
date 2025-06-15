@@ -75,10 +75,9 @@ export const useAdminDashboard = () => {
         // Safely extract profiles data with proper null handling
         let profilesData: { full_name: string } | null = null;
         
-        // Use a safer approach to handle the profiles object
-        const profiles = item.profiles;
-        if (profiles && typeof profiles === 'object' && profiles.full_name) {
-          profilesData = { full_name: profiles.full_name };
+        // Check if profiles exists and has the required property
+        if (item.profiles && typeof item.profiles === 'object' && 'full_name' in item.profiles && item.profiles.full_name) {
+          profilesData = { full_name: item.profiles.full_name };
         }
 
         return {

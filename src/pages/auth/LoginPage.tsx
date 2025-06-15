@@ -10,6 +10,7 @@ import EmailPasswordForm, { EmailPasswordFormValues } from "@/components/auth/Em
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,17 +27,42 @@ const LoginPage: React.FC = () => {
   }, [createDemoAccounts]);
 
   useEffect(() => {
-    if (user) {
-      const userRole = user.role || 'user';
-      
-      if (userRole === 'admin') {
-        navigate("/admin/dashboard");
-      } else if (userRole === 'provider') {
-        navigate("/provider/dashboard");
-      } else {
-        navigate("/");
+    const redirectUserByRole = async () => {
+      if (user) {
+        try {
+          // Fetch user role from database
+          const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', { 
+            _user_id: user.id 
+          });
+          
+          let userRole = 'user'; // default role
+          
+          if (!roleError && roleData) {
+            userRole = roleData;
+          } else {
+            // Fallback to user role property
+            userRole = user.role || 'user';
+          }
+          
+          console.log('Redirecting user with role:', userRole);
+          
+          // Redirect based on user role
+          if (userRole === 'admin') {
+            navigate("/admin/dashboard");
+          } else if (userRole === 'provider') {
+            navigate("/provider/dashboard");
+          } else {
+            navigate("/account/dashboard");
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          // Fallback to home page
+          navigate("/");
+        }
       }
-    }
+    };
+
+    redirectUserByRole();
   }, [user, navigate]);
 
   const handleLogin = async (data: EmailPasswordFormValues) => {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -156,26 +155,13 @@ const AdminHotels: React.FC = () => {
 
       console.log('Update data being sent:', updateData);
 
-      // First, check if the hotel exists
-      const { data: existingHotel, error: checkError } = await supabase
-        .from('hotels')
-        .select('id, name')
-        .eq('id', editFormData.id)
-        .single();
-
-      if (checkError || !existingHotel) {
-        console.error('Hotel not found:', checkError);
-        throw new Error('Hotel not found in database');
-      }
-
-      console.log('Hotel exists:', existingHotel);
-
-      // Perform the update
+      // Perform the update with explicit select to ensure we get the updated data back
       const { data: updatedData, error: updateError } = await supabase
         .from('hotels')
         .update(updateData)
         .eq('id', editFormData.id)
-        .select('*');
+        .select('*')
+        .single(); // Use single() since we're updating one record
 
       console.log('Update response:', { updatedData, updateError });
 
@@ -184,11 +170,27 @@ const AdminHotels: React.FC = () => {
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      if (!updatedData || updatedData.length === 0) {
-        throw new Error('Update operation completed but no data was returned');
-      }
+      if (!updatedData) {
+        // If single() fails, try without it and check the response
+        console.log('Trying alternative update approach...');
+        const { data: altData, error: altError } = await supabase
+          .from('hotels')
+          .update(updateData)
+          .eq('id', editFormData.id)
+          .select('*');
 
-      console.log('Hotel updated successfully:', updatedData[0]);
+        if (altError) {
+          throw new Error(`Alternative update failed: ${altError.message}`);
+        }
+
+        if (!altData || altData.length === 0) {
+          throw new Error('Hotel update failed - no records were updated. Please check if the hotel still exists.');
+        }
+
+        console.log('Alternative update successful:', altData[0]);
+      } else {
+        console.log('Hotel updated successfully:', updatedData);
+      }
 
       toast({
         title: "Success",

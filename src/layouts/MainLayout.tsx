@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import { TravelAssistantChat } from "@/components/TravelAssistantChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -48,6 +49,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ requireAuth = false }) => {
       </main>
       <Footer />
       <ScrollToTop />
+      <TravelAssistantChat />
     </div>
   );
 };

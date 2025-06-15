@@ -2,44 +2,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
-import { 
-  Clock,
-  Award,
-  Star,
-  Users
-} from 'lucide-react';
 
 const StatsSection = () => {
   const { t, isRTL } = useLanguage();
 
   const stats = [
     {
-      icon: Clock,
-      value: t('home.stats.support'),
-      label: t('home.stats.supportDesc'),
+      value: "24/7",
+      label: t('home.stats.support', 'Support'),
     },
     {
-      icon: Award,
-      value: t('home.stats.experience'),
-      label: t('home.stats.experienceDesc'),
+      value: "15+",
+      label: t('home.stats.experience', 'Years'),
     },
     {
-      icon: Star,
-      value: t('home.stats.rating'),
-      label: t('home.stats.ratingDesc'),
+      value: "4.9",
+      label: t('home.stats.rating', 'Rating'),
     },
     {
-      icon: Users,
-      value: t('home.stats.pilgrims'),
-      label: t('home.stats.pilgrimsDesc'),
+      value: "50K+",
+      label: t('home.stats.pilgrims', 'Pilgrims'),
     },
   ];
 
   return (
-    <section className="py-16 bg-saudi-green text-white">
+    <section className="py-12 bg-saudi-green text-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
@@ -47,11 +36,10 @@ const StatsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center space-y-3"
+              className="text-center"
             >
-              <stat.icon className="h-8 w-8 text-white/90" />
-              <div className="text-3xl font-bold text-center">{stat.value}</div>
-              <div className="text-white/80 text-sm text-center leading-relaxed">{stat.label}</div>
+              <div className="text-2xl md:text-3xl font-bold mb-1">{stat.value}</div>
+              <div className="text-white/80 text-sm">{stat.label}</div>
             </motion.div>
           ))}
         </div>

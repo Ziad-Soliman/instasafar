@@ -63,7 +63,10 @@ const HeroSection = () => {
                 {t('home.hero.subtitle')}
               </p>
               
-              <div className={cn("flex flex-col sm:flex-row gap-4", isRTL && "sm:flex-row-reverse")}>
+              <div className={cn(
+                "flex flex-col sm:flex-row gap-4",
+                isRTL ? "sm:flex-row-reverse sm:justify-end" : "sm:justify-start"
+              )}>
                 <Button size="lg" className="bg-saudi-green hover:bg-saudi-green/90">
                   {t('home.hero.explorePackages')}
                 </Button>

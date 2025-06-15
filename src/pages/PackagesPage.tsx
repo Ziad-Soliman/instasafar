@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,35 +10,82 @@ import { Slider } from '@/components/ui/slider';
 import BreadcrumbEnhanced from '@/components/ui/breadcrumb-enhanced';
 import PackageCard from '@/components/cards/PackageCard';
 import { Filter, Search, MapPin, Calendar, Users, DollarSign } from 'lucide-react';
-import { mockPackages } from '@/data/mockData';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Package {
+  id: string;
+  name: string;
+  name_ar?: string;
+  description?: string;
+  description_ar?: string;
+  thumbnail?: string;
+  price: number;
+  duration_days: number;
+  city?: string;
+  city_ar?: string;
+  includes_hotel: boolean;
+  includes_flight: boolean;
+  includes_transport: boolean;
+  created_at: string;
+}
 
 const PackagesPage = () => {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const packageType = searchParams.get('type') as 'hajj' | 'umrah' | 'custom' | null;
   
-  // Use only mockPackages data since packages export doesn't exist
-  const allPackages = useMemo(() => {
-    console.log('Available packages:', mockPackages);
-    
-    // Ensure consistent format
-    const formattedPackages = mockPackages.map(pkg => ({
-      id: pkg.id,
-      title: pkg.title,
-      image: pkg.image,
-      duration: pkg.duration,
-      price: pkg.price,
-      location: pkg.location,
-      rating: pkg.rating,
-      review_count: pkg.review_count,
-      includes: Array.isArray(pkg.includes) ? pkg.includes : [],
-      type: pkg.type,
-      is_featured: pkg.is_featured || false
-    }));
-    
-    return formattedPackages;
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('packages')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching packages:', error);
+          return;
+        }
+
+        setPackages(data || []);
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
   }, []);
+
+  // Transform packages to match expected format
+  const allPackages = useMemo(() => {
+    return packages.map(pkg => ({
+      id: pkg.id,
+      title: pkg.name,
+      name: pkg.name,
+      name_ar: pkg.name_ar,
+      image: pkg.thumbnail || 'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=400&h=300&fit=crop',
+      duration: `${pkg.duration_days} days`,
+      price: Number(pkg.price),
+      location: pkg.city || 'Saudi Arabia',
+      city: pkg.city,
+      city_ar: pkg.city_ar,
+      rating: 4.5, // Default rating
+      review_count: 0, // Default since reviews are separate
+      includes: [
+        ...(pkg.includes_hotel ? ['Hotel'] : []),
+        ...(pkg.includes_flight ? ['Flight'] : []),
+        ...(pkg.includes_transport ? ['Transport'] : [])
+      ],
+      type: 'custom' as const,
+      is_featured: false // We can add a featured flag to packages table later if needed
+    }));
+  }, [packages]);
 
   // Filter state
   const [filters, setFilters] = useState({
@@ -52,11 +100,21 @@ const PackagesPage = () => {
   // Available filter options
   const filterOptions = useMemo(() => {
     return {
-      locations: [...new Set(allPackages.map(pkg => pkg.location))],
+      locations: [...new Set(allPackages.map(pkg => pkg.location).filter(Boolean))],
       durations: [...new Set(allPackages.map(pkg => pkg.duration))],
-      maxPrice: Math.max(...allPackages.map(pkg => pkg.price))
+      maxPrice: Math.max(...allPackages.map(pkg => pkg.price), 10000)
     };
   }, [allPackages]);
+
+  // Update price range when data loads
+  useEffect(() => {
+    if (filterOptions.maxPrice > 0 && filters.priceRange[1] === 10000) {
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [0, filterOptions.maxPrice]
+      }));
+    }
+  }, [filterOptions.maxPrice]);
 
   // Filtered packages
   const filteredPackages = useMemo(() => {
@@ -84,6 +142,21 @@ const PackagesPage = () => {
     { label: t('packages.breadcrumbPackages', 'Packages'), href: '/packages' },
     ...(packageType ? [{ label: t(`packages.${packageType}`, packageType.charAt(0).toUpperCase() + packageType.slice(1)), href: `/packages?type=${packageType}` }] : [])
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-12 bg-muted rounded w-96 mx-auto mb-4"></div>
+              <div className="h-6 bg-muted rounded w-64 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

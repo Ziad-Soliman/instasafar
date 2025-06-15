@@ -1,10 +1,9 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
@@ -75,7 +74,7 @@ const App = () => {
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<Index />} />
                     <Route path="search" element={<SearchPage />} />
-                    <Route path="hotel/:id" element={<HotelDetailPage />} />
+                    <Route path="hotel/:id" element={<Navigate to="/search" replace />} />
                     <Route path="packages" element={<PackagesPage />} />
                     <Route path="package/:id" element={<PackageDetailPage />} />
                     <Route path="flights" element={<FlightSearchPage />} />

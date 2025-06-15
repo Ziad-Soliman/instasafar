@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import HeroSection from '@/components/home/HeroSection';
 import SearchSection from '@/components/home/SearchSection';
 import StatsSection from '@/components/home/StatsSection';
@@ -18,8 +19,12 @@ const Index = () => {
 
   return (
     <div className={cn("min-h-screen", isRTL && "rtl")}>
-      <HeroSection />
-      <SearchSection />
+      {/* Unified Aurora Background for Hero and Search */}
+      <AuroraBackground className="h-auto min-h-[70vh] bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
+        <HeroSection />
+        <SearchSection />
+      </AuroraBackground>
+      
       <StatsSection />
       <FeaturedPackagesSection />
       <FeaturedHotelsSection />

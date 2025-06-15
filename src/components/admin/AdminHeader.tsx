@@ -73,7 +73,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
             <div className="max-h-[300px] overflow-y-auto">
               <DropdownMenuItem className="p-4 cursor-default hover:bg-gray-50 dark:hover:bg-navy-700 rounded-xl mx-2 my-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-saudi-green-400 to-saudi-green-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-saudi-green to-saudi-green-700 rounded-xl flex items-center justify-center">
                     <Bell className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -89,7 +89,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
               </DropdownMenuItem>
               <DropdownMenuItem className="p-4 cursor-default hover:bg-gray-50 dark:hover:bg-navy-700 rounded-xl mx-2 my-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-saudi-green-500 to-saudi-green-700 rounded-xl flex items-center justify-center">
                     <MessageSquare className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -105,7 +105,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
               </DropdownMenuItem>
               <DropdownMenuItem className="p-4 cursor-default hover:bg-gray-50 dark:hover:bg-navy-700 rounded-xl mx-2 my-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-saudi-green-400 to-saudi-green-600 rounded-xl flex items-center justify-center">
                     <Settings className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">

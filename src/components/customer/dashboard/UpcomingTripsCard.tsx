@@ -28,7 +28,7 @@ const UpcomingTripsCard: React.FC<UpcomingTripsCardProps> = ({
 }) => {
   return (
     <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px] mb-6">
-      <CardHeader className="!bg-gradient-to-br from-brand-400 to-brand-600 rounded-t-[20px] text-white">
+      <CardHeader className="!bg-gradient-to-br from-saudi-green to-saudi-green-700 rounded-t-[20px] text-white">
         <CardTitle className="text-xl font-bold text-white">Upcoming Trips</CardTitle>
         <CardDescription className="text-white/80">Your confirmed upcoming bookings</CardDescription>
       </CardHeader>
@@ -48,7 +48,7 @@ const UpcomingTripsCard: React.FC<UpcomingTripsCardProps> = ({
                 whileHover={{ y: -2 }}
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-saudi-green to-saudi-green-700 rounded-lg flex items-center justify-center">
                     <Calendar className="h-6 w-6 text-white" />
                   </div>
                   <div>

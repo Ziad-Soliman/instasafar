@@ -28,7 +28,7 @@ const RecentBookingsCard: React.FC<RecentBookingsCardProps> = ({
 }) => {
   return (
     <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px]">
-      <CardHeader className="!bg-gradient-to-br from-green-400 to-green-600 rounded-t-[20px] text-white">
+      <CardHeader className="!bg-gradient-to-br from-saudi-green-500 to-saudi-green-700 rounded-t-[20px] text-white">
         <CardTitle className="text-xl font-bold text-white">Recent Bookings</CardTitle>
         <CardDescription className="text-white/80">Your latest booking history</CardDescription>
       </CardHeader>
@@ -48,7 +48,7 @@ const RecentBookingsCard: React.FC<RecentBookingsCardProps> = ({
                 whileHover={{ y: -2 }}
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-saudi-green-500 to-saudi-green-700 rounded-lg flex items-center justify-center">
                     <Calendar className="h-6 w-6 text-white" />
                   </div>
                   <div>

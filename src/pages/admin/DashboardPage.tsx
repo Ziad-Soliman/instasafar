@@ -16,7 +16,7 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-48">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-400 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-saudi-green mx-auto mb-4"></div>
           <div className="text-xl font-semibold text-navy-700 dark:text-gray-300 animate-pulse">
             Loading dashboard...
           </div>
@@ -63,19 +63,19 @@ const AdminDashboard: React.FC = () => {
           <TabsList className="grid w-full max-w-md grid-cols-3 bg-white dark:bg-navy-800 rounded-2xl p-1 shadow-lg border-0">
             <TabsTrigger 
               value="overview" 
-              className="rounded-xl data-[state=active]:bg-brand-400 data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
+              className="rounded-xl data-[state=active]:bg-saudi-green data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger 
               value="revenue" 
-              className="rounded-xl data-[state=active]:bg-brand-400 data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
+              className="rounded-xl data-[state=active]:bg-saudi-green data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
             >
               Revenue
             </TabsTrigger>
             <TabsTrigger 
               value="bookings" 
-              className="rounded-xl data-[state=active]:bg-brand-400 data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
+              className="rounded-xl data-[state=active]:bg-saudi-green data-[state=active]:text-white data-[state=active]:shadow-lg font-medium"
             >
               Bookings
             </TabsTrigger>

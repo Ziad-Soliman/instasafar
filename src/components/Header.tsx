@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,14 +21,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Menu, X, User, Package, LogOut, Heart, MapPin,
-  Calendar, Home, Search, Plane, Bus, Building
+  Calendar, Home, Search, Plane, Bus, Building, Settings
 } from "lucide-react";
 import NotificationDropdown from "./NotificationDropdown";
 import { useMobile } from "@/hooks/use-mobile";
 import { motion } from "framer-motion";
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin, isProvider } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const isMobile = useMobile();
@@ -142,6 +141,20 @@ const Header: React.FC = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
+                      {/* Role-specific dashboard links */}
+                      {isAdmin && (
+                        <DropdownMenuItem onClick={() => navigate("/admin/dashboard")}>
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </DropdownMenuItem>
+                      )}
+                      {isProvider && (
+                        <DropdownMenuItem onClick={() => navigate("/provider/dashboard")}>
+                          <Building className="mr-2 h-4 w-4" />
+                          <span>Provider Dashboard</span>
+                        </DropdownMenuItem>
+                      )}
+                      {/* Regular user links */}
                       <DropdownMenuItem onClick={() => navigate("/account/profile")}>
                         <User className="mr-2 h-4 w-4" />
                         <span>{t("profile")}</span>
@@ -247,6 +260,33 @@ const Header: React.FC = () => {
                           </div>
                           
                           <div className="flex flex-col space-y-2">
+                            {/* Role-specific dashboard buttons for mobile */}
+                            {isAdmin && (
+                              <Button 
+                                variant="outline" 
+                                className="justify-start"
+                                onClick={() => {
+                                  navigate("/admin/dashboard");
+                                  setMobileMenuOpen(false);
+                                }}
+                              >
+                                <Settings className="mr-2 h-4 w-4" />
+                                Admin Dashboard
+                              </Button>
+                            )}
+                            {isProvider && (
+                              <Button 
+                                variant="outline" 
+                                className="justify-start"
+                                onClick={() => {
+                                  navigate("/provider/dashboard");
+                                  setMobileMenuOpen(false);
+                                }}
+                              >
+                                <Building className="mr-2 h-4 w-4" />
+                                Provider Dashboard
+                              </Button>
+                            )}
                             <Button 
                               variant="outline" 
                               className="justify-start"

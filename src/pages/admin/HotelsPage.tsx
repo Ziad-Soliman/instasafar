@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,12 @@ interface Hotel {
   address: string;
   description?: string | null;
   thumbnail?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  name_ar?: string | null;
+  description_ar?: string | null;
+  city_ar?: string | null;
+  address_ar?: string | null;
 }
 
 const AdminHotels: React.FC = () => {

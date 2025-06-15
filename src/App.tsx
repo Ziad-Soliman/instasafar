@@ -8,12 +8,11 @@ import Footer from '@/components/Footer';
 import RtlContainer from '@/components/layout/RtlContainer';
 
 // Pages
-import HomePage from '@/pages/Index';
-import HotelsPage from '@/pages/SearchPage';
+import HomePage from '@/pages/HomePage';
+import HotelsPage from '@/pages/HotelsPage';
 import PackagesPage from '@/pages/PackagesPage';
-// Corrected import below:
-import FlightsPage from '@/pages/FlightSearchPage';
-import TransportPage from '@/pages/TransportSearchPage';
+import FlightsPage from '@/pages/FlightsPage';
+import TransportPage from '@/pages/TransportPage';
 import AuthPage from '@/pages/auth/AuthPage';
 import ProfilePage from '@/pages/ProfilePage';
 import BookingsPage from '@/pages/BookingsPage';

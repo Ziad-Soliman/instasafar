@@ -60,17 +60,15 @@ const FeaturedHotelsSection = () => {
     id: hotel.id,
     name: hotel.name,
     name_ar: hotel.name_ar,
+    image: hotel.thumbnail || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+    location: hotel.city,
     city: hotel.city,
     city_ar: hotel.city_ar,
-    address: hotel.address,
-    address_ar: hotel.address_ar,
-    description: hotel.description,
-    description_ar: hotel.description_ar,
-    image: hotel.thumbnail || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+    distance_to_haram: hotel.distance_to_haram || '1.2 km',
     rating: Number(hotel.rating),
-    price: Number(hotel.price_per_night),
-    distance_from_haram: hotel.distance_to_haram || '1.2 km',
     review_count: 0, // Default since reviews are separate
+    price_per_night: Number(hotel.price_per_night),
+    amenities: [], // Default empty array since amenities are in separate table
     is_featured: true
   }));
 

@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import { cn } from '@/lib/utils';
 import { 
   Star, 
@@ -38,8 +39,8 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 pt-20 pb-16 overflow-hidden">
-      <div className="container mx-auto px-4">
+    <AuroraBackground className="h-auto min-h-screen pt-20 pb-16 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Hero Content */}
           <motion.div
@@ -137,7 +138,7 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
-    </section>
+    </AuroraBackground>
   );
 };
 

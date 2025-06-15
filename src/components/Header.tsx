@@ -25,18 +25,18 @@ const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="container mx-auto px-4">
-        <div className={`flex items-center justify-between h-16 ${isRTL ? '' : ''}`}>
-          {/* Left Side for LTR / Right Side for RTL - Logo */}
+        <div className="flex items-center justify-between h-16">
+          {/* Logo - Left in LTR, Right in RTL */}
           <div className={`${isRTL ? 'order-3' : 'order-1'}`}>
             <HeaderLogo />
           </div>
 
-          {/* Center - Navigation */}
-          <div className={`${isRTL ? 'order-2' : 'order-2'} flex-1 flex justify-center`}>
+          {/* Center - Navigation - Always centered */}
+          <div className="order-2 flex-1 flex justify-center">
             <DesktopNavigation />
           </div>
 
-          {/* Right Side for LTR / Left Side for RTL - Actions */}
+          {/* Actions - Right in LTR, Left in RTL */}
           <div className={`flex items-center gap-2 ${isRTL ? 'order-1 flex-row-reverse' : 'order-3'}`}>
             <LanguageSelector />
             <UserDropdown />

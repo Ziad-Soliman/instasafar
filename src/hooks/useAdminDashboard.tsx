@@ -77,8 +77,8 @@ export const useAdminDashboard = () => {
         
         // Use a more explicit approach to satisfy TypeScript
         const profiles = item.profiles;
-        if (profiles && typeof profiles === 'object' && 'full_name' in profiles) {
-          const fullName = (profiles as { full_name: string }).full_name;
+        if (profiles && profiles !== null && typeof profiles === 'object' && 'full_name' in profiles) {
+          const fullName = profiles.full_name;
           if (fullName) {
             profilesData = { full_name: fullName };
           }

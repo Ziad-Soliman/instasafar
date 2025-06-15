@@ -11,7 +11,8 @@ import RtlContainer from '@/components/layout/RtlContainer';
 import HomePage from '@/pages/Index';
 import HotelsPage from '@/pages/SearchPage';
 import PackagesPage from '@/pages/PackagesPage';
-import FlightsPage from '@/pages/FlightsPage';
+// Corrected import below:
+import FlightsPage from '@/pages/FlightSearchPage';
 import TransportPage from '@/pages/TransportSearchPage';
 import AuthPage from '@/pages/auth/AuthPage';
 import ProfilePage from '@/pages/ProfilePage';

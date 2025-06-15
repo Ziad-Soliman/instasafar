@@ -93,34 +93,9 @@ export default {
 					800: 'hsl(140, 100%, 12%)',
 					900: 'hsl(140, 100%, 8%)',
 				},
-				// Horizon UI inspired brand colors
-				brand: {
-					DEFAULT: 'hsl(var(--brand))',
-					50: '#EFF4FF',
-					100: '#D1E7FF',
-					200: '#B2D5FF',
-					300: '#84C5FF',
-					400: '#53B1FD',
-					500: '#2D9CDB',
-					600: '#2684FF',
-					700: '#0052CC',
-					800: '#0747A6',
-					900: '#403294',
-				},
+				// Brand colors for CTA
+				brand: "hsl(var(--brand))",
 				"brand-foreground": "hsl(var(--brand-foreground))",
-				// Additional Horizon UI colors
-				navy: {
-					50: '#E7EAF0',
-					100: '#C4CDD9',
-					200: '#9FB0C2',
-					300: '#7A93AB',
-					400: '#5B7A99',
-					500: '#3B6187',
-					600: '#354B6B',
-					700: '#2F3F4F',
-					800: '#1B2332',
-					900: '#0B1426',
-				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

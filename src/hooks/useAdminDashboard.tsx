@@ -75,10 +75,10 @@ export const useAdminDashboard = () => {
         // Safely extract profiles data, handling potential errors
         let profilesData = null;
         const profiles = item.profiles;
-        if (profiles && typeof profiles === 'object' && profiles !== null) {
-          if ('full_name' in profiles && profiles.full_name) {
-            profilesData = { full_name: profiles.full_name };
-          }
+        
+        // Single comprehensive check for profiles
+        if (profiles && typeof profiles === 'object' && 'full_name' in profiles && profiles.full_name) {
+          profilesData = { full_name: profiles.full_name };
         }
 
         return {

@@ -30,18 +30,18 @@ const FeaturedHotelsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className={cn("text-center mb-16", isRTL && "text-center")}
         >
-          <div className="inline-flex items-center gap-2 bg-saudi-green/10 text-saudi-green px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center justify-center gap-2 bg-saudi-green/10 text-saudi-green px-4 py-2 rounded-full text-sm font-medium mb-6 mx-auto">
             <span className="w-2 h-2 bg-saudi-green rounded-full animate-pulse"></span>
             {t('hotels.featuredHotels')}
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-saudi-green bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-saudi-green bg-clip-text text-transparent text-center">
             {t('hotels.featuredHotels')}
           </h2>
           
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-center">
             {t('hotels.searchHotels', 'Find the perfect accommodation for your spiritual journey')}
           </p>
           
@@ -109,7 +109,7 @@ const FeaturedHotelsSection = () => {
           </Button>
           
           {/* Additional info */}
-          <p className="text-sm text-muted-foreground mt-4 font-medium">
+          <p className="text-sm text-muted-foreground mt-4 font-medium text-center">
             {t('common.viewAll', 'View all available accommodations')}
           </p>
         </motion.div>

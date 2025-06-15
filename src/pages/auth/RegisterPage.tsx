@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,7 +14,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
-import AuthPage from "./AuthPage";
 import { useRtlHelpers } from "@/utils/rtl-helpers";
 
 // Define the form schema
@@ -34,7 +34,7 @@ const RegisterPage: React.FC = () => {
   const { signUp, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
   const { getDirectionalClasses } = useRtlHelpers();
   
@@ -85,173 +85,174 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  const registerContent = (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="full_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("auth.fullName", "Full Name")}</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder={t("auth.fullNamePlaceholder", "Your Full Name")}
-                    autoComplete="name"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("auth.email", "Email")}</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="email"
-                    placeholder={t("auth.emailPlaceholder", "your.email@example.com")}
-                    autoComplete="email"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("auth.password", "Password")}</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input 
-                      type={showPassword ? "text" : "password"}
-                      placeholder={t("auth.passwordPlaceholder", "••••••••")}
-                      autoComplete="new-password"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
-                        getDirectionalClasses("right-3", "left-3")
-                      }`}
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="confirm_password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("auth.confirmPassword", "Confirm Password")}</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input 
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder={t("auth.confirmPasswordPlaceholder", "••••••••")}
-                      autoComplete="new-password"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
-                        getDirectionalClasses("right-3", "left-3")
-                      }`}
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="text-xs text-muted-foreground">
-            {t(
-              "auth.termsAgreement",
-              "By registering, you agree to our"
-            )}{" "}
-            <Link to="/terms" className="text-primary hover:underline">
-              {t("auth.termsOfService", "Terms of Service")}
-            </Link>{" "}
-            {t("auth.and", "and")}{" "}
-            <Link to="/privacy" className="text-primary hover:underline">
-              {t("auth.privacyPolicy", "Privacy Policy")}
-            </Link>
-            .
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? t("auth.registering", "Creating account...") : t("auth.register", "Create Account")}
-          </Button>
-        </form>
-      </Form>
-
-      <SocialLoginButtons 
-        isLoading={isLoading}
-        onStartLoading={() => setIsLoading(true)} 
-      />
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          {t("auth.alreadyAccount", "Already have an account?")}{" "}
-          <Link
-            to="/auth/login"
-            className="text-primary font-medium hover:underline"
-          >
-            {t("auth.login", "Sign in")}
-          </Link>
-        </p>
-      </div>
-    </>
-  );
-
   return (
-    <AuthPage
-      title={t("auth.createAccount", "Create an account")}
-      description={t("auth.signUpDescription", "Sign up to start booking your spiritual journey")}
-      tabs={[
-        {
-          id: "register",
-          label: t("auth.register", "Register"),
-          content: registerContent,
-        },
-      ]}
-    />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="flex flex-col items-center justify-center w-full max-w-md mx-auto"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">{t("auth.createAccount", "Create an account")}</h1>
+        <p className="text-muted-foreground mt-2">{t("auth.signUpDescription", "Sign up to start booking your spiritual journey")}</p>
+      </div>
+      
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="full_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.fullName", "Full Name")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={t("auth.fullNamePlaceholder", "Your Full Name")}
+                        autoComplete="name"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.email", "Email")}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email"
+                        placeholder={t("auth.emailPlaceholder", "your.email@example.com")}
+                        autoComplete="email"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.password", "Password")}</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          type={showPassword ? "text" : "password"}
+                          placeholder={t("auth.passwordPlaceholder", "••••••••")}
+                          autoComplete="new-password"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
+                            getDirectionalClasses("right-3", "left-3")
+                          }`}
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="confirm_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("auth.confirmPassword", "Confirm Password")}</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder={t("auth.confirmPasswordPlaceholder", "••••••••")}
+                          autoComplete="new-password"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
+                            getDirectionalClasses("right-3", "left-3")
+                          }`}
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="text-xs text-muted-foreground">
+                {t(
+                  "auth.termsAgreement",
+                  "By registering, you agree to our"
+                )}{" "}
+                <Link to="/terms" className="text-primary hover:underline">
+                  {t("auth.termsOfService", "Terms of Service")}
+                </Link>{" "}
+                {t("auth.and", "and")}{" "}
+                <Link to="/privacy" className="text-primary hover:underline">
+                  {t("auth.privacyPolicy", "Privacy Policy")}
+                </Link>
+                .
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? t("auth.registering", "Creating account...") : t("auth.register", "Create Account")}
+              </Button>
+            </form>
+          </Form>
+
+          <SocialLoginButtons 
+            isLoading={isLoading}
+            onStartLoading={() => setIsLoading(true)} 
+          />
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              {t("auth.alreadyAccount", "Already have an account?")}{" "}
+              <Link
+                to="/auth/login"
+                className="text-primary font-medium hover:underline"
+              >
+                {t("auth.login", "Sign in")}
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

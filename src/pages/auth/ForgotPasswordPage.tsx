@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,7 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import AuthPage from "./AuthPage";
 
 // Define the form schema
 const forgotPasswordSchema = z.object({
@@ -24,7 +25,7 @@ const ForgotPasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { toast } = useToast();
 
   const form = useForm<ForgotPasswordFormValues>({
@@ -153,20 +154,27 @@ const ForgotPasswordPage: React.FC = () => {
   );
 
   return (
-    <AuthPage
-      title={t("auth.forgotPassword", "Forgot Password")}
-      description={t(
-        "auth.forgotPasswordDescription",
-        "Enter your email address and we'll send you a password reset link"
-      )}
-      tabs={[
-        {
-          id: "forgot-password",
-          label: t("auth.resetPassword", "Reset Password"),
-          content: forgotPasswordContent,
-        },
-      ]}
-    />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="flex flex-col items-center justify-center w-full max-w-md mx-auto"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">{t("auth.forgotPassword", "Forgot Password")}</h1>
+        <p className="text-muted-foreground mt-2">{t(
+          "auth.forgotPasswordDescription",
+          "Enter your email address and we'll send you a password reset link"
+        )}</p>
+      </div>
+      
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          {forgotPasswordContent}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

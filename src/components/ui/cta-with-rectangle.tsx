@@ -79,11 +79,6 @@ export function CTASection({
             </Button>
           )}
         </div>
-
-        {/* Glow Effect */}
-        {withGlow && (
-          <div className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow opacity-0 animate-scale-in delay-700" />
-        )}
       </div>
     </section>
   )

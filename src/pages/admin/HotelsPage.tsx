@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Edit, Trash, Star, Plus } from "lucide-react";
+import { Search, Edit, Trash, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import HotelManagement from "@/components/admin/HotelManagement";
@@ -45,6 +45,7 @@ const AdminHotels: React.FC = () => {
       if (error) throw error;
       setHotels(data || []);
     } catch (error) {
+      console.error('Error fetching hotels:', error);
       toast({
         title: "Error",
         description: "Failed to fetch hotels.",
@@ -75,8 +76,9 @@ const AdminHotels: React.FC = () => {
         description: "Hotel deleted successfully.",
       });
 
-      fetchHotels();
+      fetchHotels(); // Refresh the list
     } catch (error) {
+      console.error('Error deleting hotel:', error);
       toast({
         title: "Error",
         description: "Failed to delete hotel.",
@@ -117,8 +119,9 @@ const AdminHotels: React.FC = () => {
 
       setEditingHotel(null);
       setEditFormData(null);
-      fetchHotels();
+      fetchHotels(); // Refresh the list
     } catch (error) {
+      console.error('Error updating hotel:', error);
       toast({
         title: "Error",
         description: "Failed to update hotel.",

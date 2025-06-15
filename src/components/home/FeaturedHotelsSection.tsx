@@ -53,6 +53,22 @@ const FeaturedHotelsSection = () => {
     };
 
     fetchFeaturedHotels();
+
+    // Set up real-time subscription for hotel changes
+    const channel = supabase
+      .channel('hotels-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'hotels' },
+        () => {
+          console.log('Hotel data changed, refreshing...');
+          fetchFeaturedHotels();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Transform hotels to match HotelCard expected format

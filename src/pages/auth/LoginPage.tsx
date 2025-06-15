@@ -11,7 +11,7 @@ import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 import { Link } from "react-router-dom";
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const { t, isRTL } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,10 @@ const LoginPage: React.FC = () => {
     setError(null);
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
+      const result = await signIn(data.email, data.password);
+      if (!result.success && result.error) {
+        setError(result.error.message);
+      }
     } catch (err: any) {
       setError(err.message || t("auth.loginFailed", "Login failed"));
     } finally {

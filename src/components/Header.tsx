@@ -44,7 +44,7 @@ const Header: React.FC = () => {
 
   const getDashboardLink = () => {
     if (!user) return null;
-    switch (user.user_type) {
+    switch (user.role) {
       case 'admin':
         return { href: "/admin", label: t("admin.dashboard", "Admin Dashboard") };
       case 'provider':

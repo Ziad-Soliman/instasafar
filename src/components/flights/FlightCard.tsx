@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Plane, Clock, Users, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-
 interface Flight {
   id: string;
   airline_name: string;
@@ -24,18 +22,20 @@ interface Flight {
   total_seats: number;
   aircraft_type?: string;
 }
-
 interface FlightCardProps {
   flight: Flight;
 }
-
-const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
-  const { t, language, isRTL } = useLanguage();
-
+const FlightCard: React.FC<FlightCardProps> = ({
+  flight
+}) => {
+  const {
+    t,
+    language,
+    isRTL
+  } = useLanguage();
   const getDisplayName = (name: string, name_ar?: string) => {
     return language === 'ar' && name_ar ? name_ar : name;
   };
-
   const getClassDisplay = (flightClass: string) => {
     switch (flightClass) {
       case 'economy':
@@ -48,18 +48,15 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
         return flightClass;
     }
   };
-
   const calculateDuration = (departure: string, arrival: string) => {
     const dep = new Date(departure);
     const arr = new Date(arrival);
     const diff = arr.getTime() - dep.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const minutes = Math.floor(diff % (1000 * 60 * 60) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
-
-  return (
-    <Card className="hover:shadow-md transition-shadow">
+  return <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className={`flex flex-col lg:flex-row justify-between gap-6 ${isRTL ? 'rtl:text-right' : ''}`}>
           {/* Airline Info */}
@@ -70,17 +67,15 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
             <div className="min-w-0">
               <h3 className="font-semibold text-lg truncate">{getDisplayName(flight.airline_name, flight.airline_name_ar)}</h3>
               <p className="text-sm text-muted-foreground">{flight.flight_number}</p>
-              {flight.aircraft_type && (
-                <p className="text-xs text-muted-foreground truncate">{flight.aircraft_type}</p>
-              )}
+              {flight.aircraft_type && <p className="text-xs text-muted-foreground truncate">{flight.aircraft_type}</p>}
             </div>
           </div>
 
           {/* Flight Route */}
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-3 gap-4 items-center h-full">
+            <div className={`grid grid-cols-3 gap-4 items-center h-full ${isRTL ? 'rtl:text-center' : 'text-center'}`}>
               {/* Departure */}
-              <div className={`space-y-1 ${isRTL ? 'text-left' : 'text-center'}`}>
+              <div className="space-y-1 my-0 py-0 px-px mx-[87px]">
                 <div className="text-2xl font-bold">{format(new Date(flight.departure_time), 'HH:mm')}</div>
                 <div className="text-sm font-medium text-muted-foreground truncate">
                   {getDisplayName(flight.origin, flight.origin_ar)}
@@ -89,7 +84,7 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
               </div>
               
               {/* Flight Duration & Icon */}
-              <div className="flex flex-col items-center justify-center space-y-2">
+              <div className="flex flex-col items-center justify-center space-y-2 px-[31px] mx-0 py-0">
                 <div className="text-xs text-muted-foreground font-medium">
                   {calculateDuration(flight.departure_time, flight.arrival_time)}
                 </div>
@@ -104,7 +99,7 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
               </div>
               
               {/* Arrival */}
-              <div className={`space-y-1 ${isRTL ? 'text-right' : 'text-center'}`}>
+              <div className="space-y-1 px-0 mx-[28px]">
                 <div className="text-2xl font-bold">{format(new Date(flight.arrival_time), 'HH:mm')}</div>
                 <div className="text-sm font-medium text-muted-foreground truncate">
                   {getDisplayName(flight.destination, flight.destination_ar)}
@@ -145,8 +140,6 @@ const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default FlightCard;

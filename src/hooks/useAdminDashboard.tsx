@@ -72,13 +72,17 @@ export const useAdminDashboard = () => {
       
       // Transform the data to match our interface, safely handling null/undefined values
       const transformedData: Booking[] = (data || []).map(item => {
-        // Safely extract profiles data with explicit type checking
-        let profilesData = null;
+        // Safely extract profiles data with proper null handling
+        let profilesData: { full_name: string } | null = null;
         
-        if (item.profiles && typeof item.profiles === 'object' && item.profiles !== null && 'full_name' in item.profiles) {
-          const profilesObj = item.profiles as { full_name: string };
-          if (profilesObj.full_name) {
-            profilesData = { full_name: profilesObj.full_name };
+        // Check if profiles exists and is not null first
+        if (item.profiles !== null && item.profiles !== undefined) {
+          // Now we know profiles is not null, we can safely check its properties
+          if (typeof item.profiles === 'object' && 'full_name' in item.profiles) {
+            const profilesObj = item.profiles as { full_name: string };
+            if (profilesObj.full_name) {
+              profilesData = { full_name: profilesObj.full_name };
+            }
           }
         }
 

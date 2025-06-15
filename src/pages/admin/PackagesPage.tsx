@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Calendar, MapPin } from "lucide-react";
+import { Search, Edit, Trash, Calendar, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import PackageManagement from "@/components/admin/PackageManagement";
 
 interface Package {
   id: string;
@@ -58,6 +59,8 @@ const AdminPackages: React.FC = () => {
   }, []);
 
   const handleDeletePackage = async (packageId: string) => {
+    if (!confirm("Are you sure you want to delete this package?")) return;
+    
     try {
       const { error } = await supabase
         .from('packages')
@@ -115,9 +118,7 @@ const AdminPackages: React.FC = () => {
             <h1 className="text-3xl font-bold">Packages</h1>
             <p className="text-muted-foreground">Manage your travel packages</p>
           </div>
-          <Button className="mt-4 md:mt-0">
-            <Plus className="w-4 h-4 mr-2" /> Add New Package
-          </Button>
+          <PackageManagement onPackageAdded={fetchPackages} />
         </div>
         
         <Card className="mb-6">

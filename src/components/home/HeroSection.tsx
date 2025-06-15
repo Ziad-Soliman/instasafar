@@ -37,7 +37,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <AuroraBackground className="h-auto min-h-screen pt-12 pb-0 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 relative overflow-hidden" showRadialGradient={true}>
+    <AuroraBackground className="h-auto min-h-[50vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 relative overflow-hidden" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-center justify-center">
           {/* Hero Content */}
@@ -91,14 +91,12 @@ const HeroSection = () => {
             </div>
           </motion.div>
         </div>
-        
-        {/* Globe positioned under content, taking almost full width with lower half hidden */}
-        <div className="relative h-[60vh] w-full mt-16 overflow-hidden">
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-[1200px] h-[120vh]">
-            <Globe />
-          </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-        </div>
+      </div>
+      
+      {/* Globe at the bottom */}
+      <div className="relative h-96 mt-8 flex items-center justify-center">
+        <Globe className="top-0" />
+        <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.1),rgba(255,255,255,0))]" />
       </div>
     </AuroraBackground>
   );

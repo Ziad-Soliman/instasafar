@@ -74,7 +74,7 @@ export function Globe({
   )
 
   const onResize = () => {
-    if (canvasRef.current && canvasRef.current.offsetParent) {
+    if (canvasRef.current) {
       width = canvasRef.current.offsetWidth
     }
   }
@@ -83,23 +83,16 @@ export function Globe({
     window.addEventListener("resize", onResize)
     onResize()
 
-    if (canvasRef.current && width > 0) {
-      const globe = createGlobe(canvasRef.current, {
-        ...config,
-        width: width * 2,
-        height: width * 2,
-        onRender,
-      })
+    const globe = createGlobe(canvasRef.current!, {
+      ...config,
+      width: width * 2,
+      height: width * 2,
+      onRender,
+    })
 
-      setTimeout(() => {
-        if (canvasRef.current) {
-          canvasRef.current.style.opacity = "1"
-        }
-      }, 100)
-      
-      return () => globe.destroy()
-    }
-  }, [config, onRender])
+    setTimeout(() => (canvasRef.current!.style.opacity = "1"))
+    return () => globe.destroy()
+  }, [])
 
   return (
     <div

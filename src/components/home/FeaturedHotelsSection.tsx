@@ -6,12 +6,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import HotelCard from '@/components/cards/HotelCard';
-import { mockPackages } from '@/data/mockData';
+import { hotels } from '@/data/hotels';
 
 const FeaturedHotelsSection = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const hotels = mockPackages; // Using mockPackages as hotels for now
   const featuredHotels = hotels.filter(hotel => hotel.is_featured).slice(0, 3);
 
   if (featuredHotels.length === 0) {
@@ -32,7 +31,7 @@ const FeaturedHotelsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className={cn("text-center mb-16", isRTL && "text-center")}
+          className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 bg-saudi-green/10 text-saudi-green px-4 py-2 rounded-full text-sm font-medium mb-6">
             <span className="w-2 h-2 bg-saudi-green rounded-full animate-pulse"></span>

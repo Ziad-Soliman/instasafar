@@ -38,7 +38,7 @@ const TestimonialsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className={cn("text-center mb-12", isRTL && "text-center")}
+          className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold mb-4">{t('home.testimonials.title')}</h2>
           <p className="text-muted-foreground text-lg">{t('home.testimonials.subtitle')}</p>
@@ -56,10 +56,10 @@ const TestimonialsSection = () => {
               <Card className="h-full">
                 <CardContent className="p-6">
                   <Quote className={cn("h-8 w-8 text-saudi-green mb-4", isRTL && "transform scale-x-[-1]")} />
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className={cn("text-muted-foreground mb-4 leading-relaxed", isRTL && "text-right")}>
                     "{testimonial.text}"
                   </p>
-                  <div className={cn("flex items-center gap-1 mb-3", isRTL && "flex-row-reverse")}>
+                  <div className={cn("flex items-center gap-1 mb-3", isRTL && "flex-row-reverse justify-end")}>
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}

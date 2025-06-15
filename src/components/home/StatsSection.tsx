@@ -39,10 +39,7 @@ const StatsSection = () => {
   return (
     <section className="py-16 bg-saudi-green text-white">
       <div className="container mx-auto px-4">
-        <div className={cn(
-          "grid grid-cols-2 md:grid-cols-4 gap-8",
-          isRTL && "text-center"
-        )}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <motion.div
               key={index}

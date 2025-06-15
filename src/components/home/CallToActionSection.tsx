@@ -18,7 +18,7 @@ const CallToActionSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className={cn("text-center max-w-3xl mx-auto", isRTL && "text-center")}
+          className="text-center max-w-3xl mx-auto"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t('home.cta.title')}

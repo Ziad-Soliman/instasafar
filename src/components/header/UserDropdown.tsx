@@ -31,7 +31,7 @@ const UserDropdown: React.FC = () => {
       case 'provider':
         return { href: "/provider", label: t("dashboard.overview", "Dashboard") };
       default:
-        return null;
+        return { href: "/account/dashboard", label: t("dashboard.overview", "Dashboard") };
     }
   };
 
@@ -84,19 +84,19 @@ const UserDropdown: React.FC = () => {
         )}
         
         <DropdownMenuItem asChild>
-          <Link to="/profile" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Link to="/account/profile" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
             <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t("profile", "Profile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/bookings" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Link to="/account/bookings" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
             <BookOpen className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t("bookings", "Bookings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/wishlist" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Link to="/account/wishlist" className={`cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Heart className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t("wishlist", "Wishlist")}
           </Link>

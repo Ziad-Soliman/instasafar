@@ -36,7 +36,7 @@ function Feature() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className={cn(
               "relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col",
-              isRTL && "text-right"
+              isRTL ? "text-right" : "text-left"
             )}>
               <GlowingEffect
                 spread={40}
@@ -56,7 +56,7 @@ function Feature() {
             </div>
             <div className={cn(
               "relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col",
-              isRTL && "text-right"
+              isRTL ? "text-right" : "text-left"
             )}>
               <GlowingEffect
                 spread={40}
@@ -77,7 +77,7 @@ function Feature() {
 
             <div className={cn(
               "relative bg-muted rounded-md aspect-square p-6 flex justify-between flex-col",
-              isRTL && "text-right"
+              isRTL ? "text-right" : "text-left"
             )}>
               <GlowingEffect
                 spread={40}
@@ -97,7 +97,7 @@ function Feature() {
             </div>
             <div className={cn(
               "relative bg-muted rounded-md h-full lg:col-span-2 p-6 aspect-square lg:aspect-auto flex justify-between flex-col",
-              isRTL && "text-right"
+              isRTL ? "text-right" : "text-left"
             )}>
               <GlowingEffect
                 spread={40}

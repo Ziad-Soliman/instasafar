@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -113,75 +112,73 @@ const AdminHotels: React.FC = () => {
     }
 
     setUpdateLoading(true);
-    console.log('Starting hotel update process...');
+    console.log('=== HOTEL UPDATE PROCESS START ===');
     console.log('Hotel ID to update:', editFormData.id);
-    console.log('Update data being sent:', editFormData);
+    console.log('Current form data:', editFormData);
+    console.log('Original hotel data:', editingHotel);
 
     try {
-      // First, let's check if the hotel exists
-      const { data: existingHotel, error: checkError } = await supabase
-        .from('hotels')
-        .select('id')
-        .eq('id', editFormData.id)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('Error checking hotel existence:', checkError);
-        throw new Error('Failed to verify hotel existence');
+      // Validate required fields
+      if (!editFormData.name?.trim() || !editFormData.city?.trim() || !editFormData.address?.trim()) {
+        throw new Error('Name, city, and address are required fields');
       }
 
-      if (!existingHotel) {
-        console.error('Hotel not found with ID:', editFormData.id);
-        throw new Error('Hotel not found');
+      if (!editFormData.price_per_night || Number(editFormData.price_per_night) <= 0) {
+        throw new Error('Price per night must be greater than 0');
       }
 
-      console.log('Hotel exists, proceeding with update...');
-
-      // Prepare the update data with proper types
+      // Prepare the update data
       const updateData = {
-        name: editFormData.name?.trim() || '',
-        city: editFormData.city?.trim() || '',
-        address: editFormData.address?.trim() || '',
+        name: editFormData.name.trim(),
+        city: editFormData.city.trim(),
+        address: editFormData.address.trim(),
         description: editFormData.description?.trim() || null,
         distance_to_haram: editFormData.distance_to_haram?.trim() || null,
         rating: editFormData.rating ? Number(editFormData.rating) : null,
-        price_per_night: Number(editFormData.price_per_night) || 0,
+        price_per_night: Number(editFormData.price_per_night),
         thumbnail: editFormData.thumbnail?.trim() || null,
         updated_at: new Date().toISOString()
       };
 
       console.log('Prepared update data:', updateData);
 
-      // Validate required fields
-      if (!updateData.name || !updateData.city || !updateData.address) {
-        throw new Error('Name, city, and address are required fields');
+      // Check if hotel exists first
+      const { data: existingHotel, error: checkError } = await supabase
+        .from('hotels')
+        .select('*')
+        .eq('id', editFormData.id)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking hotel existence:', checkError);
+        throw new Error('Hotel not found or access denied');
       }
 
-      if (updateData.price_per_night <= 0) {
-        throw new Error('Price per night must be greater than 0');
-      }
+      console.log('Hotel exists in database:', existingHotel);
 
-      // Perform the update without expecting a return
-      const { error: updateError } = await supabase
+      // Perform the update
+      const { data: updatedHotel, error: updateError } = await supabase
         .from('hotels')
         .update(updateData)
-        .eq('id', editFormData.id);
+        .eq('id', editFormData.id)
+        .select('*')
+        .single();
 
       if (updateError) {
-        console.error('Supabase update error:', updateError);
-        throw updateError;
+        console.error('Update error:', updateError);
+        throw new Error(`Update failed: ${updateError.message}`);
       }
 
-      console.log('Update successful');
+      console.log('Hotel updated successfully:', updatedHotel);
 
-      // Update the local state immediately
-      setHotels(currentHotels => 
-        currentHotels.map(hotel => 
-          hotel.id === editFormData.id 
-            ? { ...hotel, ...updateData, id: editFormData.id }
-            : hotel
-        )
-      );
+      // Update local state immediately
+      setHotels(prevHotels => {
+        const updatedHotels = prevHotels.map(hotel => 
+          hotel.id === editFormData.id ? updatedHotel : hotel
+        );
+        console.log('Updated local hotels state:', updatedHotels);
+        return updatedHotels;
+      });
 
       toast({
         title: "Success",
@@ -192,13 +189,13 @@ const AdminHotels: React.FC = () => {
       setEditingHotel(null);
       setEditFormData(null);
 
-      // Refresh from database to ensure consistency
-      setTimeout(() => {
-        fetchHotels();
-      }, 500);
+      // Force a complete refresh from database
+      console.log('Forcing database refresh...');
+      await fetchHotels();
       
     } catch (error: any) {
-      console.error('Error updating hotel:', error);
+      console.error('=== UPDATE ERROR ===');
+      console.error('Error details:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to update hotel. Please try again.",
@@ -206,6 +203,7 @@ const AdminHotels: React.FC = () => {
       });
     } finally {
       setUpdateLoading(false);
+      console.log('=== HOTEL UPDATE PROCESS END ===');
     }
   };
 
@@ -213,10 +211,12 @@ const AdminHotels: React.FC = () => {
     console.log(`Updating field ${field} with value:`, value);
     setEditFormData(prev => {
       if (!prev) return null;
-      return {
+      const updated = {
         ...prev,
         [field]: value
       };
+      console.log('Updated form data:', updated);
+      return updated;
     });
   };
 
@@ -240,6 +240,8 @@ const AdminHotels: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        
+        
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Hotels</h1>

@@ -36,7 +36,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <AuroraBackground className="h-auto min-h-[35vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
+    <AuroraBackground className="h-auto min-h-[35vh] pt-12 pb-0 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-center justify-center">
           {/* Hero Content */}
@@ -74,7 +74,7 @@ const HeroSection = () => {
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4 pt-8 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-4 pt-8 pb-8 max-w-2xl mx-auto">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}

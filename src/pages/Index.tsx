@@ -10,6 +10,7 @@ import FeaturedHotelsSection from '@/components/home/FeaturedHotelsSection';
 import JourneySection from '@/components/home/JourneySection';
 import ServicesSection from '@/components/home/ServicesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
+import PilgrimageRoutesSection from '@/components/home/PilgrimageRoutesSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
 
 const Index = () => {
@@ -25,6 +26,7 @@ const Index = () => {
       <JourneySection />
       <ServicesSection />
       <TestimonialsSection />
+      <PilgrimageRoutesSection />
       <CallToActionSection />
     </div>
   );

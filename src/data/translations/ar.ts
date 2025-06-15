@@ -179,6 +179,15 @@ export const arabicTranslations = {
   "home.testimonials.testimonial9.text": "أفضل خدمة حج خبرتها. من الحجز إلى العودة، كل شيء كان سلساً والدعم الروحاني كان استثنائياً.",
   "home.testimonials.testimonial9.role": "رجل أعمال",
 
+  // Home Pilgrimage Routes Section
+  "home.routes.badge": "المسارات العالمية",
+  "home.routes.title": "رحلة الحجاج إلى المدن المقدسة",
+  "home.routes.subtitle": "ربط القلوب من جميع أنحاء العالم بالوجهات المقدسة مكة المكرمة والمدينة المنورة",
+  "home.routes.makkah.title": "مكة المكرمة",
+  "home.routes.makkah.description": "أقدس مدينة في الإسلام، موطن الكعبة المشرفة والمسجد الحرام",
+  "home.routes.medina.title": "المدينة المنورة",
+  "home.routes.medina.description": "المدينة المنورة حيث دُفن النبي محمد صلى الله عليه وسلم، ثاني أقدس مدينة في الإسلام",
+
   // Home Call to Action Section
   "home.cta.title": "هل أنت مستعد لبدء رحلتك المقدسة؟",
   "home.cta.subtitle": "انضم إلى آلاف الحجاج والمعتمرين الذين يثقون بنا في رحلتهم الروحانية. احجز باقتك اليوم واختبر الفرق.",

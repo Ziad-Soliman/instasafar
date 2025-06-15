@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,7 +14,6 @@ import ProviderLayout from "@/layouts/ProviderLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import ScrollToTop from "@/components/ScrollToTop";
 import LoadingPage from "@/pages/LoadingPage";
-import RtlContainer from "@/components/layout/RtlContainer";
 
 // Lazy load pages
 const Index = lazy(() => import("@/pages/Index"));
@@ -68,68 +68,66 @@ const App = () => {
         <LanguageProvider>
           <WishlistProvider>
             <NotificationProvider>
-              <RtlContainer className="min-h-screen w-full">
-                <ScrollToTop />
-                <Suspense fallback={<LoadingPage />}>
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<MainLayout />}>
-                      <Route index element={<Index />} />
-                      <Route path="search" element={<SearchPage />} />
-                      <Route path="hotel/:id" element={<HotelDetailPage />} />
-                      <Route path="packages" element={<PackagesPage />} />
-                      <Route path="package/:id" element={<PackageDetailPage />} />
-                      <Route path="flights" element={<FlightSearchPage />} />
-                      <Route path="transport" element={<TransportSearchPage />} />
-                      <Route path="booking/confirm" element={<BookingConfirmPage />} />
-                      <Route path="booking/success" element={<BookingSuccessPage />} />
-                      
-                      {/* Account routes */}
-                      <Route path="account/dashboard" element={<CustomerDashboard />} />
-                      <Route path="account/profile" element={<ProfilePage />} />
-                      <Route path="account/bookings" element={<BookingsPage />} />
-                      <Route path="account/wishlist" element={<WishlistPage />} />
-                    </Route>
+              <ScrollToTop />
+              <Suspense fallback={<LoadingPage />}>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<MainLayout />}>
+                    <Route index element={<Index />} />
+                    <Route path="search" element={<SearchPage />} />
+                    <Route path="hotel/:id" element={<HotelDetailPage />} />
+                    <Route path="packages" element={<PackagesPage />} />
+                    <Route path="package/:id" element={<PackageDetailPage />} />
+                    <Route path="flights" element={<FlightSearchPage />} />
+                    <Route path="transport" element={<TransportSearchPage />} />
+                    <Route path="booking/confirm" element={<BookingConfirmPage />} />
+                    <Route path="booking/success" element={<BookingSuccessPage />} />
+                    
+                    {/* Account routes */}
+                    <Route path="account/dashboard" element={<CustomerDashboard />} />
+                    <Route path="account/profile" element={<ProfilePage />} />
+                    <Route path="account/bookings" element={<BookingsPage />} />
+                    <Route path="account/wishlist" element={<WishlistPage />} />
+                  </Route>
 
-                    {/* Auth routes */}
-                    <Route path="/auth" element={<AuthLayout />}>
-                      <Route index element={<AuthPage />} />
-                      <Route path="login" element={<LoginPage />} />
-                      <Route path="register" element={<RegisterPage />} />
-                      <Route path="provider-register" element={<ProviderRegisterPage />} />
-                      <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                      <Route path="update-password" element={<UpdatePasswordPage />} />
-                      <Route path="callback" element={<AuthCallbackPage />} />
-                    </Route>
+                  {/* Auth routes */}
+                  <Route path="/auth" element={<AuthLayout />}>
+                    <Route index element={<AuthPage />} />
+                    <Route path="login" element={<LoginPage />} />
+                    <Route path="register" element={<RegisterPage />} />
+                    <Route path="provider-register" element={<ProviderRegisterPage />} />
+                    <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="update-password" element={<UpdatePasswordPage />} />
+                    <Route path="callback" element={<AuthCallbackPage />} />
+                  </Route>
 
-                    {/* Admin routes */}
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<AdminDashboard />} />
-                      <Route path="hotels" element={<AdminHotels />} />
-                      <Route path="packages" element={<AdminPackages />} />
-                      <Route path="bookings" element={<AdminBookings />} />
-                      <Route path="users" element={<AdminUsers />} />
-                      <Route path="providers" element={<AdminProviders />} />
-                      <Route path="reviews" element={<AdminReviews />} />
-                      <Route path="external-listings" element={<AdminExternalListings />} />
-                    </Route>
+                  {/* Admin routes */}
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="hotels" element={<AdminHotels />} />
+                    <Route path="packages" element={<AdminPackages />} />
+                    <Route path="bookings" element={<AdminBookings />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="providers" element={<AdminProviders />} />
+                    <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="external-listings" element={<AdminExternalListings />} />
+                  </Route>
 
-                    {/* Provider routes */}
-                    <Route path="/provider" element={<ProviderLayout />}>
-                      <Route index element={<ProviderDashboard />} />
-                      <Route path="listings" element={<ProviderListings />} />
-                      <Route path="bookings" element={<ProviderBookings />} />
-                      <Route path="booking/:id" element={<ProviderBookingDetail />} />
-                      <Route path="profile" element={<ProviderProfile />} />
-                    </Route>
+                  {/* Provider routes */}
+                  <Route path="/provider" element={<ProviderLayout />}>
+                    <Route index element={<ProviderDashboard />} />
+                    <Route path="listings" element={<ProviderListings />} />
+                    <Route path="bookings" element={<ProviderBookings />} />
+                    <Route path="booking/:id" element={<ProviderBookingDetail />} />
+                    <Route path="profile" element={<ProviderProfile />} />
+                  </Route>
 
-                    {/* 404 route */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-                <Toaster />
-                <Sonner />
-              </RtlContainer>
+                  {/* 404 route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+              <Toaster />
+              <Sonner />
             </NotificationProvider>
           </WishlistProvider>
         </LanguageProvider>

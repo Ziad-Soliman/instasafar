@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -77,7 +78,7 @@ export const useAdminDashboard = () => {
         
         // Use a more explicit approach to satisfy TypeScript
         const profiles = item.profiles;
-        if (profiles && profiles !== null && typeof profiles === 'object' && 'full_name' in profiles) {
+        if (profiles !== null && profiles !== undefined && typeof profiles === 'object' && 'full_name' in profiles) {
           const fullName = profiles.full_name;
           if (fullName) {
             profilesData = { full_name: fullName };

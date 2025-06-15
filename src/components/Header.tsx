@@ -37,7 +37,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Actions - Right in LTR, Left in RTL */}
-          <div className={`flex items-center gap-2 ${isRTL ? 'order-1 flex-row-reverse' : 'order-3'}`}>
+          <div className={`flex items-center gap-2 ${isRTL ? 'order-1' : 'order-3'}`}>
             <LanguageSelector />
             <UserDropdown />
 

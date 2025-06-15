@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -71,70 +71,68 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<MainLayout />}>
-                  <Route index element={<Index />} />
-                  <Route path="search" element={<SearchPage />} />
-                  <Route path="packages" element={<PackagesPage />} />
-                  <Route path="packages/:id" element={<PackageDetailPage />} />
-                  <Route path="hotels/:id" element={<HotelDetailPage />} />
-                  <Route path="flights" element={<FlightSearchPage />} />
-                  <Route path="transport" element={<TransportSearchPage />} />
-                  <Route path="booking/confirm" element={<BookingConfirmPage />} />
-                  <Route path="booking/success" element={<BookingSuccessPage />} />
-                </Route>
+            <ScrollToTop />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Index />} />
+                <Route path="search" element={<SearchPage />} />
+                <Route path="packages" element={<PackagesPage />} />
+                <Route path="packages/:id" element={<PackageDetailPage />} />
+                <Route path="hotels/:id" element={<HotelDetailPage />} />
+                <Route path="flights" element={<FlightSearchPage />} />
+                <Route path="transport" element={<TransportSearchPage />} />
+                <Route path="booking/confirm" element={<BookingConfirmPage />} />
+                <Route path="booking/success" element={<BookingSuccessPage />} />
+              </Route>
 
-                {/* Auth routes */}
-                <Route path="/auth" element={<AuthLayout />}>
-                  <Route index element={<AuthPage />} />
-                  <Route path="login" element={<LoginPage />} />
-                  <Route path="register" element={<RegisterPage />} />
-                  <Route path="provider-register" element={<ProviderRegisterPage />} />
-                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="update-password" element={<UpdatePasswordPage />} />
-                  <Route path="callback" element={<AuthCallbackPage />} />
-                </Route>
+              {/* Auth routes */}
+              <Route path="/auth" element={<AuthLayout />}>
+                <Route index element={<AuthPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="provider-register" element={<ProviderRegisterPage />} />
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="update-password" element={<UpdatePasswordPage />} />
+                <Route path="callback" element={<AuthCallbackPage />} />
+              </Route>
 
-                {/* Account routes */}
-                <Route path="/account" element={<MainLayout />}>
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="bookings" element={<BookingsPage />} />
-                  <Route path="wishlist" element={<WishlistPage />} />
-                </Route>
+              {/* Account routes */}
+              <Route path="/account" element={<MainLayout />}>
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="bookings" element={<BookingsPage />} />
+                <Route path="wishlist" element={<WishlistPage />} />
+              </Route>
 
-                {/* Admin routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="hotels" element={<AdminHotels />} />
-                  <Route path="packages" element={<AdminPackages />} />
-                  <Route path="flights" element={<AdminFlights />} />
-                  <Route path="transport" element={<AdminTransport />} />
-                  <Route path="bookings" element={<AdminBookings />} />
-                  <Route path="providers" element={<AdminProviders />} />
-                  <Route path="reviews" element={<AdminReviews />} />
-                  <Route path="external-listings" element={<AdminExternalListings />} />
-                </Route>
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="hotels" element={<AdminHotels />} />
+                <Route path="packages" element={<AdminPackages />} />
+                <Route path="flights" element={<AdminFlights />} />
+                <Route path="transport" element={<AdminTransport />} />
+                <Route path="bookings" element={<AdminBookings />} />
+                <Route path="providers" element={<AdminProviders />} />
+                <Route path="reviews" element={<AdminReviews />} />
+                <Route path="external-listings" element={<AdminExternalListings />} />
+              </Route>
 
-                {/* Provider routes */}
-                <Route path="/provider" element={<ProviderLayout />}>
-                  <Route index element={<ProviderDashboard />} />
-                  <Route path="dashboard" element={<ProviderDashboard />} />
-                  <Route path="bookings" element={<ProviderBookings />} />
-                  <Route path="bookings/:id" element={<ProviderBookingDetail />} />
-                  <Route path="listings" element={<ProviderListings />} />
-                  <Route path="profile" element={<ProviderProfile />} />
-                </Route>
+              {/* Provider routes */}
+              <Route path="/provider" element={<ProviderLayout />}>
+                <Route index element={<ProviderDashboard />} />
+                <Route path="dashboard" element={<ProviderDashboard />} />
+                <Route path="bookings" element={<ProviderBookings />} />
+                <Route path="bookings/:id" element={<ProviderBookingDetail />} />
+                <Route path="listings" element={<ProviderListings />} />
+                <Route path="profile" element={<ProviderProfile />} />
+              </Route>
 
-                {/* 404 route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+              {/* 404 route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </TooltipProvider>
         </WishlistProvider>
       </NotificationProvider>

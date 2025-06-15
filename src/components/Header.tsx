@@ -48,21 +48,21 @@ const Header: React.FC = () => {
     <>
       <motion.header
         className={cn(
-          "fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
+          "fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 w-full max-w-7xl px-4",
           isSticky ? "top-4" : "top-6"
         )}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg min-w-fit">
-          {/* Logo - Always on the left in LTR, right in RTL */}
-          <div className={cn("flex-shrink-0", isRTL ? "order-3" : "order-1")}>
+        <div className="flex items-center justify-between bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg w-full">
+          {/* Logo - Left in LTR, Right in RTL */}
+          <div className={cn("flex-shrink-0", isRTL && "order-3")}>
             <HeaderLogo />
           </div>
 
-          {/* Navigation Items - Always in the center */}
-          <div className="hidden md:flex items-center gap-1 mx-8 order-2">
+          {/* Navigation Items - Center */}
+          <div className={cn("hidden md:flex items-center gap-1", isRTL && "order-2")}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.name;
@@ -102,8 +102,8 @@ const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Actions - Always on the right in LTR, left in RTL */}
-          <div className={cn("flex items-center gap-2 flex-shrink-0", isRTL ? "order-1" : "order-3")}>
+          {/* Actions - Right in LTR, Left in RTL */}
+          <div className={cn("flex items-center gap-2 flex-shrink-0", isRTL && "order-1")}>
             <LanguageSelector />
             <UserDropdown />
 

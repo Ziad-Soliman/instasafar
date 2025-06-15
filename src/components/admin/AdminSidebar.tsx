@@ -106,7 +106,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-navy-700">
             <Link to="/admin/dashboard" className="flex items-center">
-              <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-saudi-green rounded-lg flex items-center justify-center">
                 <LayoutDashboard className="w-5 h-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
@@ -135,7 +135,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
                   className={cn(
                     "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                     isActive
-                      ? "bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300"
+                      ? "bg-saudi-green/10 text-saudi-green dark:bg-saudi-green/20 dark:text-saudi-green"
                       : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-navy-700"
                   )}
                 >

@@ -1,21 +1,100 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import HotelCard from '@/components/cards/HotelCard';
-import { featuredHotels } from '@/data/hotels';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Hotel {
+  id: string;
+  name: string;
+  name_ar?: string;
+  city: string;
+  city_ar?: string;
+  address: string;
+  address_ar?: string;
+  description?: string;
+  description_ar?: string;
+  rating: number;
+  price_per_night: number;
+  distance_to_haram?: string;
+  thumbnail?: string;
+}
+
 const FeaturedHotelsSection = () => {
-  const {
-    t,
-    isRTL
-  } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
-  if (featuredHotels.length === 0) {
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedHotels = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('hotels')
+          .select('*')
+          .limit(3)
+          .order('rating', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching hotels:', error);
+          return;
+        }
+
+        setHotels(data || []);
+      } catch (error) {
+        console.error('Error fetching hotels:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedHotels();
+  }, []);
+
+  // Transform hotels to match HotelCard expected format
+  const transformedHotels = hotels.map(hotel => ({
+    id: hotel.id,
+    name: hotel.name,
+    name_ar: hotel.name_ar,
+    city: hotel.city,
+    city_ar: hotel.city_ar,
+    address: hotel.address,
+    address_ar: hotel.address_ar,
+    description: hotel.description,
+    description_ar: hotel.description_ar,
+    image: hotel.thumbnail || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
+    rating: Number(hotel.rating),
+    price: Number(hotel.price_per_night),
+    distance_from_haram: hotel.distance_to_haram || '1.2 km',
+    review_count: 0, // Default since reviews are separate
+    is_featured: true
+  }));
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-background via-muted/10 to-saudi-green/5 relative overflow-hidden">
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-64 mx-auto mb-4"></div>
+              <div className="h-4 bg-muted rounded w-96 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (transformedHotels.length === 0) {
     return null;
   }
-  return <section className="py-20 bg-gradient-to-br from-background via-muted/10 to-saudi-green/5 relative overflow-hidden">
+
+  return (
+    <section className="py-20 bg-gradient-to-br from-background via-muted/10 to-saudi-green/5 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-20 left-10 w-32 h-32 bg-saudi-green rounded-full blur-3xl"></div>
@@ -23,17 +102,13 @@ const FeaturedHotelsSection = () => {
       </div>
       
       <div className="container mx-auto px-4 relative">
-        <motion.div initial={{
-        opacity: 0,
-        y: 20
-      }} whileInView={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        duration: 0.6
-      }} viewport={{
-        once: true
-      }} className={cn("text-center mb-16", isRTL && "text-center")}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className={cn("text-center mb-16", isRTL && "text-center")}
+        >
           <div className="inline-flex items-center justify-center gap-2 bg-saudi-green/10 text-saudi-green px-4 py-2 rounded-full text-sm font-medium mb-6 mx-auto">
             <span className="w-2 h-2 bg-saudi-green rounded-full animate-pulse"></span>
             {t('hotels.featuredHotels')}
@@ -55,22 +130,15 @@ const FeaturedHotelsSection = () => {
 
         {/* Hotels Grid with enhanced styling */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {featuredHotels.map((hotel, index) => <motion.div key={hotel.id} initial={{
-          opacity: 0,
-          y: 20,
-          scale: 0.95
-        }} whileInView={{
-          opacity: 1,
-          y: 0,
-          scale: 1
-        }} transition={{
-          duration: 0.6,
-          delay: index * 0.15,
-          type: "spring",
-          stiffness: 100
-        }} viewport={{
-          once: true
-        }} className="group">
+          {transformedHotels.map((hotel, index) => (
+            <motion.div
+              key={hotel.id}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, delay: index * 0.15, type: "spring", stiffness: 100 }}
+              viewport={{ once: true }}
+              className="group"
+            >
               <div className="relative">
                 {/* Glow effect */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-saudi-green/20 to-saudi-green/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
@@ -80,32 +148,29 @@ const FeaturedHotelsSection = () => {
                   <HotelCard hotel={hotel} />
                 </div>
               </div>
-            </motion.div>)}
+            </motion.div>
+          ))}
         </div>
 
         {/* Enhanced CTA Button */}
-        <motion.div className="text-center" initial={{
-        opacity: 0,
-        y: 20
-      }} whileInView={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        duration: 0.6,
-        delay: 0.4
-      }} viewport={{
-        once: true
-      }}>
-          <Button onClick={() => navigate('/search')} size="lg" className="group bg-gradient-to-r from-saudi-green to-saudi-green-light hover:from-saudi-green-light hover:to-saudi-green text-white px-8 py-4 rounded-full font-semibold text-lg shadow-saudi hover:shadow-saudi-lg transform hover:-translate-y-1 transition-all duration-300 min-w-[200px]">
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          <Button
+            onClick={() => navigate('/search')}
+            size="lg"
+            className="group bg-gradient-to-r from-saudi-green to-saudi-green-light hover:from-saudi-green-light hover:to-saudi-green text-white px-8 py-4 rounded-full font-semibold text-lg shadow-saudi hover:shadow-saudi-lg transform hover:-translate-y-1 transition-all duration-300 min-w-[200px]"
+          >
             <span className="flex items-center gap-3">
               {t('hotels.searchHotels')}
-              <motion.div animate={{
-              x: [0, 4, 0]
-            }} transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}>
+              <motion.div
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
                 →
               </motion.div>
             </span>
@@ -117,6 +182,8 @@ const FeaturedHotelsSection = () => {
           </p>
         </motion.div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default FeaturedHotelsSection;

@@ -7,6 +7,7 @@ import StatsSection from '@/components/home/StatsSection';
 import SearchSection from '@/components/home/SearchSection';
 import FeaturedPackagesSection from '@/components/home/FeaturedPackagesSection';
 import FeaturedHotelsSection from '@/components/home/FeaturedHotelsSection';
+import JourneySection from '@/components/home/JourneySection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CallToActionSection from '@/components/home/CallToActionSection';
 
@@ -20,6 +21,7 @@ const Index = () => {
       <SearchSection />
       <FeaturedPackagesSection />
       <FeaturedHotelsSection />
+      <JourneySection />
       <TestimonialsSection />
       <CallToActionSection />
     </div>

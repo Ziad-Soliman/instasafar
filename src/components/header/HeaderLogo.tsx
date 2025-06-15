@@ -8,7 +8,7 @@ const HeaderLogo: React.FC = () => {
 
   return (
     <Link to="/" className={`flex items-center ${isRTL ? 'space-x-reverse' : ''}`}>
-      <span className="text-xl font-bold text-foreground">InstaSafar</span>
+      <span className="text-lg font-bold text-foreground whitespace-nowrap">InstaSafar</span>
     </Link>
   );
 };

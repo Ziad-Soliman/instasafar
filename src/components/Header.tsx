@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X, Home, Search, Package, Plane, Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,27 @@ import LanguageSelector from "./LanguageSelector";
 import HeaderLogo from "./header/HeaderLogo";
 import UserDropdown from "./header/UserDropdown";
 import MobileMenu from "./header/MobileMenu";
-import { NavBar } from "@/components/ui/tubelight-navbar";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const Header: React.FC = () => {
   const { logout } = useAuth();
   const { t, isRTL } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+  const [activeTab, setActiveTab] = useState("Home");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsSticky(scrollPosition > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -31,20 +45,64 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo - Left in LTR, Right in RTL */}
+    <>
+      <motion.header
+        className={cn(
+          "fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300",
+          isSticky ? "top-4" : "top-6"
+        )}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-2 px-4 rounded-full shadow-lg">
+          {/* Logo */}
           <div className={`flex-shrink-0 ${isRTL ? 'order-3' : 'order-1'}`}>
             <HeaderLogo />
           </div>
 
-          {/* Center - Tubelight Navigation */}
-          <div className="order-2 absolute left-1/2 transform -translate-x-1/2 hidden md:block">
-            <NavBar items={navItems} />
+          {/* Navigation Items */}
+          <div className="hidden md:flex items-center gap-1 mx-4">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.name;
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.url}
+                  onClick={() => setActiveTab(item.name)}
+                  className={cn(
+                    "relative cursor-pointer text-sm font-semibold px-4 py-2 rounded-full transition-colors",
+                    "text-foreground/80 hover:text-primary",
+                    isActive && "bg-muted text-primary"
+                  )}
+                >
+                  <span>{item.name}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="lamp"
+                      className="absolute inset-0 w-full bg-primary/5 rounded-full -z-10"
+                      initial={false}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
+                    >
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-t-full">
+                        <div className="absolute w-12 h-6 bg-primary/20 rounded-full blur-md -top-2 -left-2" />
+                        <div className="absolute w-8 h-6 bg-primary/20 rounded-full blur-md -top-1" />
+                        <div className="absolute w-4 h-4 bg-primary/20 rounded-full blur-sm top-0 left-2" />
+                      </div>
+                    </motion.div>
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Actions - Right in LTR, Left in RTL */}
+          {/* Actions */}
           <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'order-1' : 'order-3'}`}>
             <LanguageSelector />
             <UserDropdown />
@@ -66,8 +124,11 @@ const Header: React.FC = () => {
           onClose={() => setIsMenuOpen(false)}
           onLogout={handleLogout}
         />
-      </div>
-    </header>
+      </motion.header>
+
+      {/* Spacer to prevent content from hiding behind floating header */}
+      <div className="h-20" />
+    </>
   );
 };
 

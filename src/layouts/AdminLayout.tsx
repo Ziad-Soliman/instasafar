@@ -15,8 +15,11 @@ const AdminLayout: React.FC = () => {
 
   // If still checking authentication status
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-primary">Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-navy-900">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-400 mx-auto mb-4"></div>
+        <div className="text-xl font-semibold text-gray-600 dark:text-gray-300 animate-pulse">Loading...</div>
+      </div>
     </div>;
   }
 
@@ -26,7 +29,7 @@ const AdminLayout: React.FC = () => {
   }
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`flex h-screen overflow-hidden bg-gray-50 dark:bg-navy-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Sidebar */}
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       
@@ -35,7 +38,7 @@ const AdminLayout: React.FC = () => {
         <AdminHeader openSidebar={() => setSidebarOpen(true)} />
         
         <motion.main
-          className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/30"
+          className="flex-1 overflow-y-auto p-4 md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

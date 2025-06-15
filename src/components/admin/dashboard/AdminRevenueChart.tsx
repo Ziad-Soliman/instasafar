@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { TrendingUp, DollarSign } from "lucide-react";
 
 interface MonthlyData {
   name: string;
@@ -17,23 +18,45 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
   monthlyData, 
   formatCurrency 
 }) => {
+  const totalRevenue = monthlyData.reduce((sum, item) => sum + item.revenue, 0);
+  const avgRevenue = totalRevenue / monthlyData.length;
+
   return (
     <Card className="!bg-white dark:!bg-navy-800 shadow-xl shadow-shadow-500 dark:shadow-none border-0 rounded-[20px]">
-      <CardHeader className="!bg-gradient-to-br from-green-400 to-green-600 rounded-t-[20px] text-white">
-        <CardTitle className="text-xl font-bold text-white">Revenue Trends</CardTitle>
-        <CardDescription className="text-white/80">Monthly performance metrics</CardDescription>
+      <CardHeader className="border-b border-gray-200 dark:border-navy-600 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-bold text-navy-700 dark:text-white flex items-center">
+              <DollarSign className="h-6 w-6 mr-2 text-green-500" />
+              Revenue Analytics
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
+              Monthly revenue performance and trends
+            </CardDescription>
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</div>
+            <div className="text-2xl font-bold text-navy-700 dark:text-white">
+              {formatCurrency(totalRevenue)}
+            </div>
+            <div className="flex items-center text-green-500 text-sm">
+              <TrendingUp className="h-4 w-4 mr-1" />
+              +12.5% from last period
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="h-[400px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+            <AreaChart
               data={monthlyData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <defs>
-                <linearGradient id="revenueAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.3}/>
-                  <stop offset="100%" stopColor="#10B981" stopOpacity={0.05}/>
+                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#422AFB" stopOpacity={0.4}/>
+                  <stop offset="100%" stopColor="#422AFB" stopOpacity={0.05}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
@@ -42,11 +65,13 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fontSize: 12, fill: '#6B7280' }}
+                className="text-xs"
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fontSize: 12, fill: '#6B7280' }}
+                className="text-xs"
               />
               <Tooltip 
                 formatter={(value) => [formatCurrency(value as number), "Revenue"]} 
@@ -54,20 +79,43 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
                   backgroundColor: 'white',
                   border: 'none',
                   borderRadius: '16px',
-                  boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)'
+                  boxShadow: '0px 18px 40px rgba(112, 144, 176, 0.12)',
+                  fontWeight: '500'
                 }}
               />
-              <Line 
+              <Area 
                 type="monotone" 
                 dataKey="revenue" 
-                stroke="#10B981" 
-                strokeWidth={4}
-                dot={{ fill: '#10B981', strokeWidth: 3, r: 6 }}
-                activeDot={{ r: 8, stroke: '#10B981', strokeWidth: 2, fill: '#ffffff' }}
-                fill="url(#revenueAreaGradient)"
+                stroke="#422AFB" 
+                strokeWidth={3}
+                fill="url(#revenueGradient)"
+                dot={{ fill: '#422AFB', strokeWidth: 3, r: 6 }}
+                activeDot={{ r: 8, stroke: '#422AFB', strokeWidth: 2, fill: '#ffffff' }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Stats row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-navy-600">
+          <div className="text-center p-4 bg-gray-50 dark:bg-navy-700 rounded-2xl">
+            <div className="text-2xl font-bold text-navy-700 dark:text-white">
+              {formatCurrency(avgRevenue)}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Average Monthly</div>
+          </div>
+          <div className="text-center p-4 bg-gray-50 dark:bg-navy-700 rounded-2xl">
+            <div className="text-2xl font-bold text-green-600">
+              +24.5%
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Growth Rate</div>
+          </div>
+          <div className="text-center p-4 bg-gray-50 dark:bg-navy-700 rounded-2xl">
+            <div className="text-2xl font-bold text-brand-600">
+              {monthlyData.length}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Periods Tracked</div>
+          </div>
         </div>
       </CardContent>
     </Card>

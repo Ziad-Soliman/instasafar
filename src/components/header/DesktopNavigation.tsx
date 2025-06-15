@@ -15,7 +15,7 @@ const DesktopNavigation: React.FC = () => {
   ];
 
   return (
-    <nav className={`hidden md:flex items-center space-x-6 ${isRTL ? 'space-x-reverse' : ''}`}>
+    <nav className={`hidden md:flex items-center justify-center space-x-6 ${isRTL ? 'space-x-reverse' : ''}`}>
       {mainNavItems.map((item) => (
         <Link
           key={item.href}

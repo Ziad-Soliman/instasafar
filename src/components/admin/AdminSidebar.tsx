@@ -88,18 +88,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       >
         <div className="p-4 flex items-center justify-between border-b">
           <Link to="/" className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="InstaSafar" 
-              className="h-8"
-              onError={(e) => {
-                // Fallback if logo image doesn't exist yet
-                const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0yMCAyNUgxODBNOTAgMTVIOTVNOTAgMzVIOTUiIHN0cm9rZT0iIzAwOTliZiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iNDAiIHk9IjMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDk5YmYiPkluc3RhU2FmYXI8L3RleHQ+PC9zdmc+";
-              }}
-            />
-            <span className="ml-2 text-sm font-semibold">Admin</span>
+            <span className="text-xl font-bold text-primary">InstaSafar</span>
+            <span className="ml-2 text-sm font-semibold text-muted-foreground">Admin</span>
           </Link>
           <Button
             variant="ghost"

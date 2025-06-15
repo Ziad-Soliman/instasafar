@@ -6,17 +6,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface ImageCarouselProps {
   images: string[];
   height?: number;
-  aspectRatio?: number; // Added this property
-  allowFullscreen?: boolean; // Added this property
-  caption?: string; // Added this property
+  aspectRatio?: number;
+  allowFullscreen?: boolean;
+  caption?: string;
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ 
   images, 
   height = 300,
-  aspectRatio, // Not used yet, but available for future enhancement
-  allowFullscreen = false, // Not used yet, but available for future enhancement
-  caption // Not used yet, but available for future enhancement
+  aspectRatio,
+  allowFullscreen = false,
+  caption
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -54,7 +54,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       opacity: 1,
       transition: {
         duration: 0.5,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        ease: "easeOut",
       },
     },
     exit: {
@@ -62,12 +62,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
       opacity: 0,
       transition: {
         duration: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        ease: "easeOut",
       },
     },
   };
 
-  // Fixed the onClick handler to pass the index, not the event
   const handleDotClick = (index: number) => {
     setCurrentImageIndex(index);
   };

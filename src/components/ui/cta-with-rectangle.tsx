@@ -14,12 +14,12 @@ interface CTAProps {
   action: {
     text: string
     href: string
-    variant?: "default" | "glow"
+    variant?: "default" | "saudi" | "gradient"
   }
   secondaryAction?: {
     text: string
     href: string
-    variant?: "outline" | "ghost"
+    variant?: "outline" | "ghost" | "saudi-outline"
   }
   withGlow?: boolean
   className?: string
@@ -62,7 +62,7 @@ export function CTASection({
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up delay-500">
           <Button
-            variant={action.variant || "default"}
+            variant={action.variant || "saudi"}
             size="lg"
             asChild
           >
@@ -71,7 +71,7 @@ export function CTASection({
           
           {secondaryAction && (
             <Button
-              variant={secondaryAction.variant || "outline"}
+              variant={secondaryAction.variant || "saudi-outline"}
               size="lg"
               asChild
             >

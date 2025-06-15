@@ -26,12 +26,12 @@ const CallToActionSection = () => {
         description={t('home.cta.subtitle')}
         action={{
           text: t('home.cta.browsePackages'),
-          href: '#',
+          href: '/packages',
           variant: "default"
         }}
         secondaryAction={{
           text: t('home.cta.startJourney'),
-          href: '#',
+          href: '/auth/register',
           variant: "outline"
         }}
         withGlow={true}

@@ -17,7 +17,7 @@ const CallToActionSection = () => {
   };
 
   return (
-    <div className="bg-saudi-green text-white">
+    <div className="bg-saudi-green-600 text-white">
       <CTASection
         badge={{
           text: t('home.cta.badge') || 'Get Started'
@@ -35,7 +35,7 @@ const CallToActionSection = () => {
           variant: "outline"
         }}
         withGlow={true}
-        className="bg-transparent"
+        className="text-white"
       />
     </div>
   );

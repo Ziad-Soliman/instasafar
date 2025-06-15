@@ -41,20 +41,20 @@ export function CTASection({
         {badge && (
           <Badge
             variant="outline"
-            className="opacity-0 animate-fade-in-up delay-100"
+            className="opacity-0 animate-fade-in-up delay-100 border-white/30 text-white hover:bg-white/10"
           >
-            <span className="text-muted-foreground">{badge.text}</span>
+            <span>{badge.text}</span>
           </Badge>
         )}
 
         {/* Title */}
-        <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
+        <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200 text-white">
           {title}
         </h2>
 
         {/* Description */}
         {description && (
-          <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
+          <p className="text-white/90 opacity-0 animate-fade-in-up delay-300">
             {description}
           </p>
         )}
@@ -62,18 +62,20 @@ export function CTASection({
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up delay-500">
           <Button
-            variant={action.variant || "saudi"}
+            variant="default"
             size="lg"
             asChild
+            className="bg-white text-saudi-green hover:bg-white/90"
           >
             <a href={action.href}>{action.text}</a>
           </Button>
           
           {secondaryAction && (
             <Button
-              variant={secondaryAction.variant || "saudi-outline"}
+              variant="outline"
               size="lg"
               asChild
+              className="border-white text-white hover:bg-white hover:text-saudi-green"
             >
               <a href={secondaryAction.href}>{secondaryAction.text}</a>
             </Button>

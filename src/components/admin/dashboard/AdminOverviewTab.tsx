@@ -19,7 +19,7 @@ const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({ stats }) => {
       title: "Active Hotels",
       value: stats?.total_hotels || 0,
       icon: Hotel,
-      gradient: "bg-gradient-to-br from-orange-400 to-orange-600",
+      gradient: "bg-gradient-to-br from-saudi-green-400 to-saudi-green-600",
       description: "Hotels currently listed"
     },
     {
@@ -33,7 +33,7 @@ const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({ stats }) => {
       title: "Registered Users",
       value: stats?.total_users || 0,
       icon: Users,
-      gradient: "bg-gradient-to-br from-blue-400 to-blue-600",
+      gradient: "bg-gradient-to-br from-emerald-400 to-emerald-600",
       description: "Total platform users"
     }
   ];

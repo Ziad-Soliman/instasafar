@@ -27,7 +27,7 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-2xl font-bold text-navy-700 dark:text-white flex items-center">
-              <DollarSign className="h-6 w-6 mr-2 text-green-500" />
+              <DollarSign className="h-6 w-6 mr-2 text-saudi-green" />
               Revenue Analytics
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
@@ -39,7 +39,7 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
             <div className="text-2xl font-bold text-navy-700 dark:text-white">
               {formatCurrency(totalRevenue)}
             </div>
-            <div className="flex items-center text-green-500 text-sm">
+            <div className="flex items-center text-saudi-green text-sm">
               <TrendingUp className="h-4 w-4 mr-1" />
               +12.5% from last period
             </div>
@@ -55,8 +55,8 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
             >
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#422AFB" stopOpacity={0.4}/>
-                  <stop offset="100%" stopColor="#422AFB" stopOpacity={0.05}/>
+                  <stop offset="0%" stopColor="hsl(140, 100%, 20%)" stopOpacity={0.4}/>
+                  <stop offset="100%" stopColor="hsl(140, 100%, 20%)" stopOpacity={0.05}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
@@ -86,11 +86,11 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
               <Area 
                 type="monotone" 
                 dataKey="revenue" 
-                stroke="#422AFB" 
+                stroke="hsl(140, 100%, 20%)" 
                 strokeWidth={3}
                 fill="url(#revenueGradient)"
-                dot={{ fill: '#422AFB', strokeWidth: 3, r: 6 }}
-                activeDot={{ r: 8, stroke: '#422AFB', strokeWidth: 2, fill: '#ffffff' }}
+                dot={{ fill: 'hsl(140, 100%, 20%)', strokeWidth: 3, r: 6 }}
+                activeDot={{ r: 8, stroke: 'hsl(140, 100%, 20%)', strokeWidth: 2, fill: '#ffffff' }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -105,13 +105,13 @@ const AdminRevenueChart: React.FC<AdminRevenueChartProps> = ({
             <div className="text-sm text-gray-600 dark:text-gray-400">Average Monthly</div>
           </div>
           <div className="text-center p-4 bg-gray-50 dark:bg-navy-700 rounded-2xl">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-saudi-green">
               +24.5%
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Growth Rate</div>
           </div>
           <div className="text-center p-4 bg-gray-50 dark:bg-navy-700 rounded-2xl">
-            <div className="text-2xl font-bold text-brand-600">
+            <div className="text-2xl font-bold text-saudi-green">
               {monthlyData.length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Periods Tracked</div>

@@ -90,7 +90,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
         <div className="p-6 border-b border-gray-200 dark:border-navy-600">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-saudi-green-400 to-saudi-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">IS</span>
               </div>
               <div>
@@ -121,7 +121,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
                     isActive
-                      ? "bg-gradient-to-r from-brand-400 to-brand-600 text-white shadow-lg shadow-brand-400/25"
+                      ? "bg-gradient-to-r from-saudi-green-400 to-saudi-green-600 text-white shadow-lg shadow-saudi-green/25"
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-navy-700 hover:text-navy-700 dark:hover:text-white"
                   )}
                 >
@@ -131,7 +131,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
                       "transition-all duration-200",
                       isActive 
                         ? "text-white" 
-                        : "text-gray-500 dark:text-gray-400 group-hover:text-brand-500"
+                        : "text-gray-500 dark:text-gray-400 group-hover:text-saudi-green"
                     )} 
                   />
                   <span className="font-medium">{item.title}</span>
@@ -149,7 +149,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
           {/* User Info */}
           <div className="mb-4 p-3 bg-gray-50 dark:bg-navy-700 rounded-xl">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-saudi-green-400 to-saudi-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">
                   {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'A'}
                 </span>

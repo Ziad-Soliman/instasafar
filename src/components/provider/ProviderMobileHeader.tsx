@@ -36,7 +36,7 @@ const ProviderMobileHeader: React.FC<ProviderMobileHeaderProps> = ({ open, setOp
         </div>
 
         <div className="ml-auto">
-          <div className="w-8 h-8 bg-gradient-to-r from-brand-400 to-brand-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-r from-saudi-green-400 to-saudi-green-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-semibold text-xs">
               {user?.full_name?.charAt(0) || user?.email?.charAt(0) || 'P'}
             </span>

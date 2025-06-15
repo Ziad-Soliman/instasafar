@@ -41,7 +41,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
           <Input
             type="text"
             placeholder="Search anything..."
-            className="w-full pl-10 pr-4 py-3 text-sm rounded-2xl border-gray-200 dark:border-navy-600 bg-gray-50 dark:bg-navy-700 focus:ring-brand-400 focus:border-brand-400 font-medium"
+            className="w-full pl-10 pr-4 py-3 text-sm rounded-2xl border-gray-200 dark:border-navy-600 bg-gray-50 dark:bg-navy-700 focus:ring-saudi-green focus:border-saudi-green font-medium"
           />
         </div>
       </div>
@@ -50,7 +50,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
         {/* Messages */}
         <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-navy-700">
           <MessageSquare size={18} />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 bg-brand-400 text-white text-xs border-2 border-white dark:border-navy-800">
+          <Badge className="absolute -top-1 -right-1 h-5 w-5 bg-saudi-green text-white text-xs border-2 border-white dark:border-navy-800">
             3
           </Badge>
         </Button>
@@ -73,7 +73,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
             <div className="max-h-[300px] overflow-y-auto">
               <DropdownMenuItem className="p-4 cursor-default hover:bg-gray-50 dark:hover:bg-navy-700 rounded-xl mx-2 my-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-saudi-green-400 to-saudi-green-600 rounded-xl flex items-center justify-center">
                     <Bell className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -105,7 +105,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
               </DropdownMenuItem>
               <DropdownMenuItem className="p-4 cursor-default hover:bg-gray-50 dark:hover:bg-navy-700 rounded-xl mx-2 my-1">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
                     <Settings className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -121,7 +121,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ openSidebar }) => {
               </DropdownMenuItem>
             </div>
             <DropdownMenuSeparator className="bg-gray-200 dark:bg-navy-600" />
-            <DropdownMenuItem className="justify-center font-semibold text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-xl mx-2 my-1 py-3">
+            <DropdownMenuItem className="justify-center font-semibold text-saudi-green hover:bg-saudi-green-50 dark:hover:bg-saudi-green-900/20 rounded-xl mx-2 my-1 py-3">
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>

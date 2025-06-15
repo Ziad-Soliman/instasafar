@@ -5,7 +5,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { Globe } from '@/components/ui/globe';
 import { cn } from '@/lib/utils';
 import { 
   CheckCircle,
@@ -37,7 +36,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <AuroraBackground className="h-auto min-h-[50vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20 relative overflow-hidden" showRadialGradient={true}>
+    <AuroraBackground className="h-auto min-h-[35vh] pt-12 pb-8 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-center justify-center">
           {/* Hero Content */}
@@ -91,12 +90,6 @@ const HeroSection = () => {
             </div>
           </motion.div>
         </div>
-      </div>
-      
-      {/* Globe at the bottom */}
-      <div className="relative h-96 mt-8 flex items-center justify-center">
-        <Globe className="top-0" />
-        <div className="pointer-events-none absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.1),rgba(255,255,255,0))]" />
       </div>
     </AuroraBackground>
   );

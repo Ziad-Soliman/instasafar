@@ -19,10 +19,14 @@ const Index = () => {
 
   return (
     <div className={cn("min-h-screen", isRTL && "rtl")}>
-      {/* Unified Aurora Background for Hero and Search */}
-      <AuroraBackground className="h-auto min-h-[70vh] bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
-        <HeroSection />
-        <SearchSection />
+      {/* Unified Aurora Background for Hero and Search with reduced height */}
+      <AuroraBackground className="h-auto min-h-[60vh] bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
+        <div className="pb-8">
+          <HeroSection />
+        </div>
+        <div className="pt-8">
+          <SearchSection />
+        </div>
       </AuroraBackground>
       
       <StatsSection />

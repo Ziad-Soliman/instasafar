@@ -29,18 +29,18 @@ export const AuroraBackground = ({
               `
             [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
             [--dark-gradient:repeating-linear-gradient(100deg,var(--black)_0%,var(--black)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--black)_16%)]
-            [--aurora:repeating-linear-gradient(100deg,var(--saudi-green-400)_10%,var(--emerald-300)_15%,var(--saudi-green-300)_20%,var(--green-200)_25%,var(--saudi-green-500)_30%)]
+            [--aurora:repeating-linear-gradient(100deg,var(--saudi-green-200)_10%,var(--emerald-100)_15%,var(--saudi-green-100)_20%,var(--green-50)_25%,var(--saudi-green-200)_30%)]
             [background-image:var(--white-gradient),var(--aurora)]
             dark:[background-image:var(--dark-gradient),var(--aurora)]
-            [background-size:300%,_200%]
+            [background-size:400%,_300%]
             [background-position:50%_50%,50%_50%]
-            filter blur-[10px] invert dark:invert-0
+            filter blur-[15px] invert dark:invert-0
             after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
             after:dark:[background-image:var(--dark-gradient),var(--aurora)]
-            after:[background-size:200%,_100%] 
+            after:[background-size:300%,_200%] 
             after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
             pointer-events-none
-            absolute -inset-[10px] opacity-50 will-change-transform`,
+            absolute -inset-[10px] opacity-20 will-change-transform`,
 
               showRadialGradient &&
                 `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`

@@ -39,7 +39,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <AuroraBackground className="h-auto min-h-[80vh] pt-20 pb-16 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={false}>
+    <AuroraBackground className="h-auto min-h-[60vh] pt-20 pb-16 bg-gradient-to-br from-saudi-green/5 via-background to-muted/20" showRadialGradient={true}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Hero Content */}

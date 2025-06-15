@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -19,7 +18,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onLogout }) =>
 
   const mainNavItems = [
     { href: "/", label: t("home", "Home") },
-    { href: "/hotels", label: t("hotels", "Hotels") },
+    { href: "/search", label: t("hotels", "Hotels") },
     { href: "/packages", label: t("packages", "Packages") },
     { href: "/flights", label: t("flights", "Flights") },
     { href: "/transport", label: t("transport", "Transport") },

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,10 +9,10 @@ import RtlContainer from '@/components/layout/RtlContainer';
 
 // Pages
 import HomePage from '@/pages/Index';
-import HotelsPage from '@/pages/HotelsPage';
+import HotelsPage from '@/pages/SearchPage';
 import PackagesPage from '@/pages/PackagesPage';
 import FlightsPage from '@/pages/FlightsPage';
-import TransportPage from '@/pages/TransportPage';
+import TransportPage from '@/pages/TransportSearchPage';
 import AuthPage from '@/pages/auth/AuthPage';
 import ProfilePage from '@/pages/ProfilePage';
 import BookingsPage from '@/pages/BookingsPage';

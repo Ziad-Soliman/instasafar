@@ -75,14 +75,12 @@ export const useAdminDashboard = () => {
         // Safely extract profiles data with proper null handling
         let profilesData: { full_name: string } | null = null;
         
-        // Check if profiles exists and is not null first
-        if (item.profiles !== null && item.profiles !== undefined) {
-          // Now we know profiles is not null, we can safely check its properties
-          if (typeof item.profiles === 'object' && 'full_name' in item.profiles) {
-            const profilesObj = item.profiles as { full_name: string };
-            if (profilesObj.full_name) {
-              profilesData = { full_name: profilesObj.full_name };
-            }
+        // Use a more explicit approach to satisfy TypeScript
+        const profiles = item.profiles;
+        if (profiles && typeof profiles === 'object' && 'full_name' in profiles) {
+          const fullName = (profiles as { full_name: string }).full_name;
+          if (fullName) {
+            profilesData = { full_name: fullName };
           }
         }
 

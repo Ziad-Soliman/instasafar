@@ -11,34 +11,119 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Search } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const SearchSection = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchType, setSearchType] = useState('packages');
   const [destination, setDestination] = useState('');
   const [departureDate, setDepartureDate] = useState<Date>();
   const [duration, setDuration] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (destination) params.append('destination', destination);
-    if (departureDate) params.append('date', format(departureDate, 'yyyy-MM-dd'));
-    if (duration) params.append('duration', duration);
-    switch (searchType) {
-      case 'packages':
-        navigate(`/packages?${params.toString()}`);
-        break;
-      case 'hotels':
-        navigate(`/search?${params.toString()}`);
-        break;
-      case 'flights':
-        navigate(`/flights?${params.toString()}`);
-        break;
-      case 'transport':
-        navigate(`/transport?${params.toString()}`);
-        break;
+  // List of supported cities
+  const cities = [
+    { value: 'Makkah', label: 'Makkah', labelAr: 'مكة المكرمة' },
+    { value: 'Madinah', label: 'Madinah', labelAr: 'المدينة المنورة' },
+    { value: 'Jeddah', label: 'Jeddah', labelAr: 'جدة' },
+    { value: 'Riyadh', label: 'Riyadh', labelAr: 'الرياض' },
+    { value: 'Dammam', label: 'Dammam', labelAr: 'الدمام' },
+    { value: 'Taif', label: 'Taif', labelAr: 'الطائف' },
+  ];
+
+  const handleSearch = async () => {
+    // Basic validation
+    if (!destination && searchType !== 'packages') {
+      toast({
+        title: "Missing Information",
+        description: "Please select a destination to search.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (searchType === 'flights' && !departureDate) {
+      toast({
+        title: "Missing Information", 
+        description: "Please select a departure date for flight search.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Build search parameters
+      const params = new URLSearchParams();
+      
+      // Add common parameters
+      if (destination) {
+        params.append('city', destination);
+        params.append('destination', destination);
+      }
+      if (departureDate) {
+        params.append('date', format(departureDate, 'yyyy-MM-dd'));
+        params.append('departure_date', format(departureDate, 'yyyy-MM-dd'));
+      }
+      if (duration) {
+        params.append('duration', duration);
+      }
+
+      // Navigate based on search type with appropriate filters
+      switch (searchType) {
+        case 'packages':
+          if (destination) params.append('location', destination);
+          navigate(`/packages?${params.toString()}`);
+          break;
+          
+        case 'hotels':
+          // Use the search page for hotels with city filter
+          if (destination) params.append('location', destination);
+          navigate(`/search?${params.toString()}`);
+          break;
+          
+        case 'flights':
+          // Add flight-specific parameters
+          if (destination) {
+            params.append('to', destination);
+            params.append('destination', destination);
+          }
+          navigate(`/flights?${params.toString()}`);
+          break;
+          
+        case 'transport':
+          // Add transport-specific parameters
+          if (destination) {
+            params.append('to_city', destination);
+            params.append('destination_city', destination);
+          }
+          params.append('passengers', '1'); // Default passengers
+          navigate(`/transport?${params.toString()}`);
+          break;
+          
+        default:
+          navigate('/search');
+      }
+
+      // Show success message
+      toast({
+        title: "Search Started",
+        description: `Searching for ${searchType} in ${destination || 'all locations'}...`,
+      });
+
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "Search Failed",
+        description: "There was an error with your search. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,8 +136,8 @@ const SearchSection = () => {
         viewport={{ once: true }}
         className={cn("text-center mb-12", isRTL && "text-center")}
       >
-        <h2 className="text-3xl font-bold mb-4 text-center">{t('home.search.title')}</h2>
-        <p className="text-muted-foreground text-lg text-center">{t('home.search.subtitle')}</p>
+        <h2 className="text-3xl font-bold mb-4 text-center">{t('home.search.title', 'Find Your Perfect Journey')}</h2>
+        <p className="text-muted-foreground text-lg text-center">{t('home.search.subtitle', 'Search for hotels, packages, flights, and transport options')}</p>
       </motion.div>
 
       {/* Full-width card with enhanced glass effect */}
@@ -70,8 +155,9 @@ const SearchSection = () => {
                   variant={searchType === type ? 'default' : 'outline'}
                   onClick={() => setSearchType(type)}
                   className="flex-1 min-w-[120px] backdrop-blur-sm"
+                  disabled={loading}
                 >
-                  {t(`home.search.${type}`)}
+                  {t(`home.search.${type}`, type.charAt(0).toUpperCase() + type.slice(1))}
                 </Button>
               ))}
             </div>
@@ -79,17 +165,23 @@ const SearchSection = () => {
             {/* Search Form */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('home.search.destination')}</label>
-                <Input
-                  placeholder={t('home.search.destinationPlaceholder')}
-                  value={destination}
-                  onChange={e => setDestination(e.target.value)}
-                  className="backdrop-blur-sm bg-background/60"
-                />
+                <label className="text-sm font-medium">{t('home.search.destination', 'Destination')}</label>
+                <Select value={destination} onValueChange={setDestination} disabled={loading}>
+                  <SelectTrigger className="backdrop-blur-sm bg-background/60">
+                    <SelectValue placeholder={t('home.search.destinationPlaceholder', 'Select destination')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map(city => (
+                      <SelectItem key={city.value} value={city.value}>
+                        {isRTL ? city.labelAr : city.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('home.search.departureDate')}</label>
+                <label className="text-sm font-medium">{t('home.search.departureDate', 'Departure Date')}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -99,9 +191,10 @@ const SearchSection = () => {
                         !departureDate && "text-muted-foreground",
                         isRTL && "text-right"
                       )}
+                      disabled={loading}
                     >
                       <CalendarIcon className={cn("mr-2 h-4 w-4", isRTL && "ml-2 mr-0")} />
-                      {departureDate ? format(departureDate, "PPP") : t('home.search.departurePlaceholder')}
+                      {departureDate ? format(departureDate, "PPP") : t('home.search.departurePlaceholder', 'Pick a date')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -117,16 +210,17 @@ const SearchSection = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">{t('home.search.duration')}</label>
-                <Select value={duration} onValueChange={setDuration}>
+                <label className="text-sm font-medium">{t('home.search.duration', 'Duration')}</label>
+                <Select value={duration} onValueChange={setDuration} disabled={loading}>
                   <SelectTrigger className="backdrop-blur-sm bg-background/60">
-                    <SelectValue placeholder={t('home.search.durationPlaceholder')} />
+                    <SelectValue placeholder={t('home.search.durationPlaceholder', 'Select duration')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">{t('common.days', '3 Days')}</SelectItem>
                     <SelectItem value="7">{t('common.days', '7 Days')}</SelectItem>
                     <SelectItem value="14">{t('common.days', '14 Days')}</SelectItem>
                     <SelectItem value="21">{t('common.days', '21 Days')}</SelectItem>
+                    <SelectItem value="30">{t('common.days', '30 Days')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -136,10 +230,31 @@ const SearchSection = () => {
                 <Button
                   onClick={handleSearch}
                   className="w-full bg-saudi-green hover:bg-saudi-green/90"
+                  disabled={loading}
                 >
-                  {t('home.search.searchButton')}
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {t('common.searching', 'Searching...')}
+                    </div>
+                  ) : (
+                    <>
+                      <Search className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")} />
+                      {t('home.search.searchButton', 'Search')}
+                    </>
+                  )}
                 </Button>
               </div>
+            </div>
+
+            {/* Search type specific information */}
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg backdrop-blur-sm">
+              <p className="text-sm text-muted-foreground text-center">
+                {searchType === 'packages' && t('home.search.packagesInfo', 'Search for complete travel packages including accommodation and activities')}
+                {searchType === 'hotels' && t('home.search.hotelsInfo', 'Find the perfect accommodation for your stay')}
+                {searchType === 'flights' && t('home.search.flightsInfo', 'Book flights to your desired destination')}
+                {searchType === 'transport' && t('home.search.transportInfo', 'Find reliable transport options between cities')}
+              </p>
             </div>
           </CardContent>
         </Card>

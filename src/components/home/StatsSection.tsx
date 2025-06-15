@@ -44,13 +44,13 @@ const StatsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className={`text-center mb-12 ${isRTL ? 'font-arabic' : ''}`}
+          className="text-center mb-12"
         >
-          <h2 className={`text-3xl md:text-4xl font-bold text-gray-900 mb-3 ${isRTL ? 'text-right' : 'text-left'} text-center`}>
+          <h2 className={`text-3xl md:text-4xl font-bold text-gray-900 mb-3 text-center ${isRTL ? 'font-arabic' : ''}`}>
             {t('home.stats.title', 'Trusted by Thousands')}
           </h2>
           <div className="w-16 h-1 bg-saudi-green mx-auto rounded-full mb-4"></div>
-          <p className={`text-lg text-gray-600 max-w-2xl mx-auto ${isRTL ? 'text-right font-arabic' : 'text-left'} text-center`}>
+          <p className={`text-lg text-gray-600 max-w-2xl mx-auto text-center ${isRTL ? 'font-arabic' : ''}`}>
             {t('home.stats.subtitle', 'Your journey to the holy lands is our mission')}
           </p>
         </motion.div>
@@ -63,7 +63,7 @@ const StatsSection = () => {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`group ${isRTL ? 'text-right' : 'text-left'} text-center`}
+              className="group text-center"
             >
               {/* Icon container */}
               <div className="relative mb-6 flex justify-center">
@@ -89,7 +89,7 @@ const StatsSection = () => {
               </motion.div>
               
               {/* Label */}
-              <div className={`text-base md:text-lg font-medium text-gray-700 ${isRTL ? 'font-arabic' : ''}`}>
+              <div className={`text-base md:text-lg font-medium text-gray-700 text-center ${isRTL ? 'font-arabic' : ''}`}>
                 {stat.label}
               </div>
             </motion.div>

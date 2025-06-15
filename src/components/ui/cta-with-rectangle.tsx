@@ -41,20 +41,20 @@ export function CTASection({
         {badge && (
           <Badge
             variant="outline"
-            className="opacity-0 animate-fade-in-up delay-100 border-white/30 text-white hover:bg-white/10"
+            className="opacity-0 animate-fade-in-up delay-100"
           >
             <span>{badge.text}</span>
           </Badge>
         )}
 
         {/* Title */}
-        <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200 text-white">
+        <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
           {title}
         </h2>
 
         {/* Description */}
         {description && (
-          <p className="text-white/90 opacity-0 animate-fade-in-up delay-300">
+          <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
             {description}
           </p>
         )}
@@ -65,7 +65,6 @@ export function CTASection({
             variant="default"
             size="lg"
             asChild
-            className="bg-white text-saudi-green hover:bg-white/90"
           >
             <a href={action.href}>{action.text}</a>
           </Button>
@@ -75,7 +74,6 @@ export function CTASection({
               variant="outline"
               size="lg"
               asChild
-              className="border-white text-white hover:bg-white hover:text-saudi-green"
             >
               <a href={secondaryAction.href}>{secondaryAction.text}</a>
             </Button>

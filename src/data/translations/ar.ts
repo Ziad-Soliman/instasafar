@@ -1,4 +1,3 @@
-
 export const arabicTranslations = {
   // Navigation
   "home": "الرئيسية",
@@ -171,25 +170,46 @@ export const arabicTranslations = {
   "dashboard.overview": "نظرة عامة على لوحة التحكم",
 
   // Footer
+  "footer.tagline": "شريكك الموثوق في رحلات الحج والعمرة، نلتزم بجعل تجربتك الروحانية لا تُنسى ومريحة.",
+  "footer.company": "الشركة",
+  "footer.aboutUs": "معلومات عنا",
+  "footer.ourServices": "خدماتنا",
+  "footer.contactUs": "اتصل بنا",
+  "footer.careers": "الوظائف",
+  "footer.services": "الخدمات",
+  "footer.hajjPackages": "باقات الحج",
+  "footer.umrahPackages": "باقات العمرة",
+  "footer.hotelBooking": "حجز الفنادق",
+  "footer.flightBooking": "حجز الرحلات الجوية",
+  "footer.transportServices": "خدمات النقل",
+  "footer.support": "الدعم",
+  "footer.helpCenter": "مركز المساعدة",
+  "footer.faqs": "الأسئلة الشائعة",
+  "footer.visaInfo": "معلومات التأشيرة",
+  "footer.termsAndConditions": "الشروط والأحكام",
+  "footer.privacyPolicyLink": "سياسة الخصوصية",
+  "footer.newsletter": "النشرة الإخبارية",
+  "footer.newsletterTagline": "اشترك لتلقي تحديثات حول الباقات والعروض الجديدة.",
+  "footer.yourEmail": "بريدك الإلكتروني",
+  "footer.subscribe": "اشترك",
+  "footer.providerPortal": "بوابة مقدم الخدمة",
+  "footer.adminPortal": "بوابة الإدارة",
+  "footer.address": "شارع الأعمال 123، مكة المكرمة، المملكة العربية السعودية",
+  "footer.phone": "+966 123 456 7890",
+  "footer.email": "info@instasafar.com",
+  "footer.copyright": "© {year} إنستا سفر. جميع الحقوق محفوظة.",
+
+  // Legacy footer translations (keeping for compatibility)
   "footer.description": "شريكك الموثوق في رحلات الحج والعمرة. نقدم خدمة استثنائية وإرشاد روحاني منذ عام 2020.",
   "footer.quickLinks": "روابط سريعة",
-  "footer.services": "الخدمات",
   "footer.contact": "معلومات الاتصال",
   "footer.followUs": "تابعنا",
-  "footer.newsletter": "النشرة الإخبارية",
   "footer.newsletterText": "اشترك للحصول على تحديثات حول العروض الخاصة والباقات",
-  "footer.subscribe": "اشترك",
   "footer.emailPlaceholder": "أدخل بريدك الإلكتروني",
   "footer.rights": "جميع الحقوق محفوظة.",
   "footer.privacy": "سياسة الخصوصية",
   "footer.terms": "شروط الخدمة",
-  "footer.support": "الدعم",
   "footer.about": "معلومات عنا",
   "footer.hajjUmrah": "الحج والعمرة",
-  "footer.hotelBooking": "حجز الفنادق",
-  "footer.flightBooking": "حجز الرحلات الجوية",
-  "footer.transportation": "النقل",
-  "footer.phone": "+966 11 234 5678",
-  "footer.email": "info@instasafar.com",
-  "footer.address": "الرياض، المملكة العربية السعودية"
+  "footer.transportation": "النقل"
 };

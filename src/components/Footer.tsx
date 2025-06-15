@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Building, Facebook, Instagram, Twitter, MapPin, Mail, Phone } from "lucide-react";
+import { Building, Facebook, Instagram, Twitter, MapPin, Mail, Phone, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -206,15 +205,22 @@ const Footer: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Provider Link & Copyright */}
+        {/* Provider & Admin Links & Copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-8 border-t">
-          <div className="mb-4 md:mb-0">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 md:mb-0">
             <Link
               to="/provider"
               className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               <Building size={16} className="mr-2" />
               {t("footer.providerPortal", "Provider Portal")}
+            </Link>
+            <Link
+              to="/admin"
+              className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Shield size={16} className="mr-2" />
+              {t("footer.adminPortal", "Admin Portal")}
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">

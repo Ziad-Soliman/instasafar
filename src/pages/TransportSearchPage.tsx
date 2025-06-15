@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -22,16 +23,20 @@ import { useToast } from "@/hooks/use-toast";
 // Types must match backend
 interface Transport {
   id: string;
-  provider?: string;
+  name?: string;
+  name_ar?: string;
   provider_logo?: string;
-  transport_type: "bus" | "car" | "shuttle";
+  type: string;
   from_city: string;
+  from_city_ar?: string;
   to_city: string;
+  to_city_ar?: string;
   departure_time: string;
-  duration: string;
+  duration_hours: number;
   price: number;
   capacity: number;
-  is_internal?: boolean; // Supabase doesn't have this field unless you store it
+  available_seats: number;
+  is_internal?: boolean;
   features?: string[];
 }
 
@@ -44,7 +49,7 @@ interface ExternalTransportProvider {
 }
 
 const TransportSearchPage: React.FC = () => {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -62,94 +67,99 @@ const TransportSearchPage: React.FC = () => {
   const [externalProviders, setExternalProviders] = useState<ExternalTransportProvider[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch transport options from Supabase Edge Function (server-side filtering)
+  // Fetch transport options from Supabase
   const handleSearch = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Build query string for all filters
-      const queryParams: string[] = [];
-      if (fromCity) queryParams.push(`from=${encodeURIComponent(fromCity)}`);
-      if (toCity) queryParams.push(`to=${encodeURIComponent(toCity)}`);
-      if (travelDate) queryParams.push(`date=${encodeURIComponent(travelDate.toISOString().split("T")[0])}`);
-      if (transportType && transportType !== "all") queryParams.push(`type=${encodeURIComponent(transportType)}`);
-      if (passengers) queryParams.push(`passengers=${passengers}`);
-      const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+      let query = supabase.from("transport_options").select("*");
+      
+      if (transportType && transportType !== "all") {
+        query = query.eq("type", transportType);
+      }
 
-      // Call the Supabase edge function for transport search (fetching from backend with filters)
-      const { data, error } = await supabase.functions.invoke(`transport${queryString}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const { data, error } = await query;
 
       if (error) {
         setTransports([]);
-        setError("Failed to fetch transport options");
+        setError(t("transport.noTransport", "No transport options found"));
         toast({
-          title: "Error",
-          description: "Could not load transport options.",
+          title: t("common.error", "Error"),
+          description: t("transport.noTransportMessage", "Could not load transport options."),
           variant: "destructive",
         });
         setLoading(false);
         return;
       }
 
-      // All filtering is server-side now
-      const transportData: Transport[] = Array.isArray(data) ? data : [];
+      // Transform the data to match component expectations
+      const transportData: Transport[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        name_ar: item.name_ar,
+        provider_logo: item.thumbnail,
+        type: item.type,
+        from_city: item.from_city,
+        from_city_ar: item.from_city_ar,
+        to_city: item.to_city,
+        to_city_ar: item.to_city_ar,
+        departure_time: item.departure_time || "08:00",
+        duration_hours: item.duration_hours || 2,
+        price: Number(item.price),
+        capacity: item.capacity || 50,
+        available_seats: item.available_seats || 30,
+        features: []
+      }));
+
       setTransports(transportData);
 
-      // External providers - still mocked for now (not affected)
+      // External providers - still mocked for now
       setExternalProviders([
         {
           id: "provider-1",
           name: "GetYourGuide",
           logo: "/placeholder.svg",
           url: "https://getyourguide.com",
-          price_indication: "From $50"
+          price_indication: t("transport.from", "From") + " $50"
         },
         {
           id: "provider-2",
           name: "Uber",
           logo: "/placeholder.svg",
           url: "https://uber.com",
-          price_indication: "From $120"
+          price_indication: t("transport.from", "From") + " $120"
         },
         {
           id: "provider-3",
           name: "Viator",
           logo: "/placeholder.svg",
           url: "https://viator.com",
-          price_indication: "From $65"
+          price_indication: t("transport.from", "From") + " $65"
         }
       ]);
 
       setLoading(false);
     } catch (err: any) {
-      setError("Unknown error fetching data");
+      setError(t("common.error", "Unknown error fetching data"));
       setLoading(false);
       toast({
-        title: "Error",
-        description: err?.message || "An error occurred.",
+        title: t("common.error", "Error"),
+        description: err?.message || t("common.tryAgain", "An error occurred."),
         variant: "destructive",
       });
     }
-  }, [toast, fromCity, toCity, travelDate, transportType, passengers]);
+  }, [toast, transportType, t]);
 
-  // Run search on mount and whenever ANY filter changes
+  // Run search on mount and whenever filter changes
   useEffect(() => {
     handleSearch();
   }, [handleSearch]);
 
-  // Remove all local client-side filtering; show all transports received from backend
-  // Old:
-  // const filteredTransports = transports.filter(...);
-  // New:
-  const filteredTransports = transports; // display as-received (server-side filtered)
+  const filteredTransports = transports;
 
   // Handle view details/book now
   const handleViewDetails = (transport: Transport) => {
-    // Navigate for internal transports
     navigate(`/transport/${transport.id}`);
   };
 
@@ -162,12 +172,24 @@ const TransportSearchPage: React.FC = () => {
   const getTransportIcon = (type: string) => {
     switch (type) {
       case "bus":
+      case "intercity":
         return <Bus className="h-4 w-4" />;
       case "car":
+      case "private_car":
         return <Car className="h-4 w-4" />;
       default:
         return <Bus className="h-4 w-4" />;
     }
+  };
+
+  // Get display name based on language
+  const getDisplayName = (name: string, name_ar?: string) => {
+    return language === 'ar' && name_ar ? name_ar : name;
+  };
+
+  // Get display city based on language
+  const getDisplayCity = (city: string, city_ar?: string) => {
+    return language === 'ar' && city_ar ? city_ar : city;
   };
 
   return (
@@ -177,44 +199,44 @@ const TransportSearchPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-6">Find Transport</h1>
+        <h1 className="text-3xl font-bold mb-6">{t("transport.title", "Transportation Services")}</h1>
         
         {/* Transport Search Form */}
         <Card className="mb-8">
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div>
-                <Label htmlFor="from">From</Label>
+                <Label htmlFor="from">{t("transport.from", "From")}</Label>
                 <Select defaultValue={fromCity} onValueChange={setFromCity}>
                   <SelectTrigger id="from">
-                    <SelectValue placeholder="Select city" />
+                    <SelectValue placeholder={t("home.search.destinationPlaceholder", "Select city")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Makkah">Makkah</SelectItem>
-                    <SelectItem value="Madinah">Madinah</SelectItem>
-                    <SelectItem value="Jeddah">Jeddah</SelectItem>
-                    <SelectItem value="Riyadh">Riyadh</SelectItem>
+                    <SelectItem value="Makkah">{language === 'ar' ? 'مكة المكرمة' : 'Makkah'}</SelectItem>
+                    <SelectItem value="Madinah">{language === 'ar' ? 'المدينة المنورة' : 'Madinah'}</SelectItem>
+                    <SelectItem value="Jeddah">{language === 'ar' ? 'جدة' : 'Jeddah'}</SelectItem>
+                    <SelectItem value="Riyadh">{language === 'ar' ? 'الرياض' : 'Riyadh'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div>
-                <Label htmlFor="to">To</Label>
+                <Label htmlFor="to">{t("transport.to", "To")}</Label>
                 <Select defaultValue={toCity} onValueChange={setToCity}>
                   <SelectTrigger id="to">
-                    <SelectValue placeholder="Select city" />
+                    <SelectValue placeholder={t("home.search.destinationPlaceholder", "Select city")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Makkah">Makkah</SelectItem>
-                    <SelectItem value="Madinah">Madinah</SelectItem>
-                    <SelectItem value="Jeddah">Jeddah</SelectItem>
-                    <SelectItem value="Riyadh">Riyadh</SelectItem>
+                    <SelectItem value="Makkah">{language === 'ar' ? 'مكة المكرمة' : 'Makkah'}</SelectItem>
+                    <SelectItem value="Madinah">{language === 'ar' ? 'المدينة المنورة' : 'Madinah'}</SelectItem>
+                    <SelectItem value="Jeddah">{language === 'ar' ? 'جدة' : 'Jeddah'}</SelectItem>
+                    <SelectItem value="Riyadh">{language === 'ar' ? 'الرياض' : 'Riyadh'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div>
-                <Label htmlFor="travel-date">Travel Date</Label>
+                <Label htmlFor="travel-date">{t("home.search.departureDate", "Travel Date")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -225,7 +247,7 @@ const TransportSearchPage: React.FC = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {travelDate ? format(travelDate, "PPP") : <span>Pick a date</span>}
+                      {travelDate ? format(travelDate, "PPP") : <span>{t("home.search.departurePlaceholder", "Pick a date")}</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -241,15 +263,15 @@ const TransportSearchPage: React.FC = () => {
               </div>
               
               <div>
-                <Label htmlFor="passengers">Passengers</Label>
+                <Label htmlFor="passengers">{t("common.passengers", "Passengers")}</Label>
                 <Select defaultValue={passengers.toString()} onValueChange={(val) => setPassengers(parseInt(val))}>
                   <SelectTrigger id="passengers">
-                    <SelectValue placeholder="Select passengers" />
+                    <SelectValue placeholder={t("common.passengers", "Select passengers")} />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 6, 8, 10, 15, 20].map(num => (
                       <SelectItem key={num} value={num.toString()}>
-                        {num} {num === 1 ? 'passenger' : 'passengers'}
+                        {num} {num === 1 ? t("common.passenger", "passenger") : t("common.passengers", "passengers")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -258,7 +280,7 @@ const TransportSearchPage: React.FC = () => {
             </div>
             
             <div className="mb-4">
-              <Label>Transport Type</Label>
+              <Label>{t("transport.type", "Transport Type")}</Label>
               <RadioGroup 
                 defaultValue={transportType} 
                 onValueChange={setTransportType}
@@ -266,26 +288,26 @@ const TransportSearchPage: React.FC = () => {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="all" id="all-transport" />
-                  <Label htmlFor="all-transport">All Types</Label>
+                  <Label htmlFor="all-transport">{t("transport.allTypes", "All Types")}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="bus" id="bus" />
-                  <Label htmlFor="bus">Bus</Label>
+                  <RadioGroupItem value="intercity" id="bus" />
+                  <Label htmlFor="bus">{t("transport.intercity", "Bus")}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="shuttle" id="shuttle" />
-                  <Label htmlFor="shuttle">Shuttle</Label>
+                  <RadioGroupItem value="airport_transfer" id="shuttle" />
+                  <Label htmlFor="shuttle">{t("transport.airportTransfer", "Airport Transfer")}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="car" id="car" />
-                  <Label htmlFor="car">Car</Label>
+                  <RadioGroupItem value="private_car" id="car" />
+                  <Label htmlFor="car">{t("transport.privateCar", "Private Car")}</Label>
                 </div>
               </RadioGroup>
             </div>
             
             <div className="flex justify-end">
               <Button onClick={handleSearch} className="px-8">
-                <Search className="mr-2 h-4 w-4" /> Search Transport
+                <Search className="mr-2 h-4 w-4" /> {t("search.searchButton", "Search Transport")}
               </Button>
             </div>
           </CardContent>
@@ -298,11 +320,11 @@ const TransportSearchPage: React.FC = () => {
               <TabsList className="mb-6">
                 <TabsTrigger value="transport">
                   <Bus className="h-4 w-4 mr-2" />
-                  Transport Options
+                  {t("transport.options", "Transport Options")}
                 </TabsTrigger>
                 <TabsTrigger value="external">
                   <Search className="h-4 w-4 mr-2" />
-                  External Providers
+                  {t("transport.externalProviders", "External Providers")}
                 </TabsTrigger>
               </TabsList>
               
@@ -335,14 +357,14 @@ const TransportSearchPage: React.FC = () => {
                   <Card>
                     <CardContent className="p-6 text-center">
                       <p className="text-muted-foreground">{error}</p>
-                      <Button onClick={handleSearch} className="mt-4">Retry</Button>
+                      <Button onClick={handleSearch} className="mt-4">{t("common.tryAgain", "Retry")}</Button>
                     </CardContent>
                   </Card>
                 ) : filteredTransports.length === 0 ? (
                   <Card>
                     <CardContent className="p-6 text-center">
-                      <p className="text-muted-foreground">No transport options found matching your criteria.</p>
-                      <Button onClick={handleSearch} className="mt-4">Reset Filters</Button>
+                      <p className="text-muted-foreground">{t("transport.noTransport", "No transport options found matching your criteria.")}</p>
+                      <Button onClick={handleSearch} className="mt-4">{t("common.reset", "Reset Filters")}</Button>
                     </CardContent>
                   </Card>
                 ) : (
@@ -351,56 +373,55 @@ const TransportSearchPage: React.FC = () => {
                       <Card key={transport.id} className="relative overflow-hidden">
                         {transport.is_internal && (
                           <Badge className="absolute top-2 right-2 z-10 bg-primary" variant="secondary">
-                            Internal
+                            {t("transport.internal", "Internal")}
                           </Badge>
                         )}
                         <CardContent className="p-6">
                           <div className="flex flex-col lg:flex-row justify-between gap-4">
                             <div className="flex gap-4 items-center">
                               <div className="w-12 h-12 bg-muted rounded-full overflow-hidden flex-shrink-0">
-                                {/* Use provider_logo if available */}
                                 {transport.provider_logo ? (
                                   <img
                                     src={transport.provider_logo}
-                                    alt={transport.provider || ""}
+                                    alt={getDisplayName(transport.name || "", transport.name_ar)}
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground">No Logo</div>
+                                  <div className="flex items-center justify-center h-full text-xs text-muted-foreground">{t("common.noLogo", "No Logo")}</div>
                                 )}
                               </div>
                               <div>
-                                <h3 className="font-medium">{transport.provider}</h3>
+                                <h3 className="font-medium">{getDisplayName(transport.name || "", transport.name_ar)}</h3>
                                 <div className="flex items-center text-sm text-muted-foreground">
-                                  {getTransportIcon(transport.transport_type)}
-                                  <span className="ml-1 capitalize">{transport.transport_type}</span>
+                                  {getTransportIcon(transport.type)}
+                                  <span className="ml-1 capitalize">{transport.type.replace('_', ' ')}</span>
                                 </div>
                               </div>
                             </div>
                             <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-center">
                               <div className="text-center">
-                                <div className="font-semibold">{transport.from_city}</div>
-                                <div className="text-sm text-muted-foreground">From</div>
+                                <div className="font-semibold">{getDisplayCity(transport.from_city, transport.from_city_ar)}</div>
+                                <div className="text-sm text-muted-foreground">{t("transport.from", "From")}</div>
                                 <div className="text-xs">{transport.departure_time}</div>
                               </div>
                               <div className="text-center flex flex-col items-center">
-                                <div className="text-xs text-muted-foreground">{transport.duration}</div>
+                                <div className="text-xs text-muted-foreground">{transport.duration_hours}h</div>
                                 <div className="w-full flex items-center">
                                   <div className="h-[1px] bg-border flex-grow"></div>
-                                  {getTransportIcon(transport.transport_type)}
+                                  {getTransportIcon(transport.type)}
                                   <div className="h-[1px] bg-border flex-grow"></div>
                                 </div>
                               </div>
                               <div className="text-center">
-                                <div className="font-semibold">{transport.to_city}</div>
-                                <div className="text-sm text-muted-foreground">To</div>
+                                <div className="font-semibold">{getDisplayCity(transport.to_city, transport.to_city_ar)}</div>
+                                <div className="text-sm text-muted-foreground">{t("transport.to", "To")}</div>
                               </div>
                             </div>
                             <div className="flex flex-col items-end justify-between">
                               <div className="text-xl font-bold">${transport.price}</div>
-                              <div className="text-xs text-muted-foreground mb-2">per person</div>
+                              <div className="text-xs text-muted-foreground mb-2">{t("price.perPerson", "per person")}</div>
                               <Button onClick={() => handleViewDetails(transport)}>
-                                View Details
+                                {t("packages.viewDetails", "View Details")}
                               </Button>
                             </div>
                           </div>
@@ -414,7 +435,7 @@ const TransportSearchPage: React.FC = () => {
                             </div>
                             <div className="mt-2 text-xs text-muted-foreground flex items-center">
                               <Users className="w-3 h-3 mr-1" />
-                              <span>Capacity: {transport.capacity} passengers</span>
+                              <span>{t("transport.capacity", "Capacity")}: {transport.capacity} {t("common.passengers", "passengers")}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -464,7 +485,7 @@ const TransportSearchPage: React.FC = () => {
                             className="w-full"
                             variant="outline"
                           >
-                            Search on {provider.name}
+                            {t("transport.searchOn", "Search on")} {provider.name}
                             <ArrowRight className="ml-2 h-3 w-3" />
                           </Button>
                         </CardContent>

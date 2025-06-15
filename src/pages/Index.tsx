@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +21,8 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Award,
-  CheckCircle
+  CheckCircle,
+  Quote
 } from 'lucide-react';
 import PackageCard from '@/components/cards/PackageCard';
 import HotelCard from '@/components/cards/HotelCard';
@@ -101,6 +103,27 @@ const Index = () => {
     },
   ];
 
+  const testimonials = [
+    {
+      name: t('home.testimonials.testimonial1.name'),
+      text: t('home.testimonials.testimonial1.text'),
+      rating: 5,
+      location: t('home.testimonials.testimonial1.location'),
+    },
+    {
+      name: t('home.testimonials.testimonial2.name'),
+      text: t('home.testimonials.testimonial2.text'),
+      rating: 5,
+      location: t('home.testimonials.testimonial2.location'),
+    },
+    {
+      name: t('home.testimonials.testimonial3.name'),
+      text: t('home.testimonials.testimonial3.text'),
+      rating: 5,
+      location: t('home.testimonials.testimonial3.location'),
+    },
+  ];
+
   return (
     <div className={cn("min-h-screen", isRTL && "rtl")}>
       {/* Hero Section */}
@@ -166,8 +189,8 @@ const Index = () => {
               <Card className="overflow-hidden">
                 <div className="relative aspect-[4/3]">
                   <img
-                    src="/lovable-uploads/03288ca0-787e-4fff-9f1f-497e0e6eb4ad.png"
-                    alt="Masjid an-Nabawi"
+                    src="https://images.unsplash.com/photo-1564769625392-651b64d96e7f?auto=format&fit=crop&w=800&q=80"
+                    alt={t('home.hero.kaaba')}
                     className="w-full h-full object-cover"
                   />
                   
@@ -213,7 +236,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={cn("text-center space-y-2", isRTL && "text-right")}
+                className={cn("text-center space-y-2", isRTL && "text-center")}
               >
                 <stat.icon className="h-8 w-8 mx-auto mb-4 text-white/90" />
                 <div className="text-3xl font-bold">{stat.value}</div>
@@ -232,7 +255,7 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className={cn("text-center mb-12", isRTL && "text-right")}
+            className={cn("text-center mb-12", isRTL && "text-center")}
           >
             <h2 className="text-3xl font-bold mb-4">{t('home.search.title')}</h2>
             <p className="text-muted-foreground text-lg">{t('home.search.subtitle')}</p>
@@ -329,7 +352,7 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className={cn("text-center mb-12", isRTL && "text-right")}
+              className={cn("text-center mb-12", isRTL && "text-center")}
             >
               <h2 className="text-3xl font-bold mb-4">{t('packages.featuredPackages')}</h2>
               <p className="text-muted-foreground text-lg">{t('packages.pageDescription', 'Discover amazing travel packages designed for your perfect Saudi Arabian experience')}</p>
@@ -371,7 +394,7 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className={cn("text-center mb-12", isRTL && "text-right")}
+              className={cn("text-center mb-12", isRTL && "text-center")}
             >
               <h2 className="text-3xl font-bold mb-4">{t('hotels.featuredHotels')}</h2>
               <p className="text-muted-foreground text-lg">{t('hotels.searchHotels', 'Find the perfect accommodation for your spiritual journey')}</p>
@@ -403,6 +426,90 @@ const Index = () => {
           </div>
         </section>
       )}
+
+      {/* Testimonials Section */}
+      <section className="py-16 bg-muted/10">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className={cn("text-center mb-12", isRTL && "text-center")}
+          >
+            <h2 className="text-3xl font-bold mb-4">{t('home.testimonials.title')}</h2>
+            <p className="text-muted-foreground text-lg">{t('home.testimonials.subtitle')}</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full">
+                  <CardContent className="p-6">
+                    <Quote className={cn("h-8 w-8 text-saudi-green mb-4", isRTL && "transform scale-x-[-1]")} />
+                    <p className="text-muted-foreground mb-4 leading-relaxed">
+                      "{testimonial.text}"
+                    </p>
+                    <div className={cn("flex items-center gap-1 mb-3", isRTL && "flex-row-reverse")}>
+                      {Array.from({ length: testimonial.rating }).map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <div className={cn(isRTL && "text-right")}>
+                      <p className="font-semibold">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="py-16 bg-saudi-green text-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className={cn("text-center max-w-3xl mx-auto", isRTL && "text-center")}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              {t('home.cta.title')}
+            </h2>
+            <p className="text-white/90 text-lg mb-8 leading-relaxed">
+              {t('home.cta.subtitle')}
+            </p>
+            <div className={cn("flex flex-col sm:flex-row gap-4 justify-center", isRTL && "sm:flex-row-reverse")}>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => navigate('/packages')}
+                className="bg-white text-saudi-green hover:bg-white/90"
+              >
+                {t('home.cta.browsePackages')}
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => navigate('/auth/register')}
+                className="border-white text-white hover:bg-white/10"
+              >
+                {t('home.cta.startJourney')}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };

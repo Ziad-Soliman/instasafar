@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Language = 'en' | 'ar';
@@ -117,6 +116,24 @@ const translations: Record<Language, Record<string, string>> = {
     'home.search.duration': 'Duration',
     'home.search.durationPlaceholder': '7 Days',
     'home.search.searchButton': 'Search Hotels',
+    
+    // Additional homepage translations
+    'home.hero.kaaba': 'Holy Kaaba in Makkah',
+    'home.testimonials.title': 'What Our Pilgrims Say',
+    'home.testimonials.subtitle': 'Hear from thousands of satisfied pilgrims who trusted us with their spiritual journey',
+    'home.testimonials.testimonial1.name': 'Ahmed Al-Rashid',
+    'home.testimonials.testimonial1.text': 'An absolutely life-changing experience. The organization was flawless and the spiritual guidance was exceptional.',
+    'home.testimonials.testimonial1.location': 'Riyadh, Saudi Arabia',
+    'home.testimonials.testimonial2.name': 'Fatima Hassan',
+    'home.testimonials.testimonial2.text': 'Professional service with attention to every detail. I felt completely supported throughout my journey.',
+    'home.testimonials.testimonial2.location': 'Dubai, UAE',
+    'home.testimonials.testimonial3.name': 'Omar Abdullah',
+    'home.testimonials.testimonial3.text': 'Outstanding experience from booking to return. The guides were knowledgeable and the accommodations were excellent.',
+    'home.testimonials.testimonial3.location': 'Cairo, Egypt',
+    'home.cta.title': 'Ready to Begin Your Sacred Journey?',
+    'home.cta.subtitle': 'Join thousands of pilgrims who have trusted us with their spiritual journey. Book your Hajj or Umrah package today.',
+    'home.cta.browsePackages': 'Browse Packages',
+    'home.cta.startJourney': 'Start Your Journey',
     
     // Common words
     'common.search': 'Search',
@@ -528,6 +545,24 @@ const translations: Record<Language, Record<string, string>> = {
     'home.search.duration': 'المدة',
     'home.search.durationPlaceholder': '7 أيام',
     'home.search.searchButton': 'البحث عن فنادق',
+    
+    // Additional homepage translations
+    'home.hero.kaaba': 'الكعبة المشرفة في مكة',
+    'home.testimonials.title': 'ماذا يقول حجاجنا',
+    'home.testimonials.subtitle': 'استمع من آلاف الحجاج الراضين الذين وثقوا بنا في رحلتهم الروحانية',
+    'home.testimonials.testimonial1.name': 'أحمد الراشد',
+    'home.testimonials.testimonial1.text': 'تجربة تغيّر الحياة حقاً. التنظيم كان مثالياً والإرشاد الروحاني كان استثنائياً.',
+    'home.testimonials.testimonial1.location': 'الرياض، المملكة العربية السعودية',
+    'home.testimonials.testimonial2.name': 'فاطمة حسن',
+    'home.testimonials.testimonial2.text': 'خدمة مهنية مع الاهتمام بكل التفاصيل. شعرت بالدعم الكامل طوال رحلتي.',
+    'home.testimonials.testimonial2.location': 'دبي، الإمارات العربية المتحدة',
+    'home.testimonials.testimonial3.name': 'عمر عبدالله',
+    'home.testimonials.testimonial3.text': 'تجربة متميزة من الحجز وحتى العودة. المرشدون كانوا على دراية واسعة والإقامة كانت ممتازة.',
+    'home.testimonials.testimonial3.location': 'القاهرة، مصر',
+    'home.cta.title': 'مستعد لبدء رحلتك المقدسة؟',
+    'home.cta.subtitle': 'انضم إلى آلاف الحجاج الذين وثقوا بنا في رحلتهم الروحانية. احجز باقة الحج أو العمرة اليوم.',
+    'home.cta.browsePackages': 'تصفح الباقات',
+    'home.cta.startJourney': 'ابدأ رحلتك',
     
     // Common words
     'common.search': 'البحث',

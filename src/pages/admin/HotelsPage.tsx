@@ -115,7 +115,6 @@ const AdminHotels: React.FC = () => {
     console.log('=== HOTEL UPDATE PROCESS START ===');
     console.log('Hotel ID to update:', editFormData.id);
     console.log('Current form data:', editFormData);
-    console.log('Original hotel data:', editingHotel);
 
     try {
       // Validate required fields
@@ -142,33 +141,25 @@ const AdminHotels: React.FC = () => {
 
       console.log('Prepared update data:', updateData);
 
-      // Check if hotel exists first
-      const { data: existingHotel, error: checkError } = await supabase
-        .from('hotels')
-        .select('*')
-        .eq('id', editFormData.id)
-        .single();
-
-      if (checkError) {
-        console.error('Error checking hotel existence:', checkError);
-        throw new Error('Hotel not found or access denied');
-      }
-
-      console.log('Hotel exists in database:', existingHotel);
-
-      // Perform the update
-      const { data: updatedHotel, error: updateError } = await supabase
+      // Perform the update WITHOUT .single() to avoid PGRST116 error
+      const { data: updatedData, error: updateError } = await supabase
         .from('hotels')
         .update(updateData)
         .eq('id', editFormData.id)
-        .select('*')
-        .single();
+        .select('*');
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw new Error(`Update failed: ${updateError.message}`);
       }
 
+      console.log('Update response data:', updatedData);
+
+      if (!updatedData || updatedData.length === 0) {
+        throw new Error('No hotel was updated. Please check if the hotel exists.');
+      }
+
+      const updatedHotel = updatedData[0];
       console.log('Hotel updated successfully:', updatedHotel);
 
       // Update local state immediately
@@ -176,7 +167,7 @@ const AdminHotels: React.FC = () => {
         const updatedHotels = prevHotels.map(hotel => 
           hotel.id === editFormData.id ? updatedHotel : hotel
         );
-        console.log('Updated local hotels state:', updatedHotels);
+        console.log('Updated local hotels state');
         return updatedHotels;
       });
 

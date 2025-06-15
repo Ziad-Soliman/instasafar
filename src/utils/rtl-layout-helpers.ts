@@ -80,7 +80,7 @@ export const RtlWrapper: React.FC<{
   className?: string;
 }> = ({ children, className = '' }) => {
   const { isRTL } = useRtlLayout();
-  
+
   return (
     <div 
       className={`${className} ${isRTL ? 'rtl' : 'ltr'}`}
@@ -90,3 +90,5 @@ export const RtlWrapper: React.FC<{
     </div>
   );
 };
+
+// (No extra/stray code below; file ends cleanly.)

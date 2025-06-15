@@ -1,4 +1,3 @@
-
 // Mock data for development and testing
 
 export interface FlightData {
@@ -62,7 +61,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-1',
     airline: 'Saudi Arabian Airlines',
-    airline_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    airline_logo: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Riyadh',
     departure_airport: 'RUH',
     departure_time: '08:30',
@@ -77,7 +76,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-2',
     airline: 'Flynas',
-    airline_logo: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    airline_logo: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Dammam',
     departure_airport: 'DMM',
     departure_time: '14:20',
@@ -92,7 +91,7 @@ export const mockFlights: FlightData[] = [
   {
     id: 'flight-3',
     airline: 'Emirates',
-    airline_logo: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    airline_logo: 'https://images.unsplash.com/photo-1540348922519-585aa8044434?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     departure_city: 'Dubai',
     departure_airport: 'DXB',
     departure_time: '22:40',
@@ -134,7 +133,7 @@ export const mockHotels: HotelData[] = [
   {
     id: 'hotel-3',
     name: 'Riyadh Palace Hotel',
-    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
+    image: 'https://images.unsplash.com/photo-1551882547-ff40c6d73095?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     location: 'Riyadh',
     distance_to_haram: 'N/A',
     rating: 4.4,
@@ -184,6 +183,19 @@ export const mockPackages: PackageData[] = [
     includes: ['Premium Hotels', 'Tour Guide', 'All Meals', 'Entrance Fees'],
     type: 'custom',
     is_featured: false
+  },
+  {
+    id: 'package-4',
+    title: 'Jeddah Waterfront & Old Town',
+    image: 'https://images.unsplash.com/photo-1589256927903-82c44a70135b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
+    duration: '3 days',
+    price: 950,
+    location: 'Jeddah',
+    rating: 4.6,
+    review_count: 88,
+    includes: ['Boutique Hotel', 'Guided City Tour', 'Red Sea Boat Trip'],
+    type: 'custom',
+    is_featured: false
   }
 ];
 
@@ -192,12 +204,12 @@ export const mockExternalListings: ExternalListingData[] = [
     id: 'external-1',
     title: 'Premium Flight Deals to Jeddah',
     provider: 'Booking.com',
-    provider_logo: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
+    provider_logo: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100',
     price_range: '$450 - $890',
     rating: 4.5,
     review_count: 1234,
     url: 'https://booking.com',
-    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
+    image: 'https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300',
     features: ['Direct Flight', 'Baggage Included', 'Flexible Dates'],
     listing_type: 'flight'
   },

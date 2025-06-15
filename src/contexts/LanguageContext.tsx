@@ -36,8 +36,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Apply RTL class to html element for Tailwind RTL support
     if (isRTL) {
       document.documentElement.classList.add('rtl');
+      // Apply Arabic fonts for RTL
+      document.body.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
     } else {
       document.documentElement.classList.remove('rtl');
+      // Use default Inter font for LTR
+      document.body.style.fontFamily = "'Inter', sans-serif";
     }
     
     // Save language preference to localStorage

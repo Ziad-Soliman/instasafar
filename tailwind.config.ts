@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -82,6 +81,12 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+				cairo: ['Cairo', 'sans-serif'],
+				tajawal: ['Tajawal', 'sans-serif'],
+				arabic: ['Cairo', 'Tajawal', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {
@@ -181,9 +186,6 @@ export default {
 				'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
 				'shimmer': 'shimmer 2s linear infinite',
 				'pulse-saudi': 'pulse-saudi 2s infinite'
-			},
-			fontFamily: {
-				arabic: ['var(--font-arabic)', 'sans-serif'],
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

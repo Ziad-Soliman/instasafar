@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -72,23 +71,31 @@ export const useAdminDashboard = () => {
       if (error) throw error;
       
       // Transform the data to match our interface, safely handling null/undefined values
-      const transformedData: Booking[] = (data || []).map(item => ({
-        id: item.id,
-        user_id: item.user_id,
-        hotel_id: item.hotel_id,
-        package_id: item.package_id,
-        check_in_date: item.check_in_date,
-        check_out_date: item.check_out_date,
-        adults: item.adults,
-        children: item.children,
-        total_price: item.total_price,
-        status: item.status,
-        payment_status: item.payment_status,
-        created_at: item.created_at,
-        hotels: item.hotels || null,
-        packages: item.packages || null,
-        profiles: item.profiles || null
-      }));
+      const transformedData: Booking[] = (data || []).map(item => {
+        // Safely extract profiles data, handling potential errors
+        let profilesData = null;
+        if (item.profiles && typeof item.profiles === 'object' && 'full_name' in item.profiles) {
+          profilesData = { full_name: item.profiles.full_name };
+        }
+
+        return {
+          id: item.id,
+          user_id: item.user_id,
+          hotel_id: item.hotel_id,
+          package_id: item.package_id,
+          check_in_date: item.check_in_date,
+          check_out_date: item.check_out_date,
+          adults: item.adults,
+          children: item.children,
+          total_price: item.total_price,
+          status: item.status,
+          payment_status: item.payment_status,
+          created_at: item.created_at,
+          hotels: item.hotels || null,
+          packages: item.packages || null,
+          profiles: profilesData
+        };
+      });
       
       setRecentBookings(transformedData);
     } catch (error) {

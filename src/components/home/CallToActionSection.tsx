@@ -26,7 +26,7 @@ const CallToActionSection = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             {t('home.cta.title')}
           </h2>
-          <p className="text-white/90 mb-8 leading-relaxed text-center text-xl font-normal">
+          <p className="text-white/90 mb-8 leading-relaxed text-xl font-normal text-center">
             {t('home.cta.subtitle')}
           </p>
           <div className="text-center text-2xl py-[28px]">

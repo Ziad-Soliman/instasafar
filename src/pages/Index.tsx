@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -25,8 +24,7 @@ import {
 } from 'lucide-react';
 import PackageCard from '@/components/cards/PackageCard';
 import HotelCard from '@/components/cards/HotelCard';
-import { mockPackages } from '@/data/mockData';
-import { hotels } from '@/data/hotels';
+import { mockPackages, hotels } from '@/data/mockData';
 
 const Index = () => {
   const { t, isRTL } = useLanguage();

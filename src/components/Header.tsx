@@ -143,7 +143,7 @@ const Header: React.FC = () => {
                     <DropdownMenuGroup>
                       {/* Role-specific dashboard links */}
                       {isAdmin && (
-                        <DropdownMenuItem onClick={() => navigate("/admin/dashboard")}>
+                        <DropdownMenuItem onClick={() => navigate("/admin")}>
                           <Settings className="mr-2 h-4 w-4" />
                           <span>Admin Dashboard</span>
                         </DropdownMenuItem>
@@ -266,7 +266,7 @@ const Header: React.FC = () => {
                                 variant="outline" 
                                 className="justify-start"
                                 onClick={() => {
-                                  navigate("/admin/dashboard");
+                                  navigate("/admin");
                                   setMobileMenuOpen(false);
                                 }}
                               >

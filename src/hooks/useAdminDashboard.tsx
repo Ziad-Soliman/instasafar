@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -76,13 +75,10 @@ export const useAdminDashboard = () => {
         // Safely extract profiles data with proper null handling
         let profilesData: { full_name: string } | null = null;
         
-        // Use a more explicit approach to satisfy TypeScript
+        // Use a safer approach to handle the profiles object
         const profiles = item.profiles;
-        if (profiles !== null && profiles !== undefined && typeof profiles === 'object' && 'full_name' in profiles) {
-          const fullName = profiles.full_name;
-          if (fullName) {
-            profilesData = { full_name: fullName };
-          }
+        if (profiles && typeof profiles === 'object' && profiles.full_name) {
+          profilesData = { full_name: profiles.full_name };
         }
 
         return {

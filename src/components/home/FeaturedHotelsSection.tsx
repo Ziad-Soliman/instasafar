@@ -6,12 +6,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import HotelCard from '@/components/cards/HotelCard';
-import { hotels } from '@/data/hotels';
+import { featuredHotels } from '@/data/hotels';
 
 const FeaturedHotelsSection = () => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
-  const featuredHotels = hotels.filter(hotel => hotel.is_featured).slice(0, 3);
 
   if (featuredHotels.length === 0) {
     return null;

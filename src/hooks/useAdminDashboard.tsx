@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -57,29 +58,40 @@ export const useAdminDashboard = () => {
 
   const fetchRecentBookings = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch bookings with hotel and package details, and get user info separately
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
           *,
           hotels(name),
-          packages(name),
-          profiles(full_name)
+          packages(name)
         `)
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (bookingsError) throw bookingsError;
       
-      // Transform the data to match our interface, safely handling null/undefined values
-      const transformedData: Booking[] = (data || []).map(item => {
-        // Safely extract profiles data with proper null handling
-        let profilesData: { full_name: string } | null = null;
-        
-        // Check if profiles exists and has the required property
-        if (item.profiles && item.profiles !== null && typeof item.profiles === 'object' && 'full_name' in item.profiles && item.profiles.full_name) {
-          profilesData = { full_name: item.profiles.full_name };
-        }
+      if (!bookingsData) {
+        setRecentBookings([]);
+        return;
+      }
 
+      // Get user profiles separately
+      const userIds = bookingsData.map(booking => booking.user_id).filter(Boolean);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+      }
+
+      // Transform the data to match our interface
+      const transformedData: Booking[] = bookingsData.map(item => {
+        // Find the corresponding profile
+        const profile = profilesData?.find(p => p.id === item.user_id);
+        
         return {
           id: item.id,
           user_id: item.user_id,
@@ -95,7 +107,7 @@ export const useAdminDashboard = () => {
           created_at: item.created_at,
           hotels: item.hotels || null,
           packages: item.packages || null,
-          profiles: profilesData
+          profiles: profile ? { full_name: profile.full_name } : null
         };
       });
       

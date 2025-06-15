@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash, Star } from "lucide-react";
+import { Search, Edit, Trash, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import HotelManagement from "@/components/admin/HotelManagement";
 
 interface Hotel {
   id: string;
@@ -52,6 +54,8 @@ const AdminHotels: React.FC = () => {
   }, []);
 
   const handleDeleteHotel = async (hotelId: string) => {
+    if (!confirm("Are you sure you want to delete this hotel?")) return;
+    
     try {
       const { error } = await supabase
         .from('hotels')
@@ -98,11 +102,9 @@ const AdminHotels: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Hotels</h1>
-            <p className="text-muted-foreground">Manage your hotel listings</p>
+            <p className="text-muted-foreground">Manage hotel listings</p>
           </div>
-          <Button className="mt-4 md:mt-0">
-            <Plus className="w-4 h-4 mr-2" /> Add New Hotel
-          </Button>
+          <HotelManagement onHotelAdded={fetchHotels} />
         </div>
         
         <Card className="mb-6">

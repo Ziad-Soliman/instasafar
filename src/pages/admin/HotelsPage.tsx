@@ -4,10 +4,14 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Edit, Trash, Star } from "lucide-react";
+import { Search, Edit, Trash, Star, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import HotelManagement from "@/components/admin/HotelManagement";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Hotel {
   id: string;
@@ -26,6 +30,8 @@ const AdminHotels: React.FC = () => {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
+  const [editFormData, setEditFormData] = useState<Hotel | null>(null);
   const { toast } = useToast();
 
   const fetchHotels = async () => {
@@ -74,6 +80,48 @@ const AdminHotels: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to delete hotel.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditHotel = (hotel: Hotel) => {
+    setEditingHotel(hotel);
+    setEditFormData(hotel);
+  };
+
+  const handleUpdateHotel = async () => {
+    if (!editFormData) return;
+
+    try {
+      const { error } = await supabase
+        .from('hotels')
+        .update({
+          name: editFormData.name,
+          city: editFormData.city,
+          address: editFormData.address,
+          description: editFormData.description,
+          distance_to_haram: editFormData.distance_to_haram,
+          rating: editFormData.rating,
+          price_per_night: editFormData.price_per_night,
+          thumbnail: editFormData.thumbnail
+        })
+        .eq('id', editFormData.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Hotel updated successfully.",
+      });
+
+      setEditingHotel(null);
+      setEditFormData(null);
+      fetchHotels();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update hotel.",
         variant: "destructive",
       });
     }
@@ -164,7 +212,11 @@ const AdminHotels: React.FC = () => {
                       <td className="py-3 px-4">${Number(hotel.price_per_night).toFixed(0)}</td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex justify-end space-x-2">
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEditHotel(hotel)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
@@ -193,6 +245,121 @@ const AdminHotels: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Edit Hotel Dialog */}
+        <Dialog open={!!editingHotel} onOpenChange={() => setEditingHotel(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Hotel</DialogTitle>
+            </DialogHeader>
+            {editFormData && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-name">Hotel Name</Label>
+                    <Input
+                      id="edit-name"
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-city">City</Label>
+                    <Select 
+                      value={editFormData.city} 
+                      onValueChange={(value) => setEditFormData({...editFormData, city: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Makkah">Makkah</SelectItem>
+                        <SelectItem value="Medina">Medina</SelectItem>
+                        <SelectItem value="Riyadh">Riyadh</SelectItem>
+                        <SelectItem value="Jeddah">Jeddah</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-address">Address</Label>
+                  <Input
+                    id="edit-address"
+                    value={editFormData.address}
+                    onChange={(e) => setEditFormData({...editFormData, address: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={editFormData.description || ''}
+                    onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-distance">Distance to Haram</Label>
+                    <Input
+                      id="edit-distance"
+                      value={editFormData.distance_to_haram || ''}
+                      onChange={(e) => setEditFormData({...editFormData, distance_to_haram: e.target.value})}
+                      placeholder="e.g., 0.5 km"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-rating">Rating (0-5)</Label>
+                    <Input
+                      id="edit-rating"
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={editFormData.rating || 0}
+                      onChange={(e) => setEditFormData({...editFormData, rating: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-price">Price per Night (USD)</Label>
+                    <Input
+                      id="edit-price"
+                      type="number"
+                      min="0"
+                      value={editFormData.price_per_night}
+                      onChange={(e) => setEditFormData({...editFormData, price_per_night: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-thumbnail">Thumbnail URL</Label>
+                    <Input
+                      id="edit-thumbnail"
+                      type="url"
+                      value={editFormData.thumbnail || ''}
+                      onChange={(e) => setEditFormData({...editFormData, thumbnail: e.target.value})}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setEditingHotel(null)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateHotel}>
+                    Update Hotel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </div>
   );

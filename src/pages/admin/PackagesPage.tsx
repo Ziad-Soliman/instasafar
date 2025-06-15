@@ -8,6 +8,11 @@ import { Search, Edit, Trash, Calendar, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import PackageManagement from "@/components/admin/PackageManagement";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface Package {
   id: string;
@@ -22,12 +27,15 @@ interface Package {
   includes_transport: boolean;
   city?: string;
   provider_id?: string;
+  thumbnail?: string;
 }
 
 const AdminPackages: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [editFormData, setEditFormData] = useState<Package | null>(null);
   const { toast } = useToast();
 
   const fetchPackages = async () => {
@@ -76,12 +84,57 @@ const AdminPackages: React.FC = () => {
         description: "Package deleted successfully.",
       });
       
-      fetchPackages(); // Refresh the list
+      fetchPackages();
     } catch (error) {
       console.error('Error deleting package:', error);
       toast({
         title: "Error",
         description: "Failed to delete package. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditPackage = (pkg: Package) => {
+    setEditingPackage(pkg);
+    setEditFormData(pkg);
+  };
+
+  const handleUpdatePackage = async () => {
+    if (!editFormData) return;
+
+    try {
+      const { error } = await supabase
+        .from('packages')
+        .update({
+          name: editFormData.name,
+          description: editFormData.description,
+          price: editFormData.price,
+          duration_days: editFormData.duration_days,
+          start_date: editFormData.start_date || null,
+          end_date: editFormData.end_date || null,
+          city: editFormData.city,
+          includes_hotel: editFormData.includes_hotel,
+          includes_flight: editFormData.includes_flight,
+          includes_transport: editFormData.includes_transport,
+          thumbnail: editFormData.thumbnail || null
+        })
+        .eq('id', editFormData.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Package updated successfully.",
+      });
+
+      setEditingPackage(null);
+      setEditFormData(null);
+      fetchPackages();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update package.",
         variant: "destructive",
       });
     }
@@ -190,7 +243,11 @@ const AdminPackages: React.FC = () => {
                       <div className="text-sm text-muted-foreground mb-4">per person</div>
                       
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditPackage(pkg)}
+                        >
                           <Edit className="h-4 w-4 mr-2" /> Edit
                         </Button>
                         <Button 
@@ -236,6 +293,150 @@ const AdminPackages: React.FC = () => {
             <Button variant="outline" size="sm" disabled>Next</Button>
           </div>
         </div>
+
+        {/* Edit Package Dialog */}
+        <Dialog open={!!editingPackage} onOpenChange={() => setEditingPackage(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Package</DialogTitle>
+            </DialogHeader>
+            {editFormData && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-name">Package Name</Label>
+                    <Input
+                      id="edit-name"
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-city">City</Label>
+                    <Select 
+                      value={editFormData.city || ''} 
+                      onValueChange={(value) => setEditFormData({...editFormData, city: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Makkah">Makkah</SelectItem>
+                        <SelectItem value="Madinah">Madinah</SelectItem>
+                        <SelectItem value="Riyadh">Riyadh</SelectItem>
+                        <SelectItem value="Jeddah">Jeddah</SelectItem>
+                        <SelectItem value="Dammam">Dammam</SelectItem>
+                        <SelectItem value="Taif">Taif</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={editFormData.description || ''}
+                    onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-price">Price (USD)</Label>
+                    <Input
+                      id="edit-price"
+                      type="number"
+                      min="0"
+                      value={editFormData.price}
+                      onChange={(e) => setEditFormData({...editFormData, price: parseFloat(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-duration">Duration (Days)</Label>
+                    <Input
+                      id="edit-duration"
+                      type="number"
+                      min="1"
+                      value={editFormData.duration_days}
+                      onChange={(e) => setEditFormData({...editFormData, duration_days: parseInt(e.target.value) || 1})}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-start-date">Start Date</Label>
+                    <Input
+                      id="edit-start-date"
+                      type="date"
+                      value={editFormData.start_date || ''}
+                      onChange={(e) => setEditFormData({...editFormData, start_date: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-end-date">End Date</Label>
+                    <Input
+                      id="edit-end-date"
+                      type="date"
+                      value={editFormData.end_date || ''}
+                      onChange={(e) => setEditFormData({...editFormData, end_date: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-thumbnail">Thumbnail URL</Label>
+                  <Input
+                    id="edit-thumbnail"
+                    type="url"
+                    value={editFormData.thumbnail || ''}
+                    onChange={(e) => setEditFormData({...editFormData, thumbnail: e.target.value})}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Label>Package Includes</Label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-includes-hotel"
+                      checked={editFormData.includes_hotel}
+                      onCheckedChange={(checked) => setEditFormData({...editFormData, includes_hotel: checked})}
+                    />
+                    <Label htmlFor="edit-includes-hotel">Hotel Accommodation</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-includes-flight"
+                      checked={editFormData.includes_flight}
+                      onCheckedChange={(checked) => setEditFormData({...editFormData, includes_flight: checked})}
+                    />
+                    <Label htmlFor="edit-includes-flight">Flight</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-includes-transport"
+                      checked={editFormData.includes_transport}
+                      onCheckedChange={(checked) => setEditFormData({...editFormData, includes_transport: checked})}
+                    />
+                    <Label htmlFor="edit-includes-transport">Transport</Label>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setEditingPackage(null)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdatePackage}>
+                    Update Package
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </div>
   );

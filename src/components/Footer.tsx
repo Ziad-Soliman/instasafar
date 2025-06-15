@@ -1,194 +1,228 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useRtlLayout } from '@/utils/rtl-layout-helpers';
-import RtlContainer from '@/components/layout/RtlContainer';
+import React from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Building, Facebook, Instagram, Twitter, MapPin, Mail, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Footer: React.FC = () => {
-  const { t } = useLanguage();
-  const { getFlexDirection, getTextAlign, getSpacing } = useRtlLayout();
+  const { t, isRTL } = useLanguage();
+  const currentYear = new Date().getFullYear();
 
+  // Footer links organized by section
   const footerLinks = {
+    company: [
+      { label: "About Us", href: "/about" },
+      { label: "Our Services", href: "/services" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Career", href: "/careers" },
+    ],
     services: [
-      { label: t('hotels', 'Hotels'), href: '/hotels' },
-      { label: t('packages', 'Packages'), href: '/packages' },
-      { label: t('flights', 'Flights'), href: '/flights' },
-      { label: t('transport', 'Transport'), href: '/transport' },
+      { label: "Hajj Packages", href: "/packages?type=hajj" },
+      { label: "Umrah Packages", href: "/packages?type=umrah" },
+      { label: "Hotel Booking", href: "/search" },
+      { label: "Flight Booking", href: "/flights" },
+      { label: "Transport Services", href: "/transport" },
     ],
     support: [
-      { label: t('common.help', 'Help Center'), href: '/help' },
-      { label: t('common.contact', 'Contact Us'), href: '/contact' },
-      { label: t('bookings', 'My Bookings'), href: '/bookings' },
-      { label: t('common.support', 'Customer Support'), href: '/support' },
+      { label: "Help Center", href: "/help" },
+      { label: "FAQs", href: "/faqs" },
+      { label: "Visa Information", href: "/visa-info" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
     ],
-    company: [
-      { label: t('common.about', 'About Us'), href: '/about' },
-      { label: t('common.careers', 'Careers'), href: '/careers' },
-      { label: t('common.blog', 'Blog'), href: '/blog' },
-      { label: t('common.partners', 'Partners'), href: '/partners' },
-    ],
-    legal: [
-      { label: t('common.terms', 'Terms of Service'), href: '/terms' },
-      { label: t('common.privacy', 'Privacy Policy'), href: '/privacy' },
-      { label: t('common.cookies', 'Cookie Policy'), href: '/cookies' },
-      { label: t('common.refund', 'Refund Policy'), href: '/refund' },
-    ]
   };
 
-  const socialLinks = [
-    { icon: <Facebook className="h-5 w-5" />, href: '#', label: 'Facebook' },
-    { icon: <Twitter className="h-5 w-5" />, href: '#', label: 'Twitter' },
-    { icon: <Instagram className="h-5 w-5" />, href: '#', label: 'Instagram' },
-    { icon: <Youtube className="h-5 w-5" />, href: '#', label: 'YouTube' },
-  ];
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
-    <RtlContainer>
-      <footer className="bg-muted/20 border-t">
-        <div className="container mx-auto px-4 py-12">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
-            {/* Company Info */}
-            <div className="lg:col-span-2">
-              <div className={`${getFlexDirection('row')} items-center ${getSpacing('margin', 'right', '2')} mb-4`}>
-                <div className="w-8 h-8 bg-saudi-green rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">I</span>
-                </div>
-                <span className={`text-xl font-bold ${getSpacing('margin', 'left', '2')}`}>InstaSafar</span>
-              </div>
-              
-              <p className={`text-muted-foreground mb-4 ${getTextAlign('left')}`}>
-                {t('footer.description', 'Your trusted partner for Hajj, Umrah, and travel experiences across Saudi Arabia. Book with confidence and create unforgettable memories.')}
+    <footer className="bg-muted/30 border-t">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.div variants={itemVariants}>
+              <Link to="/" className="flex items-center">
+                <span className="text-2xl font-bold text-primary">InstaSafar</span>
+              </Link>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Your trusted partner for Hajj and Umrah journeys, committed to making your spiritual experience memorable and comfortable.
               </p>
-              
-              {/* Contact Info */}
-              <div className="space-y-2">
-                <div className={`${getFlexDirection('row')} items-center gap-2`}>
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">+966 11 123 4567</span>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex space-x-4 mt-4">
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook size={18} />
+              </a>
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Twitter"
+              >
+                <Twitter size={18} />
+              </a>
+              <a
+                href="#"
+                className="bg-background text-foreground hover:text-primary p-2 rounded-full transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram size={18} />
+              </a>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="pt-4">
+              <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-start">
+                  <MapPin size={16} className="mr-2 mt-0.5 flex-shrink-0" />
+                  <span>123 Business Avenue, Makkah, Saudi Arabia</span>
                 </div>
-                <div className={`${getFlexDirection('row')} items-center gap-2`}>
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">info@instasafar.com</span>
+                <div className="flex items-center">
+                  <Phone size={16} className="mr-2 flex-shrink-0" />
+                  <span>+966 123 456 7890</span>
                 </div>
-                <div className={`${getFlexDirection('row')} items-center gap-2`}>
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {t('footer.address', 'Riyadh, Saudi Arabia')}
-                  </span>
+                <div className="flex items-center">
+                  <Mail size={16} className="mr-2 flex-shrink-0" />
+                  <span>info@instasafar.com</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          </motion.div>
 
-            {/* Services */}
-            <div>
-              <h3 className={`font-semibold mb-4 ${getTextAlign('left')}`}>
-                {t('footer.services', 'Services')}
-              </h3>
-              <ul className="space-y-2">
-                {footerLinks.services.map((link, index) => (
-                  <li key={index}>
-                    <Link 
-                      to={link.href}
-                      className={`text-sm text-muted-foreground hover:text-foreground transition-colors ${getTextAlign('left')} block`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h3 className={`font-semibold mb-4 ${getTextAlign('left')}`}>
-                {t('footer.support', 'Support')}
-              </h3>
-              <ul className="space-y-2">
-                {footerLinks.support.map((link, index) => (
-                  <li key={index}>
-                    <Link 
-                      to={link.href}
-                      className={`text-sm text-muted-foreground hover:text-foreground transition-colors ${getTextAlign('left')} block`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className={`font-semibold mb-4 ${getTextAlign('left')}`}>
-                {t('footer.company', 'Company')}
-              </h3>
-              <ul className="space-y-2">
-                {footerLinks.company.map((link, index) => (
-                  <li key={index}>
-                    <Link 
-                      to={link.href}
-                      className={`text-sm text-muted-foreground hover:text-foreground transition-colors ${getTextAlign('left')} block`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h3 className={`font-semibold mb-4 ${getTextAlign('left')}`}>
-                {t('footer.legal', 'Legal')}
-              </h3>
-              <ul className="space-y-2">
-                {footerLinks.legal.map((link, index) => (
-                  <li key={index}>
-                    <Link 
-                      to={link.href}
-                      className={`text-sm text-muted-foreground hover:text-foreground transition-colors ${getTextAlign('left')} block`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Footer */}
-          <div className={`pt-8 border-t ${getFlexDirection('row')} flex-col md:flex-row items-center justify-between gap-4`}>
-            <div className={`${getFlexDirection('row')} items-center gap-4`}>
-              <p className="text-sm text-muted-foreground">
-                © 2024 InstaSafar. {t('common.allRightsReserved', 'All rights reserved')}.
-              </p>
-            </div>
-            
-            {/* Social Links */}
-            <div className={`${getFlexDirection('row')} items-center gap-4`}>
-              <span className="text-sm text-muted-foreground">
-                {t('footer.followUs', 'Follow us:')}
-              </span>
-              <div className={`${getFlexDirection('row')} items-center gap-2`}>
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.href}
-                    aria-label={social.label}
-                    className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-muted"
+          {/* Quick Links */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Company
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.company.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {social.icon}
-                  </a>
-                ))}
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+
+          {/* Services */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Services
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.services.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+
+          {/* Support & Newsletter */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="space-y-4"
+          >
+            <motion.h3 variants={itemVariants} className="text-sm font-semibold">
+              Support
+            </motion.h3>
+            <motion.ul variants={containerVariants} className="space-y-2">
+              {footerLinks.support.map((link, index) => (
+                <motion.li key={index} variants={itemVariants}>
+                  <Link
+                    to={link.href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </motion.ul>
+
+            <motion.div variants={itemVariants} className="pt-4">
+              <h3 className="text-sm font-semibold mb-3">Newsletter</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Subscribe to receive updates on new packages and offers.
+              </p>
+              <div className="flex space-x-2">
+                <Input
+                  type="email"
+                  placeholder="Your email"
+                  className="max-w-[220px]"
+                />
+                <Button size="sm">Subscribe</Button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </footer>
-    </RtlContainer>
+
+        {/* Provider Link & Copyright */}
+        <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-8 border-t">
+          <div className="mb-4 md:mb-0">
+            <Link
+              to="/provider"
+              className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Building size={16} className="mr-2" />
+              Provider Portal
+            </Link>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            &copy; {currentYear} InstaSafar. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
   );
 };
 

@@ -76,7 +76,7 @@ export const useAdminDashboard = () => {
         let profilesData: { full_name: string } | null = null;
         
         // Check if profiles exists and has the required property
-        if (item.profiles && typeof item.profiles === 'object' && 'full_name' in item.profiles && item.profiles.full_name) {
+        if (item.profiles && item.profiles !== null && typeof item.profiles === 'object' && 'full_name' in item.profiles && item.profiles.full_name) {
           profilesData = { full_name: item.profiles.full_name };
         }
 

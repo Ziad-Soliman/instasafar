@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, MapPin, Star, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PackageCardProps {
   package: {
@@ -24,7 +25,7 @@ interface PackageCardProps {
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) => {
-  console.log('PackageCard props:', pkg);
+  const { t } = useLanguage();
   
   // Ensure includes is always an array
   const includes = Array.isArray(pkg.includes) ? pkg.includes : [];
@@ -42,18 +43,31 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
     }
   };
 
+  const getPackageTypeName = (type: string) => {
+    switch (type) {
+      case 'hajj':
+        return t("packages.hajjPackage", "Hajj Package");
+      case 'umrah':
+        return t("packages.umrahPackage", "Umrah Package");
+      case 'custom':
+        return t("packages.cityTour", "City Tour");
+      default:
+        return type;
+    }
+  };
+
   return (
     <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {pkg.is_featured && (
         <Badge className="absolute top-4 left-4 z-10 bg-saudi-green text-white" variant="saudi">
-          Featured
+          {t("packages.featured", "Featured")}
         </Badge>
       )}
       
       <Badge 
         className={`absolute top-4 right-4 z-10 capitalize ${getPackageTypeColor(pkg.type)}`}
       >
-        {pkg.type}
+        {getPackageTypeName(pkg.type)}
       </Badge>
       
       <div className="relative h-48 overflow-hidden">
@@ -92,7 +106,9 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
           
           {/* Includes */}
           <div>
-            <h4 className="text-sm font-medium mb-2">Package Includes:</h4>
+            <h4 className="text-sm font-medium mb-2">
+              {t("packages.packageIncludes", "Package Includes")}:
+            </h4>
             <div className="flex flex-wrap gap-1">
               {includes.slice(0, 3).map((item, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
@@ -101,7 +117,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
               ))}
               {includes.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{includes.length - 3} more
+                  +{includes.length - 3} {t("search.showMore", "more")}
                 </Badge>
               )}
             </div>
@@ -111,14 +127,16 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg, className }) =>
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div>
               <div className="text-2xl font-bold text-foreground">
-                ${pkg.price}
+                {t("common.currency", "SAR")} {pkg.price}
               </div>
-              <div className="text-xs text-muted-foreground">per person</div>
+              <div className="text-xs text-muted-foreground">
+                {t("common.perPerson", "per person")}
+              </div>
             </div>
             
             <Button asChild variant="saudi" size="sm">
               <Link to={`/packages/${pkg.id}`}>
-                View Package
+                {t("common.view", "View")} {t("packages.title", "Package")}
               </Link>
             </Button>
           </div>

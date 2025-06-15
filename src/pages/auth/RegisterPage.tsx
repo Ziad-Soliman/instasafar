@@ -1,85 +1,63 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
 import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
-import { useRtlHelpers } from "@/utils/rtl-helpers";
-
-// Define the form schema
-const registerSchema = z.object({
-  full_name: z.string().min(2, { message: "Please enter your full name" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirm_password: z.string(),
-}).refine((data) => data.password === data.confirm_password, {
-  message: "Passwords don't match",
-  path: ["confirm_password"],
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { signUp, user } = useAuth();
+  const { register } = useAuth();
+  const { t, isRTL } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t, isRTL } = useLanguage();
-  const { toast } = useToast();
-  const { getDirectionalClasses } = useRtlHelpers();
-  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // If user is already logged in, redirect
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+  const formSchema = z.object({
+    fullName: z.string().min(2, {
+      message: t("auth.validation.fullNameRequired", "Full name must be at least 2 characters"),
+    }),
+    email: z.string().email({
+      message: t("auth.validation.emailInvalid", "Please enter a valid email address"),
+    }),
+    password: z.string().min(6, {
+      message: t("auth.validation.passwordMin", "Password must be at least 6 characters"),
+    }),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t("auth.validation.passwordMismatch", "Passwords don't match"),
+    path: ["confirmPassword"],
+  });
 
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  type FormValues = z.infer<typeof formSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      full_name: "",
+      fullName: "",
       email: "",
       password: "",
-      confirm_password: "",
+      confirmPassword: "",
     },
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
-    setIsLoading(true);
+  const handleRegister = async (data: FormValues) => {
     setError(null);
-    
+    setIsLoading(true);
     try {
-      const result = await signUp(data.email, data.password, data.full_name);
-      
-      if (result.success) {
-        toast({
-          title: t("auth.registerSuccess", "Registration successful"),
-          description: t("auth.registerSuccessDescription", "Your account has been created successfully."),
-        });
-        navigate("/");
-      } else if (result.error) {
-        setError(result.error.message);
-      }
-    } catch (error) {
-      setError(t(
-        "auth.unexpectedError",
-        "An unexpected error occurred. Please try again."
-      ));
-      console.error("Registration error:", error);
+      await register(data.email, data.password, data.fullName);
+    } catch (err: any) {
+      setError(err.message || t("auth.registerFailed", "Registration failed"));
     } finally {
       setIsLoading(false);
     }
@@ -89,29 +67,35 @@ const RegisterPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="flex flex-col items-center justify-center w-full max-w-md mx-auto"
+      className="w-full max-w-md mx-auto"
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="mb-6 text-center">
+      <div className="text-center mb-6">
         <h1 className="text-2xl font-bold">{t("auth.createAccount", "Create an account")}</h1>
-        <p className="text-muted-foreground mt-2">{t("auth.signUpDescription", "Sign up to start booking your spiritual journey")}</p>
+        <p className="text-muted-foreground mt-2">
+          {t("auth.signUpDescription", "Sign up to start booking your spiritual journey")}
+        </p>
       </div>
-      
-      <Card className="w-full">
-        <CardContent className="pt-6">
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("auth.signUp", "Sign Up")}</CardTitle>
+          <CardDescription>
+            {t("auth.signUpDescription", "Sign up to start booking your spiritual journey")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleRegister)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="full_name"
+                name="fullName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("auth.fullName", "Full Name")}</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder={t("auth.fullNamePlaceholder", "Your Full Name")}
-                        autoComplete="name"
                         disabled={isLoading}
                         {...field}
                       />
@@ -128,10 +112,9 @@ const RegisterPage: React.FC = () => {
                   <FormItem>
                     <FormLabel>{t("auth.email", "Email")}</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         type="email"
                         placeholder={t("auth.emailPlaceholder", "your.email@example.com")}
-                        autoComplete="email"
                         disabled={isLoading}
                         {...field}
                       />
@@ -149,18 +132,15 @@ const RegisterPage: React.FC = () => {
                     <FormLabel>{t("auth.password", "Password")}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input 
+                        <Input
                           type={showPassword ? "text" : "password"}
                           placeholder={t("auth.passwordPlaceholder", "••••••••")}
-                          autoComplete="new-password"
                           disabled={isLoading}
                           {...field}
                         />
                         <button
                           type="button"
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
-                            getDirectionalClasses("right-3", "left-3")
-                          }`}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -174,24 +154,21 @@ const RegisterPage: React.FC = () => {
 
               <FormField
                 control={form.control}
-                name="confirm_password"
+                name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("auth.confirmPassword", "Confirm Password")}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input 
+                        <Input
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder={t("auth.confirmPasswordPlaceholder", "••••••••")}
-                          autoComplete="new-password"
                           disabled={isLoading}
                           {...field}
                         />
                         <button
                           type="button"
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground ${
-                            getDirectionalClasses("right-3", "left-3")
-                          }`}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                           {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -209,49 +186,36 @@ const RegisterPage: React.FC = () => {
                 </Alert>
               )}
 
-              <div className="text-xs text-muted-foreground">
-                {t(
-                  "auth.termsAgreement",
-                  "By registering, you agree to our"
-                )}{" "}
-                <Link to="/terms" className="text-primary hover:underline">
-                  {t("auth.termsOfService", "Terms of Service")}
-                </Link>{" "}
-                {t("auth.and", "and")}{" "}
-                <Link to="/privacy" className="text-primary hover:underline">
-                  {t("auth.privacyPolicy", "Privacy Policy")}
-                </Link>
-                .
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? t("auth.registering", "Creating account...") : t("auth.register", "Create Account")}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? t("auth.registering", "Creating account...") : t("auth.signUp", "Sign Up")}
               </Button>
             </form>
           </Form>
 
           <SocialLoginButtons 
             isLoading={isLoading}
-            onStartLoading={() => setIsLoading(true)} 
+            onStartLoading={() => setIsLoading(true)}
           />
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              {t("auth.alreadyAccount", "Already have an account?")}{" "}
-              <Link
-                to="/auth/login"
-                className="text-primary font-medium hover:underline"
-              >
-                {t("auth.login", "Sign in")}
-              </Link>
-            </p>
+          <div className="text-center text-sm text-muted-foreground">
+            {t("auth.termsAgreement", "By registering, you agree to our")}{" "}
+            <Link to="/terms" className="text-primary hover:underline">
+              {t("auth.termsOfService", "Terms of Service")}
+            </Link>{" "}
+            {t("auth.and", "and")}{" "}
+            <Link to="/privacy" className="text-primary hover:underline">
+              {t("auth.privacyPolicy", "Privacy Policy")}
+            </Link>
           </div>
         </CardContent>
       </Card>
+
+      <div className="mt-6 text-center text-sm text-muted-foreground">
+        {t("auth.alreadyAccount", "Already have an account?")}{" "}
+        <Link to="/auth?tab=login" className="text-primary hover:underline">
+          {t("auth.signIn", "Sign in")}
+        </Link>
+      </div>
     </motion.div>
   );
 };

@@ -19,14 +19,16 @@ const AuthPage: React.FC = () => {
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold">Welcome</h1>
-        <p className="text-muted-foreground mt-2">Sign in to your account or create a new one</p>
+        <h1 className="text-2xl font-bold">{t("auth.welcome", "Welcome")}</h1>
+        <p className="text-muted-foreground mt-2">
+          {t("auth.signInOrCreate", "Sign in to your account or create a new one")}
+        </p>
       </div>
       
       <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Register</TabsTrigger>
+          <TabsTrigger value="login">{t("auth.login", "Login")}</TabsTrigger>
+          <TabsTrigger value="register">{t("auth.register", "Register")}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="login" className="mt-0">

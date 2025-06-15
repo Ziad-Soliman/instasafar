@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, Wifi, Car, Coffee, Utensils } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HotelCardProps {
   hotel: {
@@ -23,7 +24,7 @@ interface HotelCardProps {
 }
 
 const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
-  console.log('HotelCard props:', hotel);
+  const { t } = useLanguage();
   
   // Ensure amenities is always an array
   const amenities = Array.isArray(hotel.amenities) ? hotel.amenities : [];
@@ -47,7 +48,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
     <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
       {hotel.is_featured && (
         <Badge className="absolute top-4 left-4 z-10 bg-saudi-green text-white" variant="saudi">
-          Featured
+          {t("hotels.featured", "Featured")}
         </Badge>
       )}
       
@@ -80,7 +81,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
             </div>
             
             <p className="text-xs text-muted-foreground">
-              {hotel.distance_to_haram} from Haram • {hotel.review_count} reviews
+              {hotel.distance_to_haram} {t("hotels.fromHaram", "from Haram")} • {hotel.review_count} {t("common.reviews", "reviews")}
             </p>
           </div>
           
@@ -98,14 +99,16 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div>
               <div className="text-2xl font-bold text-foreground">
-                ${hotel.price_per_night}
+                {t("common.currency", "SAR")} {hotel.price_per_night}
               </div>
-              <div className="text-xs text-muted-foreground">per night</div>
+              <div className="text-xs text-muted-foreground">
+                {t("common.perNight", "per night")}
+              </div>
             </div>
             
             <Button asChild variant="saudi" size="sm">
               <Link to={`/hotels/${hotel.id}`}>
-                View Details
+                {t("common.view", "View")} {t("common.details", "Details")}
               </Link>
             </Button>
           </div>

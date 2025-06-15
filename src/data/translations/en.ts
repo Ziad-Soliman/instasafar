@@ -135,12 +135,12 @@ export const englishTranslations = {
   "home.features.securePayments": "Secure Payments",
   "home.features.expertGuides": "Expert Guides",
 
-  "home.stats.title": "Trusted by Thousands",
-  "home.stats.subtitle": "Your journey to the holy lands is our mission",
-  "home.stats.pilgrims": "Happy Pilgrims",
-  "home.stats.cities": "Cities",
-  "home.stats.rating": "Rating",
-  "home.stats.support": "Support",
+  "home.stats.title": "Experience Excellence in Pilgrimage Services",
+  "home.stats.subtitle": "Join thousands of satisfied pilgrims who have trusted us with their sacred journey to the holy lands",
+  "home.stats.pilgrims": "Satisfied Pilgrims",
+  "home.stats.cities": "Partner Hotels",
+  "home.stats.rating": "Customer Rating",
+  "home.stats.support": "Expert Support",
 
   "home.search.title": "Find Your Perfect Journey",
   "home.search.subtitle": "Search for packages, hotels, flights, and transport for your pilgrimage",

@@ -31,13 +31,7 @@ const StatsSection = () => {
   ];
 
   return (
-    <section className="relative py-16 bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden">
-      {/* Minimal background elements */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-saudi-green rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-saudi-green rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-      </div>
-
+    <section className="relative py-16 overflow-hidden">
       <div className={`container mx-auto px-4 relative z-10 ${isRTL ? 'rtl' : 'ltr'}`}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

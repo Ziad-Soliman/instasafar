@@ -101,15 +101,13 @@ export const arabicTranslations = {
   "home.features.securePayments": "مدفوعات آمنة",
   "home.features.expertGuides": "مرشدين خبراء",
 
-  // Home Stats Section
-  "home.stats.support": "24/7",
-  "home.stats.supportDesc": "دعم العملاء",
-  "home.stats.experience": "أكثر من 15 سنة",
-  "home.stats.experienceDesc": "خبرة",
-  "home.stats.rating": "4.9/5",
-  "home.stats.ratingDesc": "تقييم العملاء",
-  "home.stats.pilgrims": "أكثر من 50,000",
-  "home.stats.pilgrimsDesc": "حاج ومعتمر سعيد",
+  // Home Stats Section - Updated with more relevant content
+  "home.stats.title": "تميز في خدمات الحج والعمرة",
+  "home.stats.subtitle": "انضم إلى آلاف الحجاج والمعتمرين الذين وثقوا بنا في رحلتهم المقدسة إلى الأراضي المقدسة",
+  "home.stats.pilgrims": "حاج ومعتمر راضٍ",
+  "home.stats.cities": "فندق شريك",
+  "home.stats.rating": "تقييم العملاء",
+  "home.stats.support": "دعم متخصص",
 
   // Home Search Section
   "home.search.title": "ابحث عن رحلتك المثالية",

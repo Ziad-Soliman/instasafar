@@ -292,21 +292,26 @@ const HotelDetailPage = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-12"
         >
-          <ReviewsSection />
+          <ReviewsSection 
+            itemId={hotel.id} 
+            itemType="hotel"
+            averageRating={Number(hotel.rating)}
+            totalReviews={0}
+          />
         </motion.div>
       </div>
 
       {/* Booking Modal */}
       <HotelBookingModal
+        open={showBookingModal}
+        onOpenChange={setShowBookingModal}
         hotel={{
           id: hotel.id,
           name: hotel.name,
           price_per_night: hotel.price_per_night,
-          thumbnail: hotel.thumbnail || '',
-          location: hotel.city
+          thumbnail: hotel.thumbnail || null
         }}
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
+        userId={null}
       />
     </div>
   );

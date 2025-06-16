@@ -48,21 +48,21 @@ const Header: React.FC = () => {
     <>
       <motion.header
         className={cn(
-          "fixed inset-x-0 z-50 transition-all duration-300 flex justify-center px-4",
-          isSticky ? "top-4" : "top-6"
+          "fixed inset-x-0 z-50 transition-all duration-300 flex justify-center px-3 sm:px-4",
+          isSticky ? "top-2 sm:top-4" : "top-4 sm:top-6"
         )}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center bg-background/5 border border-border backdrop-blur-lg py-2 px-6 rounded-full shadow-lg w-full max-w-7xl relative">
-          {/* Logo - Positioned absolutely to the left */}
-          <div className="absolute left-6 flex-shrink-0">
+        <div className="flex items-center justify-between bg-background/5 border border-border backdrop-blur-lg py-2 px-4 sm:px-6 rounded-full shadow-lg w-full max-w-7xl">
+          {/* Logo */}
+          <div className="flex-shrink-0">
             <HeaderLogo />
           </div>
 
-          {/* Navigation Items - Centered */}
-          <div className="hidden md:flex items-center gap-1 mx-auto">
+          {/* Desktop Navigation - Hidden on mobile and tablet */}
+          <div className="hidden lg:flex items-center gap-1 mx-4">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.name;
@@ -73,12 +73,12 @@ const Header: React.FC = () => {
                   to={item.url}
                   onClick={() => setActiveTab(item.name)}
                   className={cn(
-                    "relative cursor-pointer text-sm font-semibold px-4 py-2 rounded-full transition-colors",
+                    "relative cursor-pointer text-sm font-semibold px-3 xl:px-4 py-2 rounded-full transition-colors",
                     "text-foreground/80 hover:text-primary",
                     isActive && "bg-muted text-primary"
                   )}
                 >
-                  <span>{item.name}</span>
+                  <span className="whitespace-nowrap">{item.name}</span>
                   {isActive && (
                     <motion.div
                       layoutId="lamp"
@@ -102,16 +102,23 @@ const Header: React.FC = () => {
             })}
           </div>
 
-          {/* Actions - Positioned absolutely to the right */}
-          <div className="absolute right-6 flex items-center gap-2 flex-shrink-0">
-            <LanguageSelector />
-            <UserDropdown />
+          {/* Right side actions */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Language selector - hidden on small mobile */}
+            <div className="hidden sm:block">
+              <LanguageSelector />
+            </div>
+            
+            {/* User dropdown - hidden on mobile */}
+            <div className="hidden md:block">
+              <UserDropdown />
+            </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - visible on tablet and mobile */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="lg:hidden h-8 w-8 p-1"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -127,7 +134,7 @@ const Header: React.FC = () => {
       </motion.header>
 
       {/* Spacer to prevent content from hiding behind floating header */}
-      <div className="h-20" />
+      <div className="h-16 sm:h-20" />
     </>
   );
 };

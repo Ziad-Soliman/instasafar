@@ -1,74 +1,15 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useWishlist } from "@/contexts/WishlistContext";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Hotel, Package, Bus, Loader } from "lucide-react";
-import HotelCard from "@/components/cards/HotelCard";
-import PackageCard from "@/components/cards/PackageCard";
-import ExternalListingCard, { type ExternalListing } from "@/components/cards/ExternalListingCard";
-import { mockHotels, mockPackages } from "@/data/mockData";
-import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-
-// Convert external listings to proper format
-const mockExternalListingsFormatted: ExternalListing[] = [
-  {
-    id: "external-1",
-    title: "Premium Flight Deals to Jeddah",
-    description: "Direct flights from major cities to Jeddah",
-    image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop",
-    price: 450,
-    currency: "USD",
-    rating: 4.5,
-    reviewCount: 1234,
-    location: "Jeddah",
-    provider: "Booking.com",
-    type: "flight",
-    url: "https://booking.com",
-    features: ["Direct Flight", "Baggage Included", "Flexible Dates"]
-  },
-  {
-    id: "external-2",
-    title: "Makkah to Madinah Transport",
-    description: "Comfortable transportation between holy cities",
-    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=300&fit=crop",
-    price: 45,
-    currency: "USD",
-    rating: 4.3,
-    reviewCount: 567,
-    location: "Both Cities",
-    provider: "Saudi Transport Co",
-    type: "activity",
-    url: "https://sauditransport.com",
-    features: ["AC Bus", "WiFi", "Comfortable Seats"]
-  }
-];
+import WishlistEmptyState from "@/components/wishlist/WishlistEmptyState";
+import WishlistTabContent from "@/components/wishlist/WishlistTabContent";
+import { useWishlistData } from "@/hooks/useWishlistData";
 
 const WishlistPage: React.FC = () => {
-  const { items, isLoading } = useWishlist();
-  const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { items, isLoading, savedHotels, savedPackages, savedTransport } = useWishlistData();
   const [activeTab, setActiveTab] = useState("all");
-  
-  // For demo purposes, we'll simulate fetching data based on wishlist IDs
-  // In a real implementation, you would fetch the actual data from the API
-  const savedHotels = items
-    .filter(item => item.itemType === "hotel")
-    .map(item => mockHotels.find(hotel => hotel.id === item.id))
-    .filter(Boolean);
-    
-  const savedPackages = items
-    .filter(item => item.itemType === "package")
-    .map(item => mockPackages.find(pkg => pkg.id === item.id))
-    .filter(Boolean);
-    
-  const savedTransport = items
-    .filter(item => item.itemType === "transport")
-    .map(item => mockExternalListingsFormatted.find(listing => listing.id === item.id))
-    .filter(Boolean);
   
   if (isLoading) {
     return (
@@ -82,32 +23,7 @@ const WishlistPage: React.FC = () => {
   }
   
   if (items.length === 0) {
-    return (
-      <div className="container mx-auto py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-lg mx-auto"
-        >
-          <div className="bg-muted/50 rounded-full p-6 mx-auto w-24 h-24 flex items-center justify-center mb-6">
-            <Heart className="h-10 w-10 text-muted-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Your Wishlist is Empty</h1>
-          <p className="text-muted-foreground mb-6">
-            Start saving your favorite hotels, packages, and transport options to plan your perfect journey.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button onClick={() => navigate("/search")}>
-              Explore Hotels
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/packages")}>
-              View Packages
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-    );
+    return <WishlistEmptyState />;
   }
   
   return (
@@ -149,102 +65,13 @@ const WishlistPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="mt-6">
-            {savedHotels.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Hotel size={18} className="mr-2" /> Hotels
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedHotels.map(hotel => (
-                    hotel && <HotelCard key={hotel.id} hotel={hotel} />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {savedPackages.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Package size={18} className="mr-2" /> Packages
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {savedPackages.map(pkg => (
-                    pkg && <PackageCard key={pkg.id} package={pkg} />
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {savedTransport.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <Bus size={18} className="mr-2" /> Transport
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedTransport.map(listing => (
-                    listing && <ExternalListingCard key={listing.id} listing={listing} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="hotels" className="mt-6">
-            {savedHotels.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedHotels.map(hotel => (
-                  hotel && <HotelCard key={hotel.id} hotel={hotel} />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">You haven't saved any hotels yet.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate("/search")}>
-                    Explore Hotels
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="packages" className="mt-6">
-            {savedPackages.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {savedPackages.map(pkg => (
-                  pkg && <PackageCard key={pkg.id} package={pkg} />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">You haven't saved any packages yet.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate("/packages")}>
-                    Explore Packages
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="transport" className="mt-6">
-            {savedTransport.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedTransport.map(listing => (
-                  listing && <ExternalListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="py-8 text-center">
-                  <p className="text-muted-foreground">You haven't saved any transport options yet.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate("/transport")}>
-                    Explore Transport Options
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+          <TabsContent value={activeTab} className="mt-6">
+            <WishlistTabContent
+              activeTab={activeTab}
+              savedHotels={savedHotels}
+              savedPackages={savedPackages}
+              savedTransport={savedTransport}
+            />
           </TabsContent>
         </Tabs>
       </motion.div>

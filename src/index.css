@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
 
 @tailwind base;
@@ -55,6 +54,10 @@
     /* Brand colors for CTA */
     --brand: 140 100% 20%;
     --brand-foreground: 140 50% 45%;
+
+    /* New animated component variables */
+    --skeleton: 220 14% 96%;
+    --btn-border: 220 13% 91%;
   }
 
   .dark {
@@ -98,6 +101,10 @@
     /* Brand colors for dark mode */
     --brand: 140 50% 45%;
     --brand-foreground: 140 100% 20%;
+
+    /* New animated component variables for dark mode */
+    --skeleton: 215 28% 17%;
+    --btn-border: 215 28% 25%;
   }
 }
 
@@ -438,5 +445,11 @@
 
   .status-info {
     @apply bg-blue-50 text-blue-700 border-blue-200;
+  }
+
+  /* New animated component classes */
+  .g-button {
+    @apply rounded-[var(--radius)] border;
+    border-color: hsl(var(--btn-border));
   }
 }

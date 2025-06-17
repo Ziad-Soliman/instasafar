@@ -158,7 +158,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Email',
         required: true,
-        type: 'email',
+        type: 'email' as const,
         placeholder: t("auth.emailPlaceholder", "Enter your email address"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'email'),
@@ -166,7 +166,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Password',
         required: true,
-        type: 'password',
+        type: 'password' as const,
         placeholder: t("auth.passwordPlaceholder", "Enter your password"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'password'),
@@ -183,7 +183,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Full Name',
         required: true,
-        type: 'text',
+        type: 'text' as const,
         placeholder: t("auth.fullNamePlaceholder", "Your Full Name"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'fullName'),
@@ -191,7 +191,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Email',
         required: true,
-        type: 'email',
+        type: 'email' as const,
         placeholder: t("auth.emailPlaceholder", "Enter your email address"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'email'),
@@ -199,7 +199,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Password',
         required: true,
-        type: 'password',
+        type: 'password' as const,
         placeholder: t("auth.passwordPlaceholder", "Enter your password"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'password'),
@@ -207,7 +207,7 @@ const AuthPage: React.FC = () => {
       {
         label: 'Confirm Password',
         required: true,
-        type: 'password',
+        type: 'password' as const,
         placeholder: t("auth.confirmPasswordPlaceholder", "Confirm your password"),
         onChange: (event: ChangeEvent<HTMLInputElement>) =>
           handleInputChange(event, 'confirmPassword'),

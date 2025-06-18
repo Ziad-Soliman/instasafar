@@ -60,6 +60,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
           .order('company_name');
         
         if (error) throw error;
+        console.log('Fetched providers:', data);
         setProviders(data || []);
       } catch (error) {
         console.error('Error fetching providers:', error);
@@ -131,6 +132,33 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
     return true;
   };
 
+  const validateProviderId = async (providerId: string | undefined): Promise<string | null> => {
+    if (!providerId || providerId === "") {
+      console.log('No provider ID specified, using null');
+      return null;
+    }
+
+    try {
+      console.log('Validating provider ID:', providerId);
+      const { data, error } = await supabase
+        .from('providers')
+        .select('id')
+        .eq('id', providerId)
+        .single();
+
+      if (error || !data) {
+        console.log('Provider ID not found, using null instead');
+        return null;
+      }
+
+      console.log('Provider ID validated successfully:', providerId);
+      return providerId;
+    } catch (error) {
+      console.error('Error validating provider ID:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -139,7 +167,10 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
     setLoading(true);
 
     try {
-      // Prepare hotel data
+      // Validate and get the correct provider_id
+      const validatedProviderId = await validateProviderId(formData.provider_id);
+      
+      // Prepare hotel data with validated provider_id
       const hotelInsertData = {
         name: formData.name.trim(),
         city: formData.city.trim(),
@@ -149,10 +180,10 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
         rating: formData.rating || 0,
         price_per_night: formData.price_per_night,
         thumbnail: formData.thumbnail.trim() || null,
-        provider_id: formData.provider_id || user?.id || null
+        provider_id: validatedProviderId
       };
 
-      console.log('Creating hotel with data:', hotelInsertData);
+      console.log('Creating hotel with validated data:', hotelInsertData);
 
       // Create the hotel record
       const { data: createdHotel, error: hotelError } = await supabase
@@ -175,6 +206,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
           name: amenity
         }));
 
+        console.log('Adding amenities:', amenitiesData);
         const { error: amenitiesError } = await supabase
           .from('hotel_amenities')
           .insert(amenitiesData);
@@ -182,6 +214,8 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
         if (amenitiesError) {
           console.error('Error adding amenities:', amenitiesError);
           // Don't fail the whole operation for amenities
+        } else {
+          console.log('Amenities added successfully');
         }
       }
 
@@ -330,27 +364,25 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
             </div>
           </div>
 
-          {providers.length > 0 && (
-            <div>
-              <Label htmlFor="provider_id">Assign to Provider (Admin Only)</Label>
-              <Select 
-                value={formData.provider_id} 
-                onValueChange={(value) => handleInputChange('provider_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select provider (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No specific provider</SelectItem>
-                  {providers.map((provider) => (
-                    <SelectItem key={provider.id} value={provider.id}>
-                      {provider.company_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div>
+            <Label htmlFor="provider_id">Assign to Provider (Optional)</Label>
+            <Select 
+              value={formData.provider_id} 
+              onValueChange={(value) => handleInputChange('provider_id', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select provider (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No specific provider</SelectItem>
+                {providers.map((provider) => (
+                  <SelectItem key={provider.id} value={provider.id}>
+                    {provider.company_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div>
             <Label>Amenities</Label>

@@ -22,7 +22,6 @@ export type Database = {
           notes: string | null
           package_id: string | null
           payment_status: string | null
-          provider_id: string | null
           status: string | null
           total_price: number
           updated_at: string | null
@@ -40,7 +39,6 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           payment_status?: string | null
-          provider_id?: string | null
           status?: string | null
           total_price: number
           updated_at?: string | null
@@ -58,7 +56,6 @@ export type Database = {
           notes?: string | null
           package_id?: string | null
           payment_status?: string | null
-          provider_id?: string | null
           status?: string | null
           total_price?: number
           updated_at?: string | null

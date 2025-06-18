@@ -1,50 +1,49 @@
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Eye, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Search, Filter, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import BookingDetailsModal from "./BookingDetailsModal";
 
-interface Booking {
+interface BookingDetails {
   id: string;
   user_id: string;
   hotel_id?: string;
   package_id?: string;
-  booking_type: string;
-  check_in_date?: string;
-  check_out_date?: string;
+  check_in_date: string;
+  check_out_date: string;
   adults: number;
   children: number;
   total_price: number;
   status: string;
   payment_status: string;
   created_at: string;
+  booking_type: string;
+  notes?: string;
   hotels?: { name: string; city: string } | null;
   packages?: { name: string; city: string } | null;
   profiles?: { full_name: string } | null;
 }
 
 const AdminBookingManagement: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [updating, setUpdating] = useState<string | null>(null);
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
+  const [selectedBooking, setSelectedBooking] = useState<BookingDetails | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      console.log('=== FETCHING ADMIN BOOKINGS ===');
-      
-      // Fetch bookings with related data
+      // First fetch bookings with related data
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -54,67 +53,39 @@ const AdminBookingManagement: React.FC = () => {
         `)
         .order('created_at', { ascending: false });
 
-      console.log('Bookings query result:', { bookingsData, bookingsError });
-
-      if (bookingsError) {
-        console.error('Bookings fetch error:', bookingsError);
-        throw bookingsError;
-      }
+      if (bookingsError) throw bookingsError;
 
       if (!bookingsData) {
         setBookings([]);
+        setLoading(false);
         return;
       }
 
-      // Get user profiles separately to avoid RLS issues
-      const userIds = [...new Set(bookingsData.map(b => b.user_id).filter(Boolean))];
-      let profilesData: Array<{id: string, full_name: string}> = [];
-      
-      if (userIds.length > 0) {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', userIds);
+      // Get user profiles separately
+      const userIds = bookingsData.map(booking => booking.user_id).filter(Boolean);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
 
-        if (profilesError) {
-          console.error('Profiles fetch error:', profilesError);
-        } else {
-          profilesData = profiles || [];
-        }
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
       }
 
-      // Transform and combine the data
-      const transformedBookings: Booking[] = bookingsData.map(booking => {
-        const profile = profilesData.find(p => p.id === booking.user_id);
-        
-        return {
-          id: booking.id,
-          user_id: booking.user_id,
-          hotel_id: booking.hotel_id,
-          package_id: booking.package_id,
-          booking_type: booking.booking_type,
-          check_in_date: booking.check_in_date,
-          check_out_date: booking.check_out_date,
-          adults: booking.adults,
-          children: booking.children,
-          total_price: booking.total_price,
-          status: booking.status,
-          payment_status: booking.payment_status,
-          created_at: booking.created_at,
-          hotels: booking.hotels || null,
-          packages: booking.packages || null,
-          profiles: profile ? { full_name: profile.full_name } : null
-        };
-      });
+      // Combine the data
+      const enhancedBookings: BookingDetails[] = bookingsData.map(booking => ({
+        ...booking,
+        profiles: profilesData?.find(p => p.id === booking.user_id) ? 
+          { full_name: profilesData.find(p => p.id === booking.user_id)?.full_name || 'Unknown' } : 
+          null
+      }));
 
-      console.log('Transformed bookings:', transformedBookings);
-      setBookings(transformedBookings);
-
-    } catch (error: any) {
+      setBookings(enhancedBookings);
+    } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to fetch bookings.",
+        description: "Failed to fetch bookings.",
         variant: "destructive",
       });
     } finally {
@@ -122,61 +93,74 @@ const AdminBookingManagement: React.FC = () => {
     }
   };
 
-  const updateBookingStatus = async (bookingId: string, status: string, paymentStatus?: string) => {
-    setUpdating(bookingId);
-    try {
-      console.log('Updating booking:', { bookingId, status, paymentStatus });
-      
-      const updateData: any = { status };
-      if (paymentStatus) {
-        updateData.payment_status = paymentStatus;
-      }
-
-      const { error } = await supabase
-        .from('bookings')
-        .update(updateData)
-        .eq('id', bookingId);
-
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: "Booking updated successfully.",
-      });
-
-      // Refresh bookings
-      await fetchBookings();
-      
-    } catch (error: any) {
-      console.error('Error updating booking:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update booking.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdating(null);
-    }
-  };
-
   useEffect(() => {
     fetchBookings();
   }, []);
 
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Booking status updated successfully.",
+      });
+
+      fetchBookings();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update booking status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updatePaymentStatus = async (bookingId: string, newPaymentStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ payment_status: newPaymentStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Payment status updated successfully.",
+      });
+
+      fetchBookings();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update payment status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewDetails = (booking: BookingDetails) => {
+    setSelectedBooking(booking);
+    setDetailsModalOpen(true);
+  };
+
   const filteredBookings = bookings.filter(booking => {
-    const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-      booking.id.toLowerCase().includes(searchLower) ||
-      (booking.profiles?.full_name || '').toLowerCase().includes(searchLower) ||
-      (booking.hotels?.name || '').toLowerCase().includes(searchLower) ||
-      (booking.packages?.name || '').toLowerCase().includes(searchLower);
-    
+      booking.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.hotels?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.packages?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.id.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+    const matchesPayment = paymentFilter === "all" || booking.payment_status === paymentFilter;
+
+    return matchesSearch && matchesStatus && matchesPayment;
   });
 
   const getStatusColor = (status: string) => {
@@ -208,152 +192,163 @@ const AdminBookingManagement: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-saudi-green"></div>
+        <div className="animate-pulse">Loading bookings...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <>
       <Card>
         <CardHeader>
-          <CardTitle>Booking Management</CardTitle>
-          <CardDescription>
-            Manage all customer bookings and reservations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <CardTitle>All Bookings</CardTitle>
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search bookings..."
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input 
+                placeholder="Search bookings..." 
+                className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={fetchBookings} variant="outline">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Payment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="unpaid">Unpaid</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-2 font-medium">Booking ID</th>
+                  <th className="text-left py-3 px-2 font-medium">Customer</th>
+                  <th className="text-left py-3 px-2 font-medium">Type</th>
+                  <th className="text-left py-3 px-2 font-medium">Item</th>
+                  <th className="text-left py-3 px-2 font-medium">Dates</th>
+                  <th className="text-left py-3 px-2 font-medium">Guests</th>
+                  <th className="text-left py-3 px-2 font-medium">Amount</th>
+                  <th className="text-left py-3 px-2 font-medium">Status</th>
+                  <th className="text-left py-3 px-2 font-medium">Payment</th>
+                  <th className="text-left py-3 px-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredBookings.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
-                      {searchTerm || statusFilter !== "all" 
-                        ? "No bookings match your filters." 
+                  <tr>
+                    <td colSpan={10} className="text-center py-8 text-muted-foreground">
+                      {searchTerm || statusFilter !== "all" || paymentFilter !== "all" 
+                        ? "No bookings found matching your filters." 
                         : "No bookings found."}
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   filteredBookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-mono text-sm">
-                        {booking.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell>
-                        {booking.profiles?.full_name || 'Anonymous'}
-                      </TableCell>
-                      <TableCell>
+                    <tr key={booking.id} className="border-b hover:bg-muted/50">
+                      <td className="py-3 px-2 font-mono text-xs">{booking.id.substring(0, 8)}...</td>
+                      <td className="py-3 px-2">{booking.profiles?.full_name || 'Unknown'}</td>
+                      <td className="py-3 px-2 capitalize">{booking.booking_type}</td>
+                      <td className="py-3 px-2">
                         {booking.booking_type === 'hotel' 
                           ? booking.hotels?.name || 'Unknown Hotel'
                           : booking.packages?.name || 'Unknown Package'}
-                      </TableCell>
-                      <TableCell className="capitalize">
-                        {booking.booking_type}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        ${booking.total_price}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getPaymentStatusColor(booking.payment_status)}>
-                          {booking.payment_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(booking.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedBooking(booking)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Select
-                            value=""
-                            onValueChange={(value) => updateBookingStatus(booking.id, value)}
-                            disabled={updating === booking.id}
-                          >
-                            <SelectTrigger className="w-28">
-                              <SelectValue placeholder="Update" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="confirmed">Confirmed</SelectItem>
-                              <SelectItem value="cancelled">Cancelled</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                      <td className="py-3 px-2 text-sm">
+                        {new Date(booking.check_in_date).toLocaleDateString()} - <br />
+                        {new Date(booking.check_out_date).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-2">{booking.adults}A, {booking.children}C</td>
+                      <td className="py-3 px-2 font-semibold">${Number(booking.total_price).toFixed(0)}</td>
+                      <td className="py-3 px-2">
+                        <Select 
+                          value={booking.status} 
+                          onValueChange={(value) => updateBookingStatus(booking.id, value)}
+                        >
+                          <SelectTrigger className={`w-24 h-8 text-xs ${getStatusColor(booking.status)}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-3 px-2">
+                        <Select 
+                          value={booking.payment_status} 
+                          onValueChange={(value) => updatePaymentStatus(booking.id, value)}
+                        >
+                          <SelectTrigger className={`w-20 h-8 text-xs ${getPaymentStatusColor(booking.payment_status)}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="unpaid">Unpaid</SelectItem>
+                            <SelectItem value="refunded">Refunded</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-3 px-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewDetails(booking)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-
-          <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredBookings.length} of {bookings.length} bookings
+          
+          <div className="py-4 border-t flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Showing <span className="font-medium">{filteredBookings.length}</span> of <span className="font-medium">{bookings.length}</span> bookings
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" disabled>Previous</Button>
+              <Button variant="outline" size="sm" disabled>Next</Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {selectedBooking && (
-        <BookingDetailsModal
-          booking={selectedBooking}
-          open={!!selectedBooking}
-          onOpenChange={(open) => !open && setSelectedBooking(null)}
-          onUpdate={updateBookingStatus}
-        />
-      )}
-    </div>
+      <BookingDetailsModal
+        booking={selectedBooking}
+        isOpen={detailsModalOpen}
+        onClose={() => setDetailsModalOpen(false)}
+        onUpdate={() => {
+          fetchBookings();
+          setDetailsModalOpen(false);
+        }}
+      />
+    </>
   );
 };
 

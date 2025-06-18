@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HotelFormData {
   name: string;
@@ -21,6 +22,7 @@ interface HotelFormData {
   price_per_night: number;
   thumbnail: string;
   amenities: string[];
+  provider_id?: string;
 }
 
 interface HotelManagementProps {
@@ -31,7 +33,9 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newAmenity, setNewAmenity] = useState("");
+  const [providers, setProviders] = useState<Array<{id: string, company_name: string}>>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState<HotelFormData>({
     name: "",
@@ -42,8 +46,30 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
     rating: 0,
     price_per_night: 0,
     thumbnail: "",
-    amenities: []
+    amenities: [],
+    provider_id: ""
   });
+
+  // Fetch providers for admin assignment
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('providers')
+          .select('id, company_name')
+          .order('company_name');
+        
+        if (error) throw error;
+        setProviders(data || []);
+      } catch (error) {
+        console.error('Error fetching providers:', error);
+      }
+    };
+
+    if (open) {
+      fetchProviders();
+    }
+  }, [open]);
 
   const handleInputChange = (field: keyof HotelFormData, value: string | number) => {
     setFormData(prev => ({
@@ -69,33 +95,83 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
     }));
   };
 
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Hotel name is required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.city.trim()) {
+      toast({
+        title: "Validation Error", 
+        description: "City is required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.address.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Address is required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.price_per_night || formData.price_per_night <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Valid price per night is required.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setLoading(true);
 
     try {
+      // Prepare hotel data
+      const hotelData = {
+        name: formData.name.trim(),
+        city: formData.city.trim(),
+        address: formData.address.trim(),
+        description: formData.description.trim() || null,
+        distance_to_haram: formData.distance_to_haram.trim() || null,
+        rating: formData.rating || 0,
+        price_per_night: formData.price_per_night,
+        thumbnail: formData.thumbnail.trim() || null,
+        provider_id: formData.provider_id || user?.id || null
+      };
+
+      console.log('Creating hotel with data:', hotelData);
+
       // Create the hotel record
-      const { data: hotelData, error: hotelError } = await supabase
+      const { data: hotelData: createdHotel, error: hotelError } = await supabase
         .from('hotels')
-        .insert({
-          name: formData.name,
-          city: formData.city,
-          address: formData.address,
-          description: formData.description,
-          distance_to_haram: formData.distance_to_haram,
-          rating: formData.rating,
-          price_per_night: formData.price_per_night,
-          thumbnail: formData.thumbnail
-        })
+        .insert(hotelData)
         .select('id')
         .single();
 
-      if (hotelError) throw hotelError;
+      if (hotelError) {
+        console.error('Hotel creation error:', hotelError);
+        throw hotelError;
+      }
+
+      console.log('Hotel created successfully:', createdHotel);
 
       // Add amenities if any
-      if (formData.amenities.length > 0 && hotelData) {
+      if (formData.amenities.length > 0 && createdHotel) {
         const amenitiesData = formData.amenities.map(amenity => ({
-          hotel_id: hotelData.id,
+          hotel_id: createdHotel.id,
           name: amenity
         }));
 
@@ -105,6 +181,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
 
         if (amenitiesError) {
           console.error('Error adding amenities:', amenitiesError);
+          // Don't fail the whole operation for amenities
         }
       }
 
@@ -123,17 +200,18 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
         rating: 0,
         price_per_night: 0,
         thumbnail: "",
-        amenities: []
+        amenities: [],
+        provider_id: ""
       });
 
       setOpen(false);
       onHotelAdded();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding hotel:', error);
       toast({
         title: "Error",
-        description: "Failed to add hotel. Please try again.",
+        description: error.message || "Failed to add hotel. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -161,6 +239,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 required
+                placeholder="Enter hotel name"
               />
             </div>
             <div>
@@ -186,6 +265,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
               value={formData.address}
               onChange={(e) => handleInputChange('address', e.target.value)}
               required
+              placeholder="Enter hotel address"
             />
           </div>
 
@@ -196,6 +276,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
+              placeholder="Enter hotel description"
             />
           </div>
 
@@ -230,9 +311,11 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
                 id="price_per_night"
                 type="number"
                 min="0"
+                step="0.01"
                 value={formData.price_per_night}
                 onChange={(e) => handleInputChange('price_per_night', parseFloat(e.target.value) || 0)}
                 required
+                placeholder="Enter price"
               />
             </div>
             <div>
@@ -246,6 +329,28 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
               />
             </div>
           </div>
+
+          {providers.length > 0 && (
+            <div>
+              <Label htmlFor="provider_id">Assign to Provider (Admin Only)</Label>
+              <Select 
+                value={formData.provider_id} 
+                onValueChange={(value) => handleInputChange('provider_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select provider (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No specific provider</SelectItem>
+                  {providers.map((provider) => (
+                    <SelectItem key={provider.id} value={provider.id}>
+                      {provider.company_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div>
             <Label>Amenities</Label>
@@ -274,7 +379,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

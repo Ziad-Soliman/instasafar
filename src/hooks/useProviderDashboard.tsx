@@ -34,9 +34,7 @@ interface BookingData {
   user?: {
     id: string;
     full_name?: string | null;
-    email?: string | null;
   } | null;
-  user_id?: string;
 }
 
 interface MonthlyData {
@@ -55,7 +53,7 @@ interface DashboardStats {
 export const useProviderDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t, language, isRTL } = useLanguage();
+  const { t, language } = useLanguage();
   const [recentBookings, setRecentBookings] = useState<BookingData[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
@@ -70,7 +68,7 @@ export const useProviderDashboard = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat(language === 'ar' ? 'ar-SA' : 'en-US', {
       style: 'currency',
-      currency: 'SAR',
+      currency: 'USD',
     }).format(amount);
   };
 
@@ -82,40 +80,147 @@ export const useProviderDashboard = () => {
     );
   };
 
-  const subscribeToBookings = () => {
+  const fetchProviderBookings = async () => {
+    if (!user?.id) return [];
+
+    try {
+      console.log('=== FETCHING PROVIDER BOOKINGS ===');
+      console.log('Provider ID:', user.id);
+
+      // Get provider's hotels and packages first
+      const [hotelsResult, packagesResult] = await Promise.all([
+        supabase.from('hotels').select('id').eq('provider_id', user.id),
+        supabase.from('packages').select('id').eq('provider_id', user.id)
+      ]);
+
+      const hotelIds = hotelsResult.data?.map(h => h.id) || [];
+      const packageIds = packagesResult.data?.map(p => p.id) || [];
+
+      console.log('Provider listings:', { hotelIds, packageIds });
+
+      if (hotelIds.length === 0 && packageIds.length === 0) {
+        console.log('No listings found for provider');
+        return [];
+      }
+
+      // Build query for bookings
+      let query = supabase.from('bookings').select(`
+        id, booking_type, total_price, status, payment_status, created_at,
+        check_in_date, check_out_date, adults, children, user_id,
+        hotels(name, city),
+        packages(name, city)
+      `);
+
+      // Add filters for provider's listings
+      const conditions = [];
+      if (hotelIds.length > 0) {
+        conditions.push(`hotel_id.in.(${hotelIds.join(',')})`);
+      }
+      if (packageIds.length > 0) {
+        conditions.push(`package_id.in.(${packageIds.join(',')})`);
+      }
+
+      if (conditions.length > 0) {
+        query = query.or(conditions.join(','));
+      }
+
+      const { data: bookingsData, error: bookingsError } = await query
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      console.log('Bookings query result:', { bookingsData, bookingsError });
+
+      if (bookingsError) {
+        console.error('Bookings error:', bookingsError);
+        return [];
+      }
+
+      return bookingsData || [];
+    } catch (error) {
+      console.error('Error fetching provider bookings:', error);
+      return [];
+    }
+  };
+
+  const calculateProviderStats = async () => {
     if (!user?.id) return;
-    
-    const channel = supabase
-      .channel('booking-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'bookings',
-          filter: `provider_id=eq.${user.id}`,
-        },
-        (payload) => {
-          toast({
-            title: t("dashboard.newBooking", "New booking received"),
-            description: t(
-              "dashboard.newBookingDesc", 
-              `A new ${payload.new.booking_type} booking has been made`
-            ),
-            variant: "default",
-          });
-          fetchData();
-        }
-      )
-      .subscribe();
+
+    try {
+      console.log('=== CALCULATING PROVIDER STATS ===');
       
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      // Get all bookings for this provider
+      const bookings = await fetchProviderBookings();
+      
+      // Get active listings count
+      const [hotelsResult, packagesResult] = await Promise.all([
+        supabase.from('hotels').select('id', { count: 'exact' }).eq('provider_id', user.id),
+        supabase.from('packages').select('id', { count: 'exact' }).eq('provider_id', user.id)
+      ]);
+
+      const activeListings = (hotelsResult.count || 0) + (packagesResult.count || 0);
+
+      // Calculate stats from bookings
+      const totalBookings = bookings.length;
+      const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+      const totalRevenue = bookings
+        .filter(b => b.payment_status === 'paid')
+        .reduce((sum, b) => sum + Number(b.total_price), 0);
+
+      const calculatedStats = {
+        totalBookings,
+        pendingBookings,
+        totalRevenue,
+        activeListings
+      };
+
+      console.log('Calculated stats:', calculatedStats);
+      setStats(calculatedStats);
+
+      return bookings;
+    } catch (error) {
+      console.error('Error calculating provider stats:', error);
+      return [];
+    }
+  };
+
+  const transformBookingsWithProfiles = async (bookings: any[]): Promise<BookingData[]> => {
+    if (!bookings.length) return [];
+
+    // Get user profiles for the bookings
+    const userIds = [...new Set(bookings.map(b => b.user_id).filter(Boolean))];
+    
+    let profilesData: Array<{id: string, full_name: string}> = [];
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+      
+      profilesData = profiles || [];
+    }
+
+    return bookings.map(booking => {
+      const profile = profilesData.find(p => p.id === booking.user_id);
+      return {
+        id: booking.id,
+        booking_type: booking.booking_type,
+        total_price: booking.total_price,
+        status: booking.status,
+        payment_status: booking.payment_status,
+        created_at: booking.created_at,
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date,
+        adults: booking.adults,
+        children: booking.children,
+        hotel: booking.hotels && typeof booking.hotels === 'object' && 'name' in booking.hotels ? booking.hotels : null,
+        package: booking.packages && typeof booking.packages === 'object' && 'name' in booking.packages ? booking.packages : null,
+        user: profile ? { id: profile.id, full_name: profile.full_name } : null,
+      };
+    });
   };
 
   const generateMonthlyData = () => {
-    const months = isRTL 
+    const months = language === 'ar' 
       ? ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
       : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
@@ -143,77 +248,12 @@ export const useProviderDashboard = () => {
       console.log('=== FETCHING PROVIDER DASHBOARD DATA ===');
       console.log('Provider ID:', user.id);
 
-      // Fetch recent bookings with proper relationships
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select(`
-          id, booking_type, total_price, status, payment_status, created_at,
-          check_in_date, check_out_date, adults, children, user_id,
-          hotels!inner(name, city, provider_id),
-          packages!inner(name, city, provider_id)
-        `)
-        .or(`hotels.provider_id.eq.${user.id},packages.provider_id.eq.${user.id}`)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // Calculate stats and get bookings
+      const bookings = await calculateProviderStats();
       
-      console.log('Bookings query result:', { bookingsData, bookingsError });
-
-      if (bookingsError) {
-        console.error('Bookings error:', bookingsError);
-        // Fallback: try direct provider_id filter if it exists
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('bookings')
-          .select(`
-            id, booking_type, total_price, status, payment_status, created_at,
-            check_in_date, check_out_date, adults, children, user_id,
-            hotels(name, city),
-            packages(name, city)
-          `)
-          .eq('provider_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (fallbackError) {
-          console.error('Fallback query also failed:', fallbackError);
-          setRecentBookings([]);
-        } else {
-          console.log('Fallback query successful:', fallbackData);
-          const transformedBookings = await transformBookingsWithProfiles(fallbackData || []);
-          setRecentBookings(transformedBookings);
-        }
-      } else {
-        const transformedBookings = await transformBookingsWithProfiles(bookingsData || []);
-        setRecentBookings(transformedBookings);
-      }
-
-      // Fetch provider stats using RPC call
-      try {
-        const { data: statsData, error: statsError } = await supabase
-          .rpc('get_provider_dashboard_stats', {
-            provider_id_arg: user.id
-          });
-
-        console.log('Stats RPC result:', { statsData, statsError });
-
-        if (statsError) {
-          console.error('Stats error:', statsError);
-          // Use fallback stats based on manual calculation
-          await calculateFallbackStats();
-        } else if (statsData && Array.isArray(statsData) && statsData.length > 0) {
-          const providerStats = statsData[0] as ProviderStats;
-          setStats({
-            totalBookings: providerStats.total_bookings || 0,
-            pendingBookings: providerStats.pending_bookings || 0,
-            totalRevenue: providerStats.total_revenue || 0,
-            activeListings: providerStats.active_listings || 0,
-          });
-        } else {
-          await calculateFallbackStats();
-        }
-      } catch (rpcError) {
-        console.error('RPC call failed:', rpcError);
-        await calculateFallbackStats();
-      }
+      // Transform bookings with user profiles
+      const transformedBookings = await transformBookingsWithProfiles(bookings);
+      setRecentBookings(transformedBookings);
 
     } catch (error) {
       console.error('Error fetching provider dashboard data:', error);
@@ -227,88 +267,15 @@ export const useProviderDashboard = () => {
     }
   };
 
-  const transformBookingsWithProfiles = async (bookings: any[]): Promise<BookingData[]> => {
-    if (!bookings.length) return [];
-
-    // Get user profiles for the bookings
-    const userIds = [...new Set(bookings.map(b => b.user_id).filter(Boolean))];
-    
-    if (userIds.length === 0) {
-      return bookings.map(transformSingleBooking);
-    }
-
-    const { data: profilesData } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .in('id', userIds);
-
-    return bookings.map(booking => {
-      const profile = profilesData?.find(p => p.id === booking.user_id);
-      return transformSingleBooking(booking, profile);
-    });
-  };
-
-  const transformSingleBooking = (booking: any, profile?: any): BookingData => {
-    return {
-      id: booking.id,
-      booking_type: booking.booking_type,
-      total_price: booking.total_price,
-      status: booking.status,
-      payment_status: booking.payment_status,
-      created_at: booking.created_at,
-      check_in_date: booking.check_in_date,
-      check_out_date: booking.check_out_date,
-      adults: booking.adults,
-      children: booking.children,
-      hotel: booking.hotels && typeof booking.hotels === 'object' && 'name' in booking.hotels ? booking.hotels : null,
-      package: booking.packages && typeof booking.packages === 'object' && 'name' in booking.packages ? booking.packages : null,
-      user: profile ? { id: profile.id, full_name: profile.full_name } : null,
-      user_id: booking.user_id,
-    };
-  };
-
-  const calculateFallbackStats = async () => {
-    try {
-      // Count hotels and packages for this provider
-      const [hotelsResult, packagesResult] = await Promise.all([
-        supabase.from('hotels').select('id', { count: 'exact' }).eq('provider_id', user!.id),
-        supabase.from('packages').select('id', { count: 'exact' }).eq('provider_id', user!.id)
-      ]);
-
-      const activeListings = (hotelsResult.count || 0) + (packagesResult.count || 0);
-
-      // For now, use simple fallback values
-      setStats({
-        totalBookings: recentBookings.length * 2, // Estimate
-        pendingBookings: recentBookings.filter(b => b.status === 'pending').length,
-        totalRevenue: recentBookings.reduce((sum, b) => sum + (b.payment_status === 'paid' ? b.total_price : 0), 0),
-        activeListings,
-      });
-    } catch (error) {
-      console.error('Error calculating fallback stats:', error);
-      setStats({
-        totalBookings: 0,
-        pendingBookings: 0,
-        totalRevenue: 0,
-        activeListings: 0,
-      });
-    }
-  };
-
   useEffect(() => {
     fetchData();
-    const unsubscribe = subscribeToBookings();
-    
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [user?.id]);
 
   useEffect(() => {
     if (!loading && stats.totalBookings >= 0) {
       generateMonthlyData();
     }
-  }, [stats, loading]);
+  }, [stats, loading, language]);
 
   return {
     recentBookings,

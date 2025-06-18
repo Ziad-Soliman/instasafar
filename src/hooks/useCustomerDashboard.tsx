@@ -36,66 +36,89 @@ export const useCustomerDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchStats = async () => {
+  const calculateStats = async () => {
     if (!user?.id) return;
 
     try {
-      console.log('=== FETCHING CUSTOMER STATS ===');
+      console.log('=== CALCULATING CUSTOMER STATS ===');
       console.log('Customer ID:', user.id);
 
-      const { data, error } = await supabase.rpc('get_customer_dashboard_stats', {
-        customer_id_arg: user.id
-      });
-      
-      console.log('Customer stats RPC result:', { data, error });
-      
-      if (error) {
-        console.error('Stats RPC error:', error);
-        // Fallback to manual calculation
-        await calculateFallbackStats();
-      } else if (data && data.length > 0) {
-        setStats(data[0]);
-      } else {
-        await calculateFallbackStats();
-      }
-    } catch (error) {
-      console.error('Error fetching customer stats:', error);
-      await calculateFallbackStats();
-    }
-  };
-
-  const calculateFallbackStats = async () => {
-    if (!user?.id) return;
-
-    try {
-      // Manual calculation as fallback
-      const { data: allBookings } = await supabase
+      // Get all customer bookings
+      const { data: allBookings, error } = await supabase
         .from('bookings')
-        .select('*')
+        .select(`
+          *,
+          hotels(name, city),
+          packages(name, city)
+        `)
         .eq('user_id', user.id);
 
-      if (allBookings) {
-        const totalBookings = allBookings.length;
-        const upcomingCount = allBookings.filter(b => 
-          b.check_in_date && new Date(b.check_in_date) > new Date() && b.status === 'confirmed'
-        ).length;
-        const totalSpent = allBookings
-          .filter(b => b.payment_status === 'paid')
-          .reduce((sum, b) => sum + b.total_price, 0);
+      console.log('Customer bookings result:', { allBookings, error });
 
-        setStats({
-          total_bookings: totalBookings,
-          upcoming_bookings: upcomingCount,
-          total_spent: totalSpent,
-          favorite_city: 'Makkah' // Default fallback
-        });
+      if (error) {
+        console.error('Error fetching bookings:', error);
+        throw error;
       }
+
+      if (!allBookings) {
+        setStats({
+          total_bookings: 0,
+          upcoming_bookings: 0,
+          total_spent: 0,
+          favorite_city: 'N/A'
+        });
+        return;
+      }
+
+      // Calculate stats
+      const totalBookings = allBookings.length;
+      const upcomingCount = allBookings.filter(b => 
+        b.check_in_date && 
+        new Date(b.check_in_date) > new Date() && 
+        b.status === 'confirmed'
+      ).length;
+      
+      const totalSpent = allBookings
+        .filter(b => b.payment_status === 'paid')
+        .reduce((sum, b) => sum + Number(b.total_price), 0);
+
+      // Find favorite city
+      const cityCount = new Map<string, number>();
+      allBookings.forEach(booking => {
+        const city = booking.hotels?.city || booking.packages?.city;
+        if (city) {
+          cityCount.set(city, (cityCount.get(city) || 0) + 1);
+        }
+      });
+
+      const favoriteCity = cityCount.size > 0 
+        ? Array.from(cityCount.entries()).reduce((a, b) => a[1] > b[1] ? a : b)[0]
+        : 'N/A';
+
+      const calculatedStats = {
+        total_bookings: totalBookings,
+        upcoming_bookings: upcomingCount,
+        total_spent: totalSpent,
+        favorite_city: favoriteCity
+      };
+
+      console.log('Calculated customer stats:', calculatedStats);
+      setStats(calculatedStats);
+
     } catch (error) {
-      console.error('Error calculating fallback stats:', error);
+      console.error('Error calculating customer stats:', error);
       toast({
         title: "Error",
         description: "Failed to fetch dashboard statistics.",
         variant: "destructive",
+      });
+      
+      // Set fallback stats
+      setStats({
+        total_bookings: 0,
+        upcoming_bookings: 0,
+        total_spent: 0,
+        favorite_city: 'N/A'
       });
     }
   };
@@ -128,6 +151,7 @@ export const useCustomerDashboard = () => {
       }
 
       // Fetch upcoming bookings
+      const today = new Date().toISOString().split('T')[0];
       const { data: upcomingData, error: upcomingError } = await supabase
         .from('bookings')
         .select(`
@@ -136,7 +160,7 @@ export const useCustomerDashboard = () => {
           packages(name, city)
         `)
         .eq('user_id', user.id)
-        .gt('check_in_date', new Date().toISOString().split('T')[0])
+        .gt('check_in_date', today)
         .eq('status', 'confirmed')
         .order('check_in_date', { ascending: true });
 
@@ -148,6 +172,7 @@ export const useCustomerDashboard = () => {
       } else {
         setUpcomingBookings(upcomingData || []);
       }
+
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({
@@ -166,7 +191,7 @@ export const useCustomerDashboard = () => {
       console.log('=== LOADING CUSTOMER DASHBOARD ===');
       
       await Promise.all([
-        fetchStats(),
+        calculateStats(),
         fetchBookings()
       ]);
       
@@ -195,7 +220,7 @@ export const useCustomerDashboard = () => {
     formatCurrency,
     formatDate,
     refetch: () => {
-      fetchStats();
+      calculateStats();
       fetchBookings();
     }
   };

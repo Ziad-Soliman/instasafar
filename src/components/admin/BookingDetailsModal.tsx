@@ -1,67 +1,43 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, MapPin, CreditCard, Phone, Mail, Edit2, Save, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Calendar, User, MapPin, CreditCard, Package } from "lucide-react";
+
+interface Booking {
+  id: string;
+  user_id: string;
+  hotel_id?: string;
+  package_id?: string;
+  booking_type: string;
+  check_in_date?: string;
+  check_out_date?: string;
+  adults: number;
+  children: number;
+  total_price: number;
+  status: string;
+  payment_status: string;
+  created_at: string;
+  hotels?: { name: string; city: string } | null;
+  packages?: { name: string; city: string } | null;
+  profiles?: { full_name: string } | null;
+}
 
 interface BookingDetailsModalProps {
-  booking: any;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdate: () => void;
+  booking: Booking;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate: (bookingId: string, status: string, paymentStatus?: string) => Promise<void>;
 }
 
 const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   booking,
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   onUpdate
 }) => {
-  const [editing, setEditing] = useState(false);
-  const [editedBooking, setEditedBooking] = useState(booking);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({
-          status: editedBooking.status,
-          payment_status: editedBooking.payment_status,
-          total_price: editedBooking.total_price,
-          adults: editedBooking.adults,
-          children: editedBooking.children,
-          notes: editedBooking.notes
-        })
-        .eq('id', booking.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Booking updated successfully.",
-      });
-
-      setEditing(false);
-      onUpdate();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update booking.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -88,203 +64,158 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     }
   };
 
-  if (!booking) return null;
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Booking Details</DialogTitle>
-            <div className="flex gap-2">
-              {editing ? (
-                <>
-                  <Button size="sm" onClick={handleSave} disabled={loading}>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setEditing(false)}>
-                    <X className="h-4 w-4 mr-2" />
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              )}
-            </div>
-          </div>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Booking Details
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Booking Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Booking Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="space-y-6">
+          {/* Basic Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Booking ID</label>
+              <p className="font-mono text-sm">{booking.id}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Booking Date</label>
+              <p>{new Date(booking.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {/* Customer Info */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-semibold">
+              <User className="h-4 w-4" />
+              Customer Information
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Booking ID</label>
-                <p className="font-mono text-sm">{booking.id}</p>
+                <label className="text-sm font-medium text-muted-foreground">Name</label>
+                <p>{booking.profiles?.full_name || 'Anonymous'}</p>
               </div>
-              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                <p className="font-mono text-sm">{booking.user_id}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking Details */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-semibold">
+              <MapPin className="h-4 w-4" />
+              Booking Details
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Type</label>
                 <p className="capitalize">{booking.booking_type}</p>
               </div>
-
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Service</label>
-                <p>{booking.hotels?.name || booking.packages?.name || 'Unknown'}</p>
+                <label className="text-sm font-medium text-muted-foreground">Item</label>
+                <p>
+                  {booking.booking_type === 'hotel' 
+                    ? booking.hotels?.name || 'Unknown Hotel'
+                    : booking.packages?.name || 'Unknown Package'}
+                </p>
               </div>
+            </div>
+            
+            {booking.booking_type === 'hotel' && booking.hotels && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Location</label>
+                <p>{booking.hotels.city}</p>
+              </div>
+            )}
 
+            {booking.check_in_date && booking.check_out_date && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Check-in</label>
-                  <p>{new Date(booking.check_in_date).toLocaleDateString()}</p>
+                  <p className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(booking.check_in_date).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Check-out</label>
-                  <p>{new Date(booking.check_out_date).toLocaleDateString()}</p>
+                  <p className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(booking.check_out_date).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
+            )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Adults</label>
-                  {editing ? (
-                    <input
-                      type="number"
-                      min="1"
-                      value={editedBooking.adults}
-                      onChange={(e) => setEditedBooking({...editedBooking, adults: parseInt(e.target.value)})}
-                      className="w-full p-2 border rounded"
-                    />
-                  ) : (
-                    <p>{booking.adults}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Children</label>
-                  {editing ? (
-                    <input
-                      type="number"
-                      min="0"
-                      value={editedBooking.children}
-                      onChange={(e) => setEditedBooking({...editedBooking, children: parseInt(e.target.value)})}
-                      className="w-full p-2 border rounded"
-                    />
-                  ) : (
-                    <p>{booking.children}</p>
-                  )}
-                </div>
-              </div>
-
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Total Price</label>
-                {editing ? (
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={editedBooking.total_price}
-                    onChange={(e) => setEditedBooking({...editedBooking, total_price: parseFloat(e.target.value)})}
-                    className="w-full p-2 border rounded"
-                  />
-                ) : (
-                  <p className="text-xl font-bold">${Number(booking.total_price).toFixed(2)}</p>
-                )}
+                <label className="text-sm font-medium text-muted-foreground">Adults</label>
+                <p>{booking.adults}</p>
               </div>
-
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Created</label>
-                <p>{new Date(booking.created_at).toLocaleString()}</p>
+                <label className="text-sm font-medium text-muted-foreground">Children</label>
+                <p>{booking.children}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Customer & Status Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Customer & Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* Payment Info */}
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-2 font-semibold">
+              <CreditCard className="h-4 w-4" />
+              Payment Information
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Customer Name</label>
-                <p>{booking.profiles?.full_name || 'Unknown Customer'}</p>
+                <label className="text-sm font-medium text-muted-foreground">Total Amount</label>
+                <p className="text-lg font-semibold">${booking.total_price}</p>
               </div>
-
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Booking Status</label>
-                {editing ? (
-                  <Select 
-                    value={editedBooking.status} 
-                    onValueChange={(value) => setEditedBooking({...editedBooking, status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge className={getStatusColor(booking.status)}>
-                    {booking.status}
-                  </Badge>
-                )}
-              </div>
-
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Payment Status</label>
-                {editing ? (
-                  <Select 
-                    value={editedBooking.payment_status} 
-                    onValueChange={(value) => setEditedBooking({...editedBooking, payment_status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="paid">Paid</SelectItem>
-                      <SelectItem value="unpaid">Unpaid</SelectItem>
-                      <SelectItem value="refunded">Refunded</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge className={getPaymentStatusColor(booking.payment_status)}>
-                    {booking.payment_status}
-                  </Badge>
-                )}
+                <Badge className={getPaymentStatusColor(booking.payment_status)}>
+                  {booking.payment_status}
+                </Badge>
               </div>
+            </div>
+          </div>
 
+          {/* Status Management */}
+          <div className="space-y-2">
+            <h3 className="font-semibold">Status Management</h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                {editing ? (
-                  <textarea
-                    value={editedBooking.notes || ''}
-                    onChange={(e) => setEditedBooking({...editedBooking, notes: e.target.value})}
-                    className="w-full p-2 border rounded"
-                    rows={4}
-                    placeholder="Add notes..."
-                  />
-                ) : (
-                  <p>{booking.notes || 'No notes'}</p>
-                )}
+                <label className="text-sm font-medium text-muted-foreground">Current Status</label>
+                <Badge className={getStatusColor(booking.status)}>
+                  {booking.status}
+                </Badge>
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Update Status</label>
+                <Select onValueChange={(value) => onUpdate(booking.id, value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

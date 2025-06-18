@@ -17,6 +17,7 @@ interface HotelBookingModalProps {
     name: string;
     price_per_night: number;
     thumbnail?: string | null;
+    provider_id?: string;
   };
   userId?: string | null;
 }
@@ -55,8 +56,9 @@ const HotelBookingModal: React.FC<HotelBookingModalProps> = ({
       });
       return;
     }
+
     setLoading(true);
-    const { error } = await supabase.from("bookings").insert([{
+    console.log('Creating hotel booking with data:', {
       user_id: userId,
       hotel_id: hotel.id,
       booking_type: "hotel",
@@ -65,25 +67,50 @@ const HotelBookingModal: React.FC<HotelBookingModalProps> = ({
       adults,
       children,
       total_price: totalPrice,
-    }]);
-    setLoading(false);
-    if (error) {
-      toast({
-        title: t("booking.failed", "Booking failed"),
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+      status: 'pending',
+      payment_status: 'unpaid'
+    });
+
+    try {
+      const { error } = await supabase.from("bookings").insert([{
+        user_id: userId,
+        hotel_id: hotel.id,
+        booking_type: "hotel",
+        check_in_date: checkIn?.toISOString().slice(0, 10),
+        check_out_date: checkOut?.toISOString().slice(0, 10),
+        adults,
+        children,
+        total_price: totalPrice,
+        status: 'pending',
+        payment_status: 'unpaid'
+        // provider_id will be set automatically by the trigger
+      }]);
+
+      if (error) {
+        console.error('Booking creation error:', error);
+        throw error;
+      }
+
       toast({
         title: t("booking.success", "Booking confirmed!"),
         description: t("booking.seeBookings", "Check your account for booking details."),
       });
+      
       onOpenChange(false);
-      // reset form
+      // Reset form
       setCheckIn(today);
       setCheckOut(undefined);
       setAdults(1);
       setChildren(0);
+    } catch (error: any) {
+      console.error('Error creating booking:', error);
+      toast({
+        title: t("booking.failed", "Booking failed"),
+        description: error.message || t("booking.tryAgain", "Please try again later."),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -143,7 +170,7 @@ const HotelBookingModal: React.FC<HotelBookingModalProps> = ({
           <div className="font-bold mt-2 text-lg">{t("booking.total", "Total")}: ${totalPrice}</div>
         </div>
         <DialogFooter>
-          <Button loading={loading} disabled={!isFormValid || loading} onClick={handleBooking} className="w-full">
+          <Button disabled={!isFormValid || loading} onClick={handleBooking} className="w-full">
             {loading ? t("booking.submitting", "Processing...") : t("booking.confirm", "Confirm Booking")}
           </Button>
         </DialogFooter>

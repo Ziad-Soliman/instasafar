@@ -140,7 +140,7 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
 
     try {
       // Prepare hotel data
-      const hotelData = {
+      const hotelInsertData = {
         name: formData.name.trim(),
         city: formData.city.trim(),
         address: formData.address.trim(),
@@ -152,12 +152,12 @@ const HotelManagement: React.FC<HotelManagementProps> = ({ onHotelAdded }) => {
         provider_id: formData.provider_id || user?.id || null
       };
 
-      console.log('Creating hotel with data:', hotelData);
+      console.log('Creating hotel with data:', hotelInsertData);
 
       // Create the hotel record
-      const { data: hotelData: createdHotel, error: hotelError } = await supabase
+      const { data: createdHotel, error: hotelError } = await supabase
         .from('hotels')
-        .insert(hotelData)
+        .insert(hotelInsertData)
         .select('id')
         .single();
 

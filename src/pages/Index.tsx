@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import HeroSection from '@/components/home/HeroSection';
 import SearchSection from '@/components/home/SearchSection';
+import PromotionsSection from '@/components/home/PromotionsSection';
 import StatsSection from '@/components/home/StatsSection';
 import FeaturedPackagesSection from '@/components/home/FeaturedPackagesSection';
 import FeaturedHotelsSection from '@/components/home/FeaturedHotelsSection';
@@ -29,6 +30,7 @@ const Index = () => {
         </div>
       </AuroraBackground>
       
+      <PromotionsSection />
       <StatsSection />
       <FeaturedPackagesSection />
       <FeaturedHotelsSection />

@@ -1,3 +1,4 @@
+
 export const arabicTranslations = {
   // Navigation
   "home": "الرئيسية",
@@ -191,6 +192,31 @@ export const arabicTranslations = {
   "home.cta.subtitle": "انضم إلى آلاف الحجاج والمعتمرين الذين يثقون بنا في رحلتهم الروحانية. احجز باقتك اليوم واختبر الفرق.",
   "home.cta.browsePackages": "تصفح الباقات",
   "home.cta.startJourney": "ابدأ رحلتك",
+
+  // Home Promotions Section (NEW)
+  "home.promotions.title": "عروض الرحلات المقدسة",
+  "home.promotions.subtitle": "اكتشف العروض الحصرية لحجك أو عمرتك إلى المدن المقدسة",
+  "home.promotions.hajjPackages": "باقات الحج 2024",
+  "home.promotions.hajjSubtitle": "رحلة مقدسة شاملة",
+  "home.promotions.hajjDescription": "باقات حج شاملة مع إقامة مميزة قرب الحرم",
+  "home.promotions.umrahOffers": "عروض العمرة الخاصة",
+  "home.promotions.umrahSubtitle": "عروض الحج المقدس",
+  "home.promotions.umrahDescription": "باقات عمرة مميزة مع فنادق فاخرة وجولات مرشدة",
+  "home.promotions.ramadanUmrah": "عمرة رمضان",
+  "home.promotions.ramadanSubtitle": "رحلة الشهر المبارك",
+  "home.promotions.ramadanDescription": "اختبر الأجواء الروحانية لرمضان في المدن المقدسة",
+  "home.promotions.groupPilgrimage": "حج جماعي",
+  "home.promotions.groupSubtitle": "سافر مع المجتمع",
+  "home.promotions.groupDescription": "انضم إلى الحجاج الآخرين لتجربة روحانية مشتركة",
+  "home.promotions.ziyaratTours": "جولات الزيارات",
+  "home.promotions.ziyaratSubtitle": "المواقع الإسلامية التاريخية",
+  "home.promotions.ziyaratDescription": "زر المواقع الإسلامية التاريخية المهمة وتعلم قصصها",
+  "home.promotions.viewPackages": "عرض الباقات",
+  "home.promotions.bookNow": "احجز الآن",
+  "home.promotions.learnMore": "اعرف المزيد",
+  "home.promotions.joinGroups": "انضم للمجموعات",
+  "home.promotions.explore": "استكشف",
+  "home.promotions.viewAllPackages": "عرض جميع باقات الرحلات المقدسة",
 
   // Common
   "common.viewAll": "عرض الكل",

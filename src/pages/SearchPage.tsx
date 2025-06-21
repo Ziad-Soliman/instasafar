@@ -1,200 +1,165 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
+import { useBookingFilters } from '@/hooks/useBookingFilters';
+import SearchResultsHeader from '@/components/booking/SearchResultsHeader';
+import BookingFilters from '@/components/booking/BookingFilters';
+import ComparisonTool from '@/components/booking/ComparisonTool';
 import HotelCard from '@/components/cards/HotelCard';
+import PackageCard from '@/components/cards/PackageCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, MapPin } from 'lucide-react';
-
-interface Hotel {
-  id: string;
-  name: string;
-  name_ar?: string;
-  city: string;
-  city_ar?: string;
-  address: string;
-  address_ar?: string;
-  description?: string;
-  description_ar?: string;
-  rating: number;
-  price_per_night: number;
-  distance_to_haram?: string;
-  thumbnail?: string;
-}
+import { useToast } from '@/hooks/use-toast';
 
 const SearchPage = () => {
-  const { t, isRTL } = useLanguage();
-  const [searchParams] = useSearchParams();
-  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const { t } = useLanguage();
+  const { toast } = useToast();
+  
+  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || '');
-  const [priceRange, setPriceRange] = useState('');
+  const [searchType, setSearchType] = useState<'hotels' | 'packages'>('hotels');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  const {
+    filters,
+    updatePriceRange,
+    toggleAmenity,
+    updateRating,
+    updateSortBy,
+    updateViewMode,
+    toggleMap,
+    clearFilters,
+    activeFiltersCount,
+    comparisonItems,
+    showComparison,
+    addToComparison,
+    removeFromComparison,
+    clearComparison,
+    toggleComparison,
+    applyFilters,
+    sortData
+  } = useBookingFilters({
+    maxPrice: 2000,
+    filterType: searchType === 'hotels' ? 'hotel' : 'package'
+  });
 
-  const fetchHotels = async () => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('hotels')
-        .select('*')
-        .order('rating', { ascending: false });
-
-      if (selectedCity && selectedCity !== 'all') {
-        query = query.eq('city', selectedCity);
-      }
-
-      if (searchTerm) {
-        query = query.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching hotels:', error);
-        return;
-      }
-
-      setHotels(data || []);
-    } catch (error) {
-      console.error('Error fetching hotels:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch search results
   useEffect(() => {
-    fetchHotels();
-  }, [selectedCity, searchTerm]);
+    const fetchResults = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from(searchType)
+          .select('*')
+          .limit(20);
 
-  const handleSearch = () => {
-    fetchHotels();
-  };
+        if (error) throw error;
+        setSearchResults(data || []);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load search results",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Transform hotels to match HotelCard expected format
-  const transformedHotels = hotels.map(hotel => ({
-    id: hotel.id,
-    name: hotel.name,
-    name_ar: hotel.name_ar,
-    image: hotel.thumbnail || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop',
-    location: hotel.city,
-    city: hotel.city,
-    city_ar: hotel.city_ar,
-    distance_to_haram: hotel.distance_to_haram || '1.2 km',
-    rating: Number(hotel.rating),
-    review_count: 0, // Default since reviews are separate
-    price_per_night: Number(hotel.price_per_night),
-    amenities: [], // Default empty array since amenities are in separate table
-    is_featured: false
-  }));
+    fetchResults();
+  }, [searchType, toast]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-muted rounded w-64 mx-auto mb-4"></div>
-              <div className="h-4 bg-muted rounded w-96 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Apply filters and sorting
+  const filteredAndSortedResults = sortData(applyFilters(searchResults));
 
   return (
-    <div className={cn("min-h-screen bg-background", isRTL && "rtl")}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Search Header */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder={t('hotels.searchPlaceholder', 'Search hotels...')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-              
-              <Select value={selectedCity} onValueChange={setSelectedCity}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder={t('common.city', 'City')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Cities</SelectItem>
-                  <SelectItem value="Makkah">Makkah</SelectItem>
-                  <SelectItem value="Medina">Medina</SelectItem>
-                  <SelectItem value="Riyadh">Riyadh</SelectItem>
-                  <SelectItem value="Jeddah">Jeddah</SelectItem>
-                </SelectContent>
-              </Select>
+    <div className="container mx-auto py-8 px-4">
+      <SearchResultsHeader
+        totalResults={filteredAndSortedResults.length}
+        currentPage={1}
+        totalPages={1}
+        viewMode={filters.viewMode}
+        onViewModeChange={updateViewMode}
+        sortBy={filters.sortBy}
+        onSortChange={updateSortBy}
+        showMap={filters.showMap}
+        onMapToggle={toggleMap}
+        onFiltersToggle={() => setShowFilters(!showFilters)}
+        filtersCount={activeFiltersCount}
+        searchLocation="Makkah"
+        searchType={searchType}
+      />
 
-              <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder={t('common.priceRange', 'Price Range')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="0-200">$0 - $200</SelectItem>
-                  <SelectItem value="200-400">$200 - $400</SelectItem>
-                  <SelectItem value="400+">$400+</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button onClick={handleSearch} className="md:w-auto">
-                <Search className="h-4 w-4 mr-2" />
-                {t('common.search', 'Search')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">
-            {t('hotels.searchResults', 'Search Results')}
-          </h1>
-          <p className="text-muted-foreground">
-            {transformedHotels.length} {t('hotels.hotelsFound', 'hotels found')}
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Filters Sidebar */}
+        <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+          <BookingFilters
+            priceRange={filters.priceRange}
+            maxPrice={2000}
+            onPriceChange={updatePriceRange}
+            selectedAmenities={filters.selectedAmenities}
+            onAmenityChange={toggleAmenity}
+            selectedRating={filters.selectedRating}
+            onRatingChange={updateRating}
+            sortBy={filters.sortBy}
+            onSortChange={updateSortBy}
+            onClearFilters={clearFilters}
+            filterType={searchType === 'hotels' ? 'hotel' : 'package'}
+          />
         </div>
 
-        {/* Hotels Grid */}
-        {transformedHotels.length === 0 ? (
-          <Card className="p-8 text-center">
-            <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {t('hotels.noResults', 'No hotels found')}
-            </h3>
-            <p className="text-muted-foreground">
-              {t('hotels.tryDifferentSearch', 'Try adjusting your search criteria')}
-            </p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {transformedHotels.map((hotel, index) => (
-              <motion.div
-                key={hotel.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <HotelCard hotel={hotel} />
-              </motion.div>
-            ))}
-          </div>
-        )}
+        {/* Results */}
+        <div className="lg:col-span-3">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-muted h-48 rounded-lg mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="bg-muted h-4 rounded w-3/4"></div>
+                    <div className="bg-muted h-4 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={`grid gap-6 ${
+                filters.viewMode === 'grid' 
+                  ? 'grid-cols-1 md:grid-cols-2' 
+                  : 'grid-cols-1'
+              }`}
+            >
+              {filteredAndSortedResults.map((item: any) => (
+                <div key={item.id} className="relative">
+                  {searchType === 'hotels' ? (
+                    <HotelCard 
+                      hotel={item}
+                      className={filters.viewMode === 'list' ? 'flex-row' : ''}
+                    />
+                  ) : (
+                    <PackageCard 
+                      package={item}
+                      className={filters.viewMode === 'list' ? 'flex-row' : ''}
+                    />
+                  )}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </div>
       </div>
+
+      {/* Comparison Tool */}
+      <ComparisonTool
+        items={comparisonItems}
+        onRemoveItem={removeFromComparison}
+        onClearAll={clearComparison}
+        isOpen={showComparison}
+        onClose={toggleComparison}
+      />
     </div>
   );
 };

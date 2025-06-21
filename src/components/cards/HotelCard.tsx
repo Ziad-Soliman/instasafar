@@ -1,33 +1,41 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, Wifi, Car, Coffee, Utensils } from 'lucide-react';
+import { Star, MapPin, Wifi, Car, Coffee, Utensils, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBilingualText } from '@/utils/bilingual-helpers';
+import WishlistButton from '@/components/booking/WishlistButton';
 
 interface HotelCardProps {
   hotel: {
     id: string;
     name: string;
     name_ar?: string;
-    image: string;
-    location: string;
+    image?: string;
+    thumbnail?: string;
+    location?: string;
     city?: string;
     city_ar?: string;
-    distance_to_haram: string;
+    distance_to_haram?: string;
     rating: number;
-    review_count: number;
+    review_count?: number;
     price_per_night: number;
-    amenities: string[];
+    amenities?: string[];
     is_featured?: boolean;
   };
   className?: string;
+  onAddToComparison?: (hotel: any) => void;
+  showComparisonButton?: boolean;
 }
 
-const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
+const HotelCard: React.FC<HotelCardProps> = ({ 
+  hotel, 
+  className,
+  onAddToComparison,
+  showComparisonButton = true
+}) => {
   const { t } = useLanguage();
   const { getText } = useBilingualText();
   
@@ -51,9 +59,32 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
 
   const hotelName = getText(hotel.name, hotel.name_ar);
   const hotelLocation = getText(hotel.location || hotel.city || '', hotel.city_ar);
+  const hotelImage = hotel.image || hotel.thumbnail || '/placeholder.svg';
+
+  const handleAddToComparison = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToComparison?.(hotel);
+  };
 
   return (
-    <Card variant="interactive" className={`group overflow-hidden ${className || ''}`}>
+    <Card variant="interactive" className={`group overflow-hidden relative ${className || ''}`}>
+      {/* Wishlist and Comparison buttons */}
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <WishlistButton itemId={hotel.id} itemType="hotel" size="sm" />
+        {showComparisonButton && onAddToComparison && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 rounded-full bg-white/80 hover:bg-white/90 backdrop-blur-sm border border-white/20"
+            onClick={handleAddToComparison}
+            title="Add to comparison"
+          >
+            <Plus className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        )}
+      </div>
+
       {hotel.is_featured && (
         <Badge className="absolute top-4 left-4 z-10 bg-saudi-green text-white" variant="saudi">
           {t("hotels.featured", "Featured")}
@@ -62,7 +93,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
       
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={hotel.image} 
+          src={hotelImage} 
           alt={hotelName}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -89,7 +120,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ hotel, className }) => {
             </div>
             
             <p className="text-xs text-muted-foreground">
-              {hotel.distance_to_haram} {t("hotels.fromHaram", "from Haram")} • {hotel.review_count} {t("common.reviews", "reviews")}
+              {hotel.distance_to_haram} {t("hotels.fromHaram", "from Haram")} • {hotel.review_count || 0} {t("common.reviews", "reviews")}
             </p>
           </div>
           
